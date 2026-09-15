@@ -597,15 +597,22 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase`
 
 **Done when**:
-- [ ] Usuário A não enxerga notas de clientes de B e não cria nota apontando para cliente de B
-- [ ] A lê e atualiza apenas o próprio perfil; update em `email` falha
-- [ ] A insere em `error_logs` com o próprio identificador e não consegue ler a tabela
-- [ ] Excluir um cliente pelo cliente Supabase remove suas notas
-- [ ] Contagem de testes: 9 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] Usuário A não enxerga notas de clientes de B e não cria nota apontando para cliente de B
+- [x] A lê e atualiza apenas o próprio perfil; update em `email` falha
+- [x] A insere em `error_logs` com o próprio identificador e não consegue ler a tabela
+- [x] Excluir um cliente pelo cliente Supabase remove suas notas
+- [x] Contagem de testes: 14 testes passam nesta suíte, 23 no projeto `rls` (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done — encerra a Fase 3
+
+> **Quatro mutações, quatro detecções.** Dar `select` em `error_logs` a `authenticated` derruba o teste de leitura negada; afrouxar a política de select de `notes` derruba 2; incluir `email` no grant de `profiles` derruba o teste do e-mail imutável; trocar a cascata por `no action` derruba o teste de exclusão.
+>
+> **Contraste com T15, que vale registrar.** Lá, incluir `owner_id` no grant não era detectável por esta camada, porque a cláusula `with check` da política recusa com o mesmo código. Aqui, o e-mail **é** detectável, porque nenhuma política impede alterá-lo — só o grant. A regra que emerge: um teste comportamental discrimina a camada de grant apenas quando nenhuma política cobre o mesmo caso. Quando cobre, é preciso ir ao catálogo.
+>
+> **Harness estendido**: `criarUsuario` passou a aceitar um nome, gravado em `user_metadata`, de onde o trigger o lê. Sem isso o teste de `profiles` verificaria apenas o fallback do nome, e não o caminho principal.
 **Commit**: `test(db): verifica isolamento de notes, profiles e error_logs`
 
 ---

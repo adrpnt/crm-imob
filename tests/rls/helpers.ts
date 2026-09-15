@@ -59,8 +59,14 @@ export async function exigirSupabaseLocal(): Promise<void> {
 
 export type Usuario = { id: string; email: string }
 
-/** Cria um usuário confirmado com identificador único a esta execução. */
-export async function criarUsuario(rotulo: string): Promise<Usuario> {
+/**
+ * Cria um usuário confirmado com identificador único a esta execução.
+ *
+ * `nome` vai para os metadados do cadastro, de onde o trigger
+ * handle_new_user o lê para montar o perfil. Omitir faz o nome cair para a
+ * parte do e-mail antes do @, que é o outro caminho coberto pelo pgTAP.
+ */
+export async function criarUsuario(rotulo: string, nome?: string): Promise<Usuario> {
   const id = randomUUID()
   const email = `${rotulo}-${id}@teste.local`
   const { error } = await admin.auth.admin.createUser({
@@ -68,6 +74,7 @@ export async function criarUsuario(rotulo: string): Promise<Usuario> {
     email,
     password: SENHA,
     email_confirm: true,
+    user_metadata: nome ? { full_name: nome } : undefined,
   })
   if (error) throw new Error(`falha ao criar o usuário ${rotulo}: ${error.message}`)
   return { id, email }
