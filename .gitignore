@@ -1,0 +1,69 @@
+# Dependências
+node_modules/
+.pnp
+.pnp.js
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# Build
+dist/
+dist-ssr/
+build/
+*.tsbuildinfo
+
+# Cache de ferramentas
+.vite/
+.cache/
+.eslintcache
+.stylelintcache
+*.local
+
+# Variáveis de ambiente — .env.example é versionado de propósito
+.env
+.env.*
+!.env.example
+
+# Testes e cobertura
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+playwright/.auth/
+
+# Supabase CLI — migrations, seed e config.toml SÃO versionados
+supabase/.temp/
+supabase/.branches/
+
+# Vercel
+.vercel/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editores e sistema operacional
+.DS_Store
+Thumbs.db
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Configuração local de máquina (as skills em si são versionadas)
+.claude/settings.local.json
