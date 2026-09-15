@@ -57,7 +57,7 @@ T1 → T2 → T3 → T4 → T5
 O schema completo com sua segurança. Cada tabela nasce já protegida.
 
 ```
-T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13
+T6 → T7 → T8 → T9 → T10 → T11 → T23 → T12 → T13
 ```
 
 ### Phase 3: Tipos e verificação pelo cliente
@@ -422,11 +422,41 @@ T17 → T18 → T19 → T20 → T21 → T22
 
 ---
 
+#### T23: Remover o índice `clients (id, owner_id)`
+
+**What**: Migration aditiva que descarta um índice cujo racional foi refutado por medição em T11.
+**Where**: `supabase/migrations/<ts>_drop_clients_id_owner_idx.sql`
+**Depends on**: T11
+**Reuses**: medição de plano feita em T11
+**Requirement**: FND-07
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Tarefa inserida durante a execução.** Não constava do plano aprovado. Nasceu do achado de T11: o índice foi criado em T10 para servir ao `exists` das políticas de `notes`, e o plano de execução mostrou que não é ele que serve. Remoção decidida pelo usuário.
+
+**Done when**:
+- [x] Migration descarta `clients_id_owner_idx`
+- [x] A asserção de existência desse índice sai da suíte de busca, e o `plan()` é ajustado
+- [x] `design.md` deixa de listar o índice
+- [x] Contagem de testes: 16 testes pgTAP na suíte de busca (uma asserção a menos que as 17 de T10)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+
+**Tests**: integration
+**Gate**: full
+**Status**: ✅ Done
+**Commit**: `perf(db): remove índice sem justificativa medida`
+
+> **Sobre remover uma asserção**: a regra de integridade de testes proíbe apagar teste para reduzir falhas. Não é o caso. O requisito mudou — o índice deixou de existir por decisão do usuário —, então a asserção passaria a exigir algo que o sistema não deve mais ter. A remoção foi consultada antes, junto com a do próprio índice.
+
+---
+
 #### T12: Migration da tabela `error_logs`
 
 **What**: Tabela, constraints de tamanho, índice, grant apenas de insert, RLS e a política.
 **Where**: `supabase/migrations/<ts>_error_logs.sql`
-**Depends on**: T11
+**Depends on**: T23
 **Reuses**: forma canônica de política do design
 **Requirement**: FND-10
 
@@ -708,7 +738,7 @@ T17 → T18 → T19 → T20 → T21 → T22
 Phase 1 → Phase 2 → Phase 3 → Phase 4
 
 Phase 1:  T1 → T2 → T3 → T4 → T5
-Phase 2:  T6 → T7 → T8 → T9 → T10 → T11 → T12 → T13
+Phase 2:  T6 → T7 → T8 → T9 → T10 → T11 → T23 → T12 → T13
 Phase 3:  T14 → T15 → T16
 Phase 4:  T17 → T18 → T19 → T20 → T21 → T22
 ```

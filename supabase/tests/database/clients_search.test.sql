@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(17);
+select plan(16);
 
 insert into auth.users (id, email, instance_id)
 values ('11111111-1111-1111-1111-111111111111', 'dono@exemplo.com',
@@ -91,13 +91,6 @@ select ok(
            where schemaname = 'public' and tablename = 'clients'
              and indexname = 'clients_owner_region_idx'),
   'índice clients_owner_region_idx existe — serve à filtro de região, insensível a caixa'
-);
-
-select ok(
-  exists (select 1 from pg_indexes
-           where schemaname = 'public' and tablename = 'clients'
-             and indexname = 'clients_id_owner_idx'),
-  'índice clients_id_owner_idx existe — serve à subconsulta `exists` das políticas de notes'
 );
 
 select ok(
