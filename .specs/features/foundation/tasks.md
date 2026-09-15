@@ -404,15 +404,20 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase-postgres-best-practices`
 
 **Done when**:
-- [ ] `client_id` referencia `clients(id)` com `on delete cascade`
-- [ ] Título aparado entre 1 e 120; descrição até 5000; descrição só com espaços vira nulo
-- [ ] As quatro políticas usam `exists` sobre `clients` com `(select auth.uid())` (AD-004)
-- [ ] Teste pgTAP cobre a matriz mais: nota de cliente alheio é invisível, insert apontando para cliente alheio é recusado, excluir o cliente apaga as notas
-- [ ] Contagem de testes: 16 testes pgTAP passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] `client_id` referencia `clients(id)` com `on delete cascade`
+- [x] Título aparado entre 1 e 120; descrição até 5000; descrição só com espaços vira nulo
+- [x] As quatro políticas usam `exists` sobre `clients` com `(select auth.uid())` (AD-004)
+- [x] Teste pgTAP cobre a matriz mais: nota de cliente alheio é invisível, insert apontando para cliente alheio é recusado, excluir o cliente apaga as notas
+- [x] Contagem de testes: 22 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **Cinco mutações, cinco detecções, nenhuma lacuna.** Política de select como `using (true)` derruba 2 testes; insert como `with check (true)` derruba 1; cascata trocada por `no action` derruba 2; `client_id` no grant de update derruba 1; remover o `nullif` da descrição derruba 1. A lição de T9 e T10 foi aplicada de saída: a camada de grant é verificada por catálogo, com controle positivo, e não por comportamento.
+>
+> **Racional do design refutado por medição.** Verifiquei o plano de execução com 1000 clientes e 10000 notas. O `exists` das políticas **não** é avaliado por linha: o planner o eleva a um SubPlan com hash, avaliado uma vez, atendido por varredura de bitmap sobre `clients` filtrando `owner_id`. Consequências: o trade-off registrado no AD-004 estava errado e foi corrigido; o índice `clients (id, owner_id)`, criado em T10 sob a justificativa de servir a esse `exists`, ficou **sem justificativa medida**. A decisão de mantê-lo ou removê-lo está pendente com o usuário.
 **Commit**: `feat(db): adiciona tabela notes com RLS derivada de clients`
 
 ---

@@ -29,7 +29,7 @@
 ### AD-004
 - **Decision**: A RLS de `notes` valida o dono através de `exists (select 1 from public.clients ...)`, sem coluna `owner_id` desnormalizada em `notes`.
 - **Reason**: Mantém `notes` com uma única fonte de verdade sobre propriedade — a nota pertence a quem é dono do cliente, e ponto. Não há trigger de sincronização nem risco de a coluna divergir.
-- **Trade-off**: Uma subconsulta por linha avaliada, contra uma comparação direta de coluna. Aceitável no volume de um consultor; será o primeiro ponto a revisitar se o produto virar multiusuário de imobiliária (PLAN §15). Mitigado por índices em `notes(client_id)` e `clients(id, owner_id)`.
+- **Trade-off**: Menor do que eu supus ao registrar esta decisão. Media-se em T11, com 1000 clientes e 10000 notas: o planner não avalia a subconsulta por linha, ele a eleva a um SubPlan com hash avaliado uma vez, atendido por varredura de bitmap sobre `clients` filtrando `owner_id`. O custo real é uma varredura de índice por consulta, não por linha. O texto original desta linha afirmava avaliação por linha e estava errado.
 - **Scope**: `notes`.
 - **Date**: 2026-09-15
 - **Status**: active

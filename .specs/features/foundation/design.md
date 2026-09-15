@@ -276,7 +276,7 @@ create table public.error_logs (
 | `clients (owner_id, status)` | Filtro de status |
 | `clients (owner_id, source)` | Filtro de origem |
 | `clients (owner_id, lower(region))` | Filtro de região e montagem das opções distintas |
-| `clients (id, owner_id)` | Torna o `exists` das políticas de `notes` um index-only scan |
+| `clients (id, owner_id)` | ~~Torna o `exists` das políticas de `notes` um index-only scan~~ **Racional refutado em T11** — o planner eleva o `exists` a um SubPlan com hash atendido por índice em `owner_id`, não por `(id, owner_id)`. O índice permanece sem justificativa medida; decisão sobre mantê-lo ou removê-lo pendente |
 | `clients using gin (search_text extensions.gin_trgm_ops)` | Busca parcial por nome, e-mail ou telefone |
 | `notes (client_id, created_at desc)` | Lista de notas da ficha e cascata da exclusão |
 | `error_logs (owner_id, created_at desc)` | Inspeção manual por usuário e período |
