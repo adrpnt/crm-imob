@@ -176,14 +176,19 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] `@tailwindcss/vite` registrado e `@import "tailwindcss"` presente
-- [ ] Bloco `@theme` define tokens de cor, espaçamento e tipografia, incluindo a cor de ação destrutiva e a de foco
-- [ ] Nenhum `tailwind.config.js` existe no repositório (AD-010)
-- [ ] Par de cores de texto e fundo dos tokens atinge contraste de ao menos 4.5:1
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run build`
+- [x] `@tailwindcss/vite` registrado e `@import "tailwindcss"` presente
+- [x] Bloco `@theme` define tokens de cor, espaçamento e tipografia, incluindo a cor de ação destrutiva e a de foco
+- [x] Nenhum `tailwind.config.js` existe no repositório (AD-010)
+- [x] Par de cores de texto e fundo dos tokens atinge contraste de ao menos 4.5:1
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run build`
 
 **Tests**: none
 **Gate**: build
+**Status**: ✅ Done
+
+> **Evidência de contraste**: os 10 pares de texto sobre fundo foram calculados pela fórmula de luminância relativa da WCAG 2.1. Menor razão encontrada: 5.02:1 (`success` sobre `surface`). Maior: 17.63:1 (`ink` sobre `surface`). Nenhum par abaixo de 4.5:1.
+>
+> **Evidência do pipeline**: o CSS construído contém o preflight, os tokens como variáveis CSS nativas e os utilitários derivados deles (`text-ink-muted`, `max-w-3xl`), o que prova que a declaração em `@theme` chega até a classe utilitária.
 **Commit**: `feat(ui): configura Tailwind v4 e tokens de design`
 
 ---
