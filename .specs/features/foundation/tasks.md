@@ -1002,7 +1002,7 @@ Phase 1:  T1 → T2 → T3 → T4 → T5
 Phase 2:  T6 → T7 → T8 → T9 → T10 → T11 → T23 → T12 → T13
 Phase 3:  T14 → T15 → T16
 Phase 4:  T17 → T18 → T19 → T20 → T21 → T22
-Phase 5:  T24 → T25 → T26 → T27 → T28 → T28
+Phase 5:  T24 → T25 → T26 → T27 → T28
 ```
 
 A execução é estritamente sequencial — não há paralelismo dentro de uma fase.
