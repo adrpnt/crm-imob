@@ -122,12 +122,15 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] Existem os scripts `dev`, `build`, `lint`, `format`, `typecheck`, `test:unit`, `test:db`, `test:rls`, `test:e2e`, `db:reset`, `db:types`
-- [ ] `npm run lint` e `npm run typecheck` saem com código zero e sem aviso
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run build`
+- [x] Existem os scripts `dev`, `build`, `lint`, `format`, `typecheck`, `test:unit`, `test:db`, `test:rls`, `test:e2e`, `db:reset`, `db:types`
+- [x] `npm run lint` e `npm run typecheck` saem com código zero e sem aviso
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run build`
 
 **Tests**: none
 **Gate**: build
+**Status**: ✅ Done
+
+> **Decisão de execução**: o template atual do Vite entrega oxlint, não ESLint. Confirmado com o usuário manter ESLint e Prettier, como o PLAN §2 especifica, pela cobertura completa das regras de hooks do React. Os presets do `eslint-plugin-react-hooks` v7 ainda são publicados em formato eslintrc, então o plugin é ligado à mão no flat config — há comentário no `eslint.config.js` explicando. `lint` roda com `--max-warnings 0` para satisfazer o FND-01, que exige saída sem aviso.
 **Commit**: `chore(setup): configura ESLint, Prettier e scripts de npm`
 
 ---

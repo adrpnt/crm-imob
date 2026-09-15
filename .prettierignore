@@ -1,0 +1,14 @@
+dist
+coverage
+playwright-report
+test-results
+package-lock.json
+src/types/database.types.ts
+supabase/.temp
+supabase/.branches
+
+# Conteúdo vendorizado e documentos escritos à mão: não reformatar
+.claude
+.agents
+.specs
+PLAN.md
