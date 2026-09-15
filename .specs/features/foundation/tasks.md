@@ -871,16 +871,23 @@ T24 → T25 → T26 → T27
 **Lacuna 3, a mais grave.** Duas mutações independentes atravessaram 131 testes: remover `to authenticated` e trocar `(select auth.uid())` por `auth.uid()`. Nenhuma muda comportamento hoje, e é por isso que podem ser desfeitas por refatoração sem alarme.
 
 **Done when**:
-- [ ] Toda política de `public` tem `roles = {authenticated}`, nunca `{public}`
-- [ ] Toda expressão de política que chama `auth.uid()` a usa em subconsulta, detectável como `SELECT auth.uid()` no catálogo
-- [ ] A suíte cobre as políticas existentes sem enumerá-las à mão, de modo que tabela nova entre na verificação automaticamente
-- [ ] Remover `to authenticated` de uma política derruba a suíte
-- [ ] Trocar `(select auth.uid())` por `auth.uid()` derruba a suíte
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] Toda política de `public` tem `roles = {authenticated}`, nunca `{public}`
+- [x] Toda expressão de política que chama `auth.uid()` a usa em subconsulta, detectável como `SELECT auth.uid()` no catálogo
+- [x] A suíte cobre as políticas existentes sem enumerá-las à mão, de modo que tabela nova entre na verificação automaticamente
+- [x] Remover `to authenticated` de uma política derruba a suíte
+- [x] Trocar `(select auth.uid())` por `auth.uid()` derruba a suíte
+- [x] Contagem de testes: 6 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **As duas mutações do Verifier morrem.** M6 (remover `to authenticated` das 4 políticas de `clients`) derruba o teste 3; M7 (trocar `(select auth.uid())` por `auth.uid()`) derruba os testes 4 e 5. Ambas atravessavam 131 testes antes.
+>
+> **O controle positivo pegou um erro meu na hora de escrever.** Afirmei 13 políticas; são 11 — `clients` 4, `notes` 4, `profiles` 2, `error_logs` 1. Sem ele, as asserções de varredura passariam vacuamente caso o filtro deixasse de casar com qualquer política.
+>
+> **A suíte varre o catálogo em vez de enumerar.** Uma tabela nova com política entra na verificação sem que ninguém precise lembrar de acrescentá-la — o que importa porque `auth`, `clients` e `notes` ainda vão adicionar políticas.
 **Commit**: `test(db): assere papel e forma de avaliação das políticas`
 
 ---
