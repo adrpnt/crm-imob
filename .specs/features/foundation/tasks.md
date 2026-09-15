@@ -495,14 +495,23 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase`
 
 **Done when**:
-- [ ] Função declarada `security definer` com `set search_path = ''` (AD-005)
-- [ ] `full_name` lido de `raw_user_meta_data`; sem ele, cai para a parte do e-mail antes do `@`
-- [ ] Teste pgTAP cobre os dois caminhos e confirma que o perfil existe com `id`, `email` e `full_name` corretos
-- [ ] Contagem de testes: 5 testes pgTAP passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] Função declarada `security definer` com `set search_path = ''` (AD-005)
+- [x] `full_name` lido de `raw_user_meta_data`; sem ele, cai para a parte do e-mail antes do `@`
+- [x] Teste pgTAP cobre os dois caminhos e confirma que o perfil existe com `id`, `email` e `full_name` corretos
+- [x] Contagem de testes: 11 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done — encerra a Fase 2
+
+> **Contagem revista de 5 para 11.** Três caminhos de nome em vez de dois — com metadados, sem metadados, e com `full_name` presente mas só com espaços. Mais o invariante "nenhum usuário sem perfil", a cascata na direção inversa, e três asserções de catálogo sobre a própria função.
+>
+> **Fixture de `profiles.test.sql` adaptada.** Aquele arquivo inseria a linha de perfil à mão, o que passou a colidir com o trigger. O setup agora passa `full_name` em `raw_user_meta_data` e deixa o trigger criar o perfil — nenhuma asserção mudou, e o novo caminho é o real do produto.
+>
+> **Um literal meu estava errado.** A asserção sobre `proconfig` esperava `search_path=`; o catálogo grava `search_path=""`. A intenção do teste estava certa, o valor esperado não. Corrigi o literal, não a intenção.
+>
+> **Quatro mutações, quatro detecções.** Remover `security definer` derruba o teste 1; remover o `set search_path` derruba o 2; remover o trigger derruba 11. Remover o fallback do nome aborta o arquivo com violação de `not null` — que é a demonstração exata do risco registrado no design: exceção dentro do trigger aborta o cadastro inteiro.
 **Commit**: `feat(db): cria perfil automaticamente no cadastro`
 
 ---

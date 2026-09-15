@@ -2,17 +2,15 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select plan(11);
 
--- Dois usuários reais. As linhas de profiles são inseridas aqui como superusuário
--- porque a aplicação não tem esse caminho: quem cria o perfil é o trigger.
-insert into auth.users (id, email, instance_id)
+-- Dois usuários reais. As linhas de profiles NÃO são inseridas aqui: quem as
+-- cria é o trigger on_auth_user_created, e o nome vem dos metadados do
+-- cadastro. Este setup é o caminho real do produto.
+insert into auth.users (id, email, instance_id, raw_user_meta_data)
 values
-  ('11111111-1111-1111-1111-111111111111', 'dono@exemplo.com',     '00000000-0000-0000-0000-000000000000'),
-  ('22222222-2222-2222-2222-222222222222', 'estranho@exemplo.com', '00000000-0000-0000-0000-000000000000');
-
-insert into public.profiles (id, full_name, email)
-values
-  ('11111111-1111-1111-1111-111111111111', 'Dono da Conta', 'dono@exemplo.com'),
-  ('22222222-2222-2222-2222-222222222222', 'Outro Usuário', 'estranho@exemplo.com');
+  ('11111111-1111-1111-1111-111111111111', 'dono@exemplo.com',
+   '00000000-0000-0000-0000-000000000000', '{"full_name":"Dono da Conta"}'::jsonb),
+  ('22222222-2222-2222-2222-222222222222', 'estranho@exemplo.com',
+   '00000000-0000-0000-0000-000000000000', '{"full_name":"Outro Usuário"}'::jsonb);
 
 -- Sanidade: sem esta asserção, todo o resto poderia passar por engano se a
 -- claim não fosse lida e auth.uid() devolvesse NULL.
