@@ -903,15 +903,22 @@ T24 → T25 → T26 → T27
 **Lacunas 4 e 5.** O trigger era testado numa tabela temporária; a ligação com `profiles`, `clients` e `notes` não. Default `lead`, `name` máx 120, `email` ≤ 254, `phone` ≤ 20 dígitos e `income` ≤ 99.999.999,99 não tinham asserção.
 
 **Done when**:
-- [ ] `updated_at` é verificado em `profiles`, `clients` e `notes`, cada uma com o trigger ligado de fato
-- [ ] O default `lead` de `status` tem asserção
-- [ ] Os quatro limites de tamanho sem cobertura ganham asserção de rejeição
-- [ ] Remover o trigger de qualquer uma das três tabelas derruba a suíte
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] `updated_at` é verificado em `profiles`, `clients` e `notes`, cada uma com o trigger ligado de fato
+- [x] O default `lead` de `status` tem asserção
+- [x] Os quatro limites de tamanho sem cobertura ganham asserção de rejeição
+- [x] Remover o trigger de qualquer uma das três tabelas derruba a suíte
+- [x] Contagem de testes: 16 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **As três mutações do Verifier morrem.** M1 (default `lead` → `contacted`) derruba o teste 7; M2 (remover o trigger de `clients`) derruba os testes 2 e 5; M3 (`name` de 120 → 400) derruba o teste 8.
+>
+> **Cada trigger é verificado duas vezes**: que existe ligado à tabela, e que faz efeito. A primeira asserção sozinha não provaria que ele funciona; a segunda sozinha não distinguiria o trigger da tabela do trigger de outra. Juntas, remover a ligação derruba as duas.
+>
+> **Um limite é testado pelos dois lados**: renda exatamente em 99.999.999,99 é aceita, e 100.000.000 é recusada. Só o lado da rejeição deixaria passar um limite errado para baixo.
 **Commit**: `test(db): cobre trigger de updated_at, default e limites`
 
 ---
