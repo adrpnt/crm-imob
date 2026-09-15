@@ -182,7 +182,7 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 
 | Requirement ID | Story | Phase | Status |
 | -------------- | ----- | ----- | ------ |
-| FND-01 | P1: Esqueleto da aplicação executável | Design | Pending |
+| FND-01 | P1: Esqueleto da aplicação executável | Implementing | Implementing |
 | FND-02 | P1: Esqueleto — configuração Tailwind v4 e tokens | Design | Pending |
 | FND-03 | P1: Esqueleto — validação de variáveis de ambiente | Design | Pending |
 | FND-04 | P1: Schema versionado — tabelas e relacionamentos | Design | Pending |

@@ -95,13 +95,16 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] `npm run dev` serve a aplicação e a página renderiza sem erro no console
-- [ ] Existem `src/app/`, `src/components/{ui,layout,feedback}/`, `src/features/`, `src/lib/`, `src/styles/`, `src/types/`
-- [ ] Dependências fixadas em versão exata, sem `^`, e lockfile commitado
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
+- [x] `npm run dev` serve a aplicação e a página renderiza sem erro no console
+- [x] Existem `src/app/`, `src/components/{ui,layout,feedback}/`, `src/features/`, `src/lib/`, `src/styles/`, `src/types/`
+- [x] Dependências fixadas em versão exata, sem `^`, e lockfile commitado
+- [x] Gate check passa: `npm run lint && npm run build`
 
 **Tests**: none
-**Gate**: build
+**Gate**: build (reduzido — ver nota)
+**Status**: ✅ Done
+
+> **Nota de gate**: o gate de build completo invoca `typecheck` e `test:unit`, scripts que só passam a existir em T2 e T3. Exigi-los aqui era um erro de ordenação na minha quebra de tarefas. T1 roda o subconjunto executável (`lint` e `build`); a partir de T2 o gate de build vale integralmente.
 **Commit**: `chore(setup): cria projeto Vite com React e TypeScript`
 
 ---
