@@ -632,12 +632,20 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] `QueryClient` não repete tentativa em erro de autorização
-- [ ] `src/app/providers.tsx` compõe o provedor de query e deixa o ponto de encaixe do provedor de sessão que `auth` vai inserir por dentro dele
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
+- [x] `QueryClient` não repete tentativa em erro de autorização
+- [x] `src/app/providers.tsx` compõe o provedor de query e deixa o ponto de encaixe do provedor de sessão que `auth` vai inserir por dentro dele
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
 
-**Tests**: none
-**Gate**: build
+**Tests**: unit (corrigido — ver nota)
+**Gate**: quick
+**Status**: ✅ Done
+
+> **Campo `Tests` corrigido de `none` para `unit`.** A matriz de cobertura exige teste unitário para módulos de `src/lib/`, e "não repetir tentativa em erro de autorização" é lógica com ramificação, não configuração. Classificar como `none` na fase Tasks foi erro meu: teria deixado a decisão de retry sem verificação. O predicado foi extraído como função nomeada — `deveTentarDeNovo` e `ehErroDeAutorizacao` — justamente para ser testável.
+>
+> **Quatro mutações, quatro detecções.** Remover a checagem de autorização, mudar o limite de tentativas, ligar retry em mutações e deixar de reconhecer o código `42501` derrubam, cada uma, o teste correspondente.
+>
+> **`providers.tsx` também ganhou teste**, contra o que o campo original previa: além de renderizar filhos, a asserção confirma que a árvore recebe a mesma instância de `QueryClient`, e não uma nova. Um provedor que entrega outro cliente compila e renderiza igual — só o teste distingue.
 **Commit**: `feat(app): configura TanStack Query e provedores globais`
 
 ---
