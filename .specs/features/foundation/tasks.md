@@ -531,14 +531,21 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase`
 
 **Done when**:
-- [ ] `npm run db:types` escreve `src/types/database.types.ts` e o arquivo está commitado
-- [ ] O cliente é criado como `createClient<Database>`, lendo de `env`, nunca de `import.meta.env`
-- [ ] Uma coluna inexistente em uma consulta vira erro de compilação
-- [ ] `npm run db:reset && npm run db:types` não produz diferença no arquivo commitado
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
+- [x] `npm run db:types` escreve `src/types/database.types.ts` e o arquivo está commitado
+- [x] O cliente é criado como `createClient<Database>`, lendo de `env`, nunca de `import.meta.env`
+- [x] Uma coluna inexistente em uma consulta vira erro de compilação
+- [x] `npm run db:reset && npm run db:types` não produz diferença no arquivo commitado
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
 
 **Tests**: none
 **Gate**: build
+**Status**: ✅ Done
+
+> **Onde a tipagem pega, medido por sonda.** Verificados seis casos: coluna inexistente em `insert`, em `.eq`, tipo errado de valor, campo obrigatório ausente, acesso a campo inexistente no resultado e tabela inexistente — todos viram erro de compilação. A exceção aparente é a coluna desconhecida dentro da string do `select()`, que não falha no ponto da chamada. O tipo inferido do resultado, porém, vira `SelectQueryError<"column 'x' does not exist on 'clients'.">`, então qualquer consumo tipado falha. O critério está cumprido, com o erro diferido para o uso.
+>
+> **Duas consequências para as features seguintes, não para esta**:
+> `status`, `source` e `income_type` vêm como `string`, não como união de literais, porque o domínio é check constraint e não enum (AD-006). O produto vai precisar dos tipos derivados dos schemas Zod para ter união no TypeScript.
+> `search_text` aparece em `Insert` e `Update` como opcional, mas é coluna gerada: escrevê-la falha em tempo de execução com `428C9`. O gerador de tipos não distingue coluna gerada.
 **Commit**: `feat(db): gera tipos do banco e tipa o cliente Supabase`
 
 ---
