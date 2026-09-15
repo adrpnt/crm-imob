@@ -13,7 +13,7 @@
     "typecheck": "tsc -b",
     "test:unit": "vitest run --project unit",
     "test:db": "supabase test db",
-    "test:rls": "vitest run --project rls --passWithNoTests",
+    "test:rls": "vitest run --project rls",
     "test:e2e": "playwright test",
     "db:reset": "supabase db reset",
     "db:types": "supabase gen types typescript --local > src/types/database.types.ts"

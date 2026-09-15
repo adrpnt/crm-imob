@@ -563,14 +563,23 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase`
 
 **Done when**:
-- [ ] O setup falha com mensagem pedindo `supabase start` quando o Supabase local não responde
-- [ ] Dois usuários com identificadores únicos por execução, sem depender de reset entre testes
-- [ ] Usuário A não lê, não altera e não exclui cliente de B; insert com `owner_id` de B é recusado
-- [ ] Contagem de testes: 6 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] O setup falha com mensagem pedindo `supabase start` quando o Supabase local não responde
+- [x] Dois usuários com identificadores únicos por execução, sem depender de reset entre testes
+- [x] Usuário A não lê, não altera e não exclui cliente de B; insert com `owner_id` de B é recusado
+- [x] Contagem de testes: 9 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **Guard verificado por execução**, não por leitura: apontando `SUPABASE_URL` para uma porta morta, a suíte falha com "Supabase local não respondeu … Rode 'npx supabase start'", e não com erro de rede cru.
+>
+> **A divisão de trabalho do AD-012 confirmada com evidência.** Três mutações sondadas. Devolver a `anon` os grants padrão do schema derruba o teste da sessão anônima — algo que o pgTAP também pega, mas que só aqui é exercido pelo caminho do PostgREST. Política de select como `using (true)` derruba 2 testes. Já incluir `owner_id` no grant de `update` **não** é detectado por esta suíte, porque a cláusula `with check` da política recusa com o mesmo `42501`: quem discrimina esse caso é [clients.test.sql:69](../../../supabase/tests/database/clients.test.sql), verificado por execução. É exatamente a repartição que o AD-012 previu — pgTAP fixa o mecanismo, a suíte JS confirma o efeito.
+>
+> **`--passWithNoTests` removido** do script `test:rls`, agora que existem arquivos reais.
+>
+> **Dois defeitos pegos pelo próprio gate**: faltava encadear a causa no erro relançado do guard, e o cliente do Bruno estava declarado sem uso. O segundo virou uma verificação de simetria do isolamento, em vez de ser apagado.
 **Commit**: `test(db): verifica isolamento de clients pelo cliente Supabase`
 
 ---
