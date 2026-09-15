@@ -41,6 +41,8 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 | Estratégia de migração quando o schema evoluir | Migrations aditivas; nenhuma edição de arquivo de migration já aplicado | Editar uma migration aplicada faz o histórico local divergir do remoto e quebra `db reset` | n |
 | Versões das dependências | Últimas estáveis no momento da instalação, fixadas exatamente (sem `^`) no `package.json` mais lockfile commitado | PLAN §2 pede isso. Fixar exato impede que uma minor de terceiro altere o comportamento entre a máquina local e a Vercel | n |
 
+| Índice `clients(id, owner_id)`, exigido na redação original do AC10 | Removido | Existia para servir ao `exists` das políticas de `notes`. A medição de plano feita durante a implementação, com 1000 clientes e 10000 notas, mostrou que o planner eleva esse `exists` a um SubPlan com hash atendido por índice em `owner_id`. Sem justificativa medida, o índice só custa escrita e espaço. Ver AD-004 | y |
+
 **Open questions:** none — todas resolvidas ou registradas acima.
 
 ---
@@ -84,7 +86,7 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 7. WHEN uma linha de `profiles`, `clients` ou `notes` é atualizada THEN o sistema SHALL gravar o instante corrente em `updated_at` por trigger, ignorando qualquer valor que o cliente tenha enviado para essa coluna.
 8. WHEN um cliente é inserido ou atualizado THEN o sistema SHALL normalizar `region` removendo espaços nas pontas e colapsando espaços internos, e SHALL gravar `phone` contendo apenas dígitos.
 9. IF um insert violar um limite de tamanho declarado na tabela de premissas THEN o sistema SHALL rejeitar a operação com erro de constraint.
-10. The system SHALL criar os índices `clients(owner_id, created_at desc)`, `clients(owner_id, status)`, `clients(owner_id, source)`, `clients(owner_id, lower(region))`, `clients(id, owner_id)` e `notes(client_id, created_at desc)`.
+10. The system SHALL criar os índices `clients(owner_id, created_at desc)`, `clients(owner_id, name)`, `clients(owner_id, status)`, `clients(owner_id, source)`, `clients(owner_id, lower(region))` e `notes(client_id, created_at desc)`.
 11. The system SHALL criar a extensão `pg_trgm` e um índice GIN cobrindo `clients.name` e `clients.email` para a busca textual.
 
 **Independent Test**: Rodar `supabase db reset` num banco limpo, depois `\d+ clients` no psql e conferir colunas, constraints e índices contra este spec.

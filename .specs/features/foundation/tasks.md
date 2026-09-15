@@ -76,6 +76,15 @@ A moldura que as features seguintes preenchem.
 T17 → T18 → T19 → T20 → T21 → T22
 ```
 
+### Phase 5: Correções pós-verificação
+
+Fase inserida após o Verifier independente reprovar a feature. Fecha as seis
+lacunas que ele encontrou, em ordem de gravidade.
+
+```
+T24 → T25 → T26 → T27
+```
+
 ---
 
 ## Task Breakdown
@@ -122,7 +131,7 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [x] Existem os scripts `dev`, `build`, `lint`, `format`, `typecheck`, `test:unit`, `test:db`, `test:rls`, `test:e2e`, `db:reset`, `db:types`
+- [x] Existem os scripts `dev`, `build`, `lint`, `format`, `typecheck`, `test`, `test:unit`, `test:db`, `test:rls`, `test:e2e`, `db:reset`, `db:types` — o script `test`, exigido pelo spec, foi omitido aqui e acrescentado em T24
 - [x] `npm run lint` e `npm run typecheck` saem com código zero e sem aviso
 - [x] Gate check passa: `npm run lint && npm run typecheck && npm run build`
 
@@ -817,15 +826,123 @@ T17 → T18 → T19 → T20 → T21 → T22
 
 ---
 
+
+### Phase 5: Correções pós-verificação
+
+#### T24: Alinhar spec e código
+
+**What**: Criar o script `test` que o spec exige e emendar o critério do índice removido.
+**Where**: `package.json`
+**Depends on**: T22
+**Reuses**: medição registrada em AD-004
+**Requirement**: FND-14, FND-07
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Lacunas 1 e 2 do Verifier.** Dois casos de artefato contradizendo código, ambos por omissão minha durante a execução.
+
+**Done when**:
+- [x] `npm run test` existe e roda as suítes que não exigem navegador, saindo com zero
+- [x] O AC10 do FND-07 no `spec.md` deixa de exigir `clients(id, owner_id)`, com o motivo e a referência à medição
+- [x] A nota de T14 no `tasks.md` deixa de afirmar que o critério do script `test` foi cumprido por substituição
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
+
+**Tests**: none
+**Gate**: build
+**Status**: ✅ Done
+
+> **`test` roda unit, db e rls, mas não e2e.** O E2E precisa de servidor e navegador; incluí-lo faria o comando mais usado do projeto levar dezenas de segundos. O spec pede que `npm run test` rode a suíte Vitest e saia com zero, o que está cumprido.
+>
+> **O AC10 foi emendado, não apagado.** A premissa correspondente entrou na tabela do spec com o motivo e a referência ao AD-004, para que a remoção do índice fique rastreável a partir da fonte da verdade, e não só do histórico do git.
+**Commit**: `fix(specs): alinha spec e código após verificação`
+
+---
+
+#### T25: Assertar a forma das políticas de RLS
+
+**What**: Suíte pgTAP que verifica papel e forma de avaliação de toda política do schema público.
+**Where**: `supabase/tests/database/rls_policy_shape.test.sql`
+**Depends on**: T24
+**Reuses**: catálogo `pg_policies`
+**Requirement**: FND-08
+
+**Lacuna 3, a mais grave.** Duas mutações independentes atravessaram 131 testes: remover `to authenticated` e trocar `(select auth.uid())` por `auth.uid()`. Nenhuma muda comportamento hoje, e é por isso que podem ser desfeitas por refatoração sem alarme.
+
+**Done when**:
+- [ ] Toda política de `public` tem `roles = {authenticated}`, nunca `{public}`
+- [ ] Toda expressão de política que chama `auth.uid()` a usa em subconsulta, detectável como `SELECT auth.uid()` no catálogo
+- [ ] A suíte cobre as políticas existentes sem enumerá-las à mão, de modo que tabela nova entre na verificação automaticamente
+- [ ] Remover `to authenticated` de uma política derruba a suíte
+- [ ] Trocar `(select auth.uid())` por `auth.uid()` derruba a suíte
+- [ ] Contagem de testes: a definir na implementação
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `test(db): assere papel e forma de avaliação das políticas`
+
+---
+
+#### T26: Cobrir trigger, default e limites não asseridos
+
+**What**: Asserções para o trigger `updated_at` nas tabelas reais, o default de `status` e os limites de tamanho.
+**Where**: `supabase/tests/database/clients.test.sql`
+**Depends on**: T25
+**Reuses**: suítes pgTAP existentes
+**Requirement**: FND-05, FND-06
+
+**Lacunas 4 e 5.** O trigger era testado numa tabela temporária; a ligação com `profiles`, `clients` e `notes` não. Default `lead`, `name` máx 120, `email` ≤ 254, `phone` ≤ 20 dígitos e `income` ≤ 99.999.999,99 não tinham asserção.
+
+**Done when**:
+- [ ] `updated_at` é verificado em `profiles`, `clients` e `notes`, cada uma com o trigger ligado de fato
+- [ ] O default `lead` de `status` tem asserção
+- [ ] Os quatro limites de tamanho sem cobertura ganham asserção de rejeição
+- [ ] Remover o trigger de qualquer uma das três tabelas derruba a suíte
+- [ ] Contagem de testes: a definir na implementação
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `test(db): cobre trigger de updated_at, default e limites`
+
+---
+
+#### T27: Fechar as lacunas menores
+
+**What**: Diretórios versionados, normalização em update, imutabilidade de `profiles.id` e o ramo sem sessão do registro de erro.
+**Where**: `supabase/tests/database/clients.test.sql`
+**Depends on**: T26
+**Reuses**: suítes existentes
+**Requirement**: FND-01, FND-06, FND-10, FND-16
+
+**Lacuna 6.**
+
+**Done when**:
+- [ ] `src/features/` e `src/components/ui/` chegam a um clone
+- [ ] A normalização é verificada também em `update`, não só em `insert`
+- [ ] `profiles.id` tem asserção de imutabilidade
+- [ ] O ramo sem sessão de `registrarErroDoCliente` assere o registro em console
+- [ ] Contagem de testes: a definir na implementação
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+
+**Tests**: integration
+**Gate**: full
+**Commit**: `test: fecha lacunas menores apontadas na verificação`
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
 
 Phase 1:  T1 → T2 → T3 → T4 → T5
 Phase 2:  T6 → T7 → T8 → T9 → T10 → T11 → T23 → T12 → T13
 Phase 3:  T14 → T15 → T16
 Phase 4:  T17 → T18 → T19 → T20 → T21 → T22
+Phase 5:  T24 → T25 → T26 → T27
 ```
 
 A execução é estritamente sequencial — não há paralelismo dentro de uma fase.
