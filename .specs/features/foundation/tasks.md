@@ -800,14 +800,19 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] Alguém sem contexto chega ao app rodando com banco local seguindo apenas o README
-- [ ] Documenta Docker e Supabase CLI como pré-requisitos, as variáveis de ambiente e os nove scripts
-- [ ] Documenta como criar uma migration e por que arquivos já aplicados nunca são editados
-- [ ] Registra que a feature `deploy` estende este documento com a operação de produção
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
+- [x] Alguém sem contexto chega ao app rodando com banco local seguindo apenas o README
+- [x] Documenta Docker e Supabase CLI como pré-requisitos, as variáveis de ambiente e os treze scripts
+- [x] Documenta como criar uma migration e por que arquivos já aplicados nunca são editados
+- [x] Registra que a feature `deploy` estende este documento com a operação de produção
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
 
 **Tests**: none
 **Gate**: build
+**Status**: ✅ Done — encerra a Fase 4 e a feature `foundation`
+
+> **Afirmações do README conferidas, não presumidas**: os quinze caminhos citados existem, o Studio responde no endereço documentado, e a consulta de diagnóstico de `error_logs` é SQL válido contra o schema real.
+>
+> **Três armadilhas que custaram tempo nesta feature foram documentadas** para quem vier depois: o prefixo de migration precisa ser UTC, colunas editáveis novas precisam entrar no grant de `update`, e mudanças em política exigem rodar `test:db` **e** `test:rls`, porque cada suíte pega o que a outra não vê.
 **Commit**: `docs: documenta operação local do projeto`
 
 ---
