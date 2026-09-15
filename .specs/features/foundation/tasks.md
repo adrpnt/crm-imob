@@ -664,7 +664,7 @@ T17 → T18 → T19 → T20 → T21 → T22
 
 **Done when**:
 - [x] Renderiza `<Outlet />` e um cabeçalho com slot nomeado para a identificação do usuário
-- [ ] Legível de 320px a desktop, sem rolagem horizontal — **adiado para T21**, ver nota
+- [x] Legível de 320px a desktop, sem rolagem horizontal — **verificado em T21** por medição em navegador real
 - [x] Teste de componente cobre renderização do filho e presença do slot do cabeçalho
 - [x] Contagem de testes: 5 testes passam (sem deleções silenciosas)
 - [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
@@ -765,14 +765,24 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] `npm run test:e2e` sobe o servidor de desenvolvimento, roda e sai com código zero
-- [ ] O teste de fumaça carrega a raiz e confirma que a página renderiza
-- [ ] Artefatos do Playwright já cobertos pelo `.gitignore`
-- [ ] Contagem de testes: 1 teste E2E passa (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls && npm run test:e2e`
+- [x] `npm run test:e2e` sobe o servidor de desenvolvimento, roda e sai com código zero
+- [x] O teste de fumaça carrega a raiz e confirma que a página renderiza
+- [x] Artefatos do Playwright já cobertos pelo `.gitignore`
+- [x] Contagem de testes: 4 testes E2E passam (sem deleções silenciosas)
+- [x] **Critério herdado de T18**: o layout cabe em 320px sem rolagem horizontal
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls && npm run test:e2e`
 
 **Tests**: e2e
 **Gate**: full
+**Status**: ✅ Done
+
+> **O critério de responsividade transferido de T18 está cumprido aqui**, e verificado por comportamento: a asserção compara `scrollWidth` do documento com `clientWidth` da janela a 320px e a 1440px. Em jsdom isso seria impossível; em navegador real é uma medida direta.
+>
+> **A asserção foi provada por sonda, e não presumida.** Inserir um elemento de 900px fixos no conteúdo derruba o teste de 320px e mantém o de 1440px passando — que é o comportamento correto. Um `console.error` plantado derruba o teste de fumaça. Sem essas duas sondas, eu estaria declarando responsividade verificada por asserções possivelmente vazias.
+>
+> **Contagem revista de 1 para 4**: fumaça, rota inexistente com volta ao CRM, e as duas larguras.
+>
+> **Só Chromium**: o MVP não tem requisito de compatibilidade entre navegadores, e três engines triplicariam o tempo sem retorno medido.
 **Commit**: `test(e2e): configura Playwright com teste de fumaça`
 
 ---
