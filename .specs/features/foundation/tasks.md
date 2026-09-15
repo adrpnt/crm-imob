@@ -730,15 +730,24 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] Erro lançado por um filho renderiza a tela de erro com ação de recarregar
-- [ ] Com sessão, grava em `error_logs` com identificador, mensagem, stack e rota
-- [ ] Sem sessão, registra apenas no console e não tenta escrever (AD-011)
-- [ ] Falha da própria gravação não lança segunda exceção
-- [ ] Contagem de testes: 6 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] Erro lançado por um filho renderiza a tela de erro com ação de recarregar
+- [x] Com sessão, grava em `error_logs` com identificador, mensagem, stack e rota
+- [x] Sem sessão, registra apenas no console e não tenta escrever (AD-011)
+- [x] Falha da própria gravação não lança segunda exceção
+- [x] Contagem de testes: 15 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: unit
 **Gate**: full
+**Status**: ✅ Done
+
+> **Uma fronteira só não cumpria o FND-16.** O design previa um error boundary de classe na raiz. Testei e descobri que ele **não** captura erros lançados dentro de rotas: em data mode, a fronteira padrão do React Router os pega antes e mostra a tela genérica da biblioteca, sem registrar nada. Como quase todo erro do produto acontece dentro de uma rota, o requisito ficaria cumprido apenas no papel. A tarefa passou a entregar duas fronteiras sobre uma tela compartilhada: `RootErrorBoundary` cobre o que quebra acima do roteador, e `ErroDeRota` é registrada como `ErrorBoundary` nas rotas de topo. Um teste assere que toda rota de topo da árvore real a tem — sem ele, a lacuna voltaria em silêncio ao adicionar uma rota.
+>
+> **Truncamento acrescentado, não previsto no design.** As constraints limitam `message` a 2000 e `stack` a 10000 caracteres. Sem truncar, um stack longo faria o insert ser recusado e o registro se perderia justamente no caso mais interessante de diagnosticar.
+>
+> **Quatro mutações, quatro detecções**: remover a `ErrorBoundary` das rotas, remover a guarda de sessão, remover o truncamento e remover a captura da própria falha de registro derrubam, cada uma, o teste correspondente.
+>
+> **Contagem revista de 6 para 15**, distribuídos em três arquivos: o módulo de registro, a fronteira de classe e a fronteira de rota.
 **Commit**: `feat(app): captura erros da árvore e registra no banco`
 
 ---

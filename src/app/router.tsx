@@ -1,5 +1,6 @@
 import { createBrowserRouter, type RouteObject } from 'react-router'
 
+import { ErroDeRota } from '../components/feedback/ErroDeRota'
 import { PaginaNaoEncontrada } from '../components/feedback/PaginaNaoEncontrada'
 import { AppLayout } from '../components/layout/AppLayout'
 import { PublicLayout } from '../components/layout/PublicLayout'
@@ -19,10 +20,12 @@ import App from './App'
 export const rotas: RouteObject[] = [
   {
     element: <AppLayout />,
+    ErrorBoundary: ErroDeRota,
     children: [{ path: '/', element: <App /> }],
   },
   {
     element: <PublicLayout />,
+    ErrorBoundary: ErroDeRota,
     children: [{ path: '*', element: <PaginaNaoEncontrada /> }],
   },
 ]
