@@ -663,14 +663,21 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] Renderiza `<Outlet />` e um cabeçalho com slot nomeado para a identificação do usuário
-- [ ] Legível de 320px a desktop, sem rolagem horizontal
-- [ ] Teste de componente cobre renderização do filho e presença do slot do cabeçalho
-- [ ] Contagem de testes: 3 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Renderiza `<Outlet />` e um cabeçalho com slot nomeado para a identificação do usuário
+- [ ] Legível de 320px a desktop, sem rolagem horizontal — **adiado para T21**, ver nota
+- [x] Teste de componente cobre renderização do filho e presença do slot do cabeçalho
+- [x] Contagem de testes: 5 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done, com um critério transferido para T21
+
+> **Critério de responsividade não verificado aqui, e isto é deliberado.** O jsdom não tem motor de layout: não calcula largura, não rola, não aplica media query. Qualquer asserção sobre "sem rolagem horizontal a 320px" neste ambiente testaria classes CSS, não comportamento — exatamente o tipo de asserção que prova o resultado sem provar o mecanismo, e que já me custou três correções nesta feature. O critério foi transferido para T21, que roda em navegador real.
+>
+> **Três mutações, três detecções.** Remover o `Outlet` derruba 2 testes; remover o espaço das ações derruba 2; trocar `<main>` por `<div>` derruba 1.
+>
+> **Descoberta de versão**: a instalação trouxe React Router **8.4.0**, não v7. A API que o design usa existe igual, mas a v8 removeu o pacote `react-router-dom` e move `RouterProvider` para `react-router/dom`. Os dois caminhos exportam o símbolo, então importar do errado compila e roda. Registrado no AD-013 para que não passe despercebido em T19.
 **Commit**: `feat(ui): cria layout base das rotas privadas`
 
 ---

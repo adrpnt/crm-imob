@@ -99,9 +99,10 @@
 - **Status**: active
 
 ### AD-013
-- **Decision**: React Router v7 em data mode, com `createBrowserRouter`, sem usar `loader` nem `action`. Os dados permanecem inteiramente com o TanStack Query.
+- **Decision**: React Router em data mode, com `createBrowserRouter`, sem usar `loader` nem `action`. Os dados permanecem inteiramente com o TanStack Query. Versão instalada: 8.4.0 (a decisão foi registrada quando a v7 era a estável; a substância não muda com a major).
 - **Reason**: O data mode dá layouts aninhados e `ErrorBoundary` por rota. Usar loaders além disso criaria um segundo cache convivendo com o TanStack Query, com invalidação em dois lugares — contrariando o PLAN §8, que centraliza cache e invalidação em um mecanismo só.
 - **Trade-off**: Abre-se mão do carregamento antes da transição de rota que os loaders permitem; os estados de carregamento continuam sendo responsabilidade de cada tela.
+- **Nota da v8** (verificada em T18): o pacote `react-router-dom` deixou de existir. `RouterProvider` deve vir de `react-router/dom`; todo o resto, de `react-router`. Ambos os caminhos exportam o símbolo, então importar do lugar errado compila e roda — o registro existe para que isso não passe despercebido.
 - **Scope**: Todas as features que adicionam rota.
 - **Date**: 2026-09-15
 - **Status**: active
