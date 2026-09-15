@@ -695,15 +695,24 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] Roteador criado fora da árvore React e entregue por `RouterProvider` (AD-013)
-- [ ] Nenhum `loader` nem `action` é usado
-- [ ] Rota inexistente renderiza a página de não encontrado com link de volta
-- [ ] Teste de componente cobre a rota raiz e a rota inexistente
-- [ ] Contagem de testes: 3 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Roteador criado fora da árvore React e entregue por `RouterProvider` (AD-013)
+- [x] Nenhum `loader` nem `action` é usado
+- [x] Rota inexistente renderiza a página de não encontrado com link de volta
+- [x] Teste de componente cobre a rota raiz e a rota inexistente
+- [x] Contagem de testes: 5 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Um teste guarda a decisão, não só o comportamento.** A asserção "não define loader nem action em nenhuma rota" percorre a árvore inteira, incluindo aninhadas. É o alarme do AD-013: uma rota com loader criaria um segundo cache convivendo com o TanStack Query, e o sintoma só apareceria como invalidação inconsistente muito depois. Acrescentar um loader derruba esse teste.
+>
+> **Desvio de local, registrado.** O campo `Where` previa o `PublicLayout` dentro de `router.tsx`. Preferi colocá-lo ao lado do `AppLayout`, em `components/layout/`, e a página de não encontrado em `components/feedback/`. Motivo: são componentes com casa natural, e a razão original para juntá-los — evitar um commit só para dez linhas — some quando os três nascem na mesma tarefa.
+>
+> **`PublicLayout` não nasceu como código morto.** A página de não encontrado é pública, então já o consome. `auth` acrescenta login, cadastro e redefinição por baixo dele.
+>
+> **Três mutações, três detecções**, mais verificação no servidor real: raiz, rota profunda e rota inexistente respondem 200 no dev server.
 **Commit**: `feat(app): monta árvore de rotas em data mode`
 
 ---
