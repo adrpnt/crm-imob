@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(16);
+select plan(20);
 
 -- Trigger de updated_at nas tabelas REAIS, e os limites que ficaram sem
 -- asserção na primeira passada.
@@ -119,6 +119,33 @@ select throws_ok(
   $$ insert into public.notes (client_id, title, description)
      values ('aaaaaaaa-0000-0000-0000-000000000001', 'Titulo', repeat('d', 5001)) $$,
   '23514', null, 'descrição de nota com mais de 5000 caracteres é recusada');
+
+-- ---------- normalização também em UPDATE ----------
+-- O trigger é BEFORE INSERT OR UPDATE, mas só o caminho de insert tinha
+-- asserção. Um trigger declarado apenas para insert passaria despercebido.
+select results_eq(
+  $$ update public.clients
+        set phone = '(21) 91234-5678', region = '  Barra   da   Tijuca  '
+      where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+     returning phone || '|' || region $$,
+  array['21912345678|Barra da Tijuca'],
+  'a normalização vale também em update, não só em insert');
+
+select results_eq(
+  $$ update public.clients set region = '   '
+      where id = 'aaaaaaaa-0000-0000-0000-000000000001'
+     returning coalesce(region, 'NULO') $$,
+  array['NULO'],
+  'em update, região só com espaços também vira nulo');
+
+-- ---------- profiles.id é imutável pela aplicação ----------
+select ok(
+  not has_column_privilege('authenticated', 'public.profiles', 'id', 'UPDATE'),
+  'authenticated não tem privilégio de UPDATE em profiles.id');
+
+select ok(
+  has_column_privilege('authenticated', 'public.profiles', 'full_name', 'UPDATE'),
+  'controle positivo: authenticated tem privilégio de UPDATE em profiles.full_name');
 
 select * from finish();
 rollback;

@@ -934,15 +934,20 @@ T24 → T25 → T26 → T27
 **Lacuna 6.**
 
 **Done when**:
-- [ ] `src/features/` e `src/components/ui/` chegam a um clone
-- [ ] A normalização é verificada também em `update`, não só em `insert`
-- [ ] `profiles.id` tem asserção de imutabilidade
-- [ ] O ramo sem sessão de `registrarErroDoCliente` assere o registro em console
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] `src/features/` e `src/components/ui/` chegam a um clone
+- [x] A normalização é verificada também em `update`, não só em `insert`
+- [x] `profiles.id` tem asserção de imutabilidade
+- [x] O ramo sem sessão de `registrarErroDoCliente` assere o registro em console
+- [x] Contagem de testes: 20 pgTAP na suíte de triggers e limites, 44 unitários no total
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done — encerra a Fase 5
+
+> **Três mutações, três detecções.** Trocar o trigger de normalização para valer só em `insert` derruba a suíte; incluir `profiles.id` no grant de update derruba o teste 19; remover o `console.error` do ramo sem sessão — a M8 do Verifier — derruba o novo teste unitário.
+>
+> **Por que a asserção de console importa**: um erro em rota pública não vai para o banco por decisão registrada (AD-011). O console é a única via que resta. Sem asserção, ele sumiria sem deixar rastro algum.
 **Commit**: `test: fecha lacunas menores apontadas na verificação`
 
 ---

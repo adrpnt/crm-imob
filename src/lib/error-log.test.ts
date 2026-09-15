@@ -58,6 +58,18 @@ describe('registrarErroDoCliente', () => {
     expect(from).not.toHaveBeenCalled()
   })
 
+  it('registra no console o erro que não pôde ser persistido', async () => {
+    auth.getSession.mockResolvedValue({ data: { session: null } } as never)
+    const erro = new Error('quebrou no login')
+
+    await registrarErroDoCliente(erro, '/login')
+
+    // Sem esta asserção, o erro de rota pública sumiria sem deixar rastro
+    // algum: não vai para o banco por decisão (AD-011), e o console é a única
+    // via que resta.
+    expect(console.error).toHaveBeenCalledWith('[erro sem sessão, não persistido]', erro)
+  })
+
   it('devolve "falhou" sem lançar quando o insert é recusado', async () => {
     comSessao('user-1')
     insertQueDevolve({ error: { code: '42501', message: 'permission denied' } })
