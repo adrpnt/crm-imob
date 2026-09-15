@@ -12,6 +12,12 @@ export default defineConfig({
           environment: 'jsdom',
           include: ['src/**/*.test.{ts,tsx}'],
           setupFiles: ['src/test/setup.ts'],
+          // env.ts valida na importação. Sem estes valores, qualquer teste que
+          // importe o módulo falharia no carregamento em vez de na asserção.
+          env: {
+            VITE_SUPABASE_URL: 'http://localhost:54321',
+            VITE_SUPABASE_ANON_KEY: 'chave-de-teste',
+          },
         },
       },
       {

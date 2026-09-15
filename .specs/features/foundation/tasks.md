@@ -206,15 +206,20 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] Exporta `env` já validado; nenhum outro módulo lê `import.meta.env`
-- [ ] Variável ausente ou vazia lança erro cuja mensagem contém o nome da variável
-- [ ] URL inválida é rejeitada
-- [ ] `.env.example` versionado com as duas chaves sem valor, e `.env.local` coberto pelo `.gitignore`
-- [ ] Contagem de testes: 4 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Exporta `env` já validado; nenhum outro módulo lê `import.meta.env`
+- [x] Variável ausente ou vazia lança erro cuja mensagem contém o nome da variável
+- [x] URL inválida é rejeitada
+- [x] `.env.example` versionado com as duas chaves sem valor, e `.env.local` coberto pelo `.gitignore`
+- [x] Contagem de testes: 5 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Contagem revista de 4 para 5**: o critério "exporta `env` já validado" precisava de evidência própria, separada dos três casos de erro. O quinto teste assere o objeto exportado.
+>
+> **Evidência de discriminação**: remover o `path` da mensagem de erro mata 3 dos 6 testes da suíte. A mensagem padrão do Zod descreve o problema sem nomear a variável, então as asserções realmente verificam o comportamento que o FND-03 exige, e não apenas que algo foi lançado.
 **Commit**: `feat(config): valida variáveis de ambiente na inicialização`
 
 ---
