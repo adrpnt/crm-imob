@@ -269,15 +269,22 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase-postgres-best-practices`
 
 **Done when**:
-- [ ] Ambas as extensões criadas no schema `extensions`
-- [ ] `immutable_unaccent()` marcada `immutable` e usável em expressão de índice
-- [ ] `set_updated_at()` declarada com `set search_path = ''`
-- [ ] Teste pgTAP confirma que `immutable_unaccent('São João')` devolve `Sao Joao` e que a função é imutável
-- [ ] Contagem de testes: 3 testes pgTAP passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] Ambas as extensões criadas no schema `extensions`
+- [x] `immutable_unaccent()` marcada `immutable` e usável em expressão de índice
+- [x] `set_updated_at()` declarada com `set search_path = ''`
+- [x] Teste pgTAP confirma que `immutable_unaccent('São João')` devolve `Sao Joao` e que a função é imutável
+- [x] Contagem de testes: 6 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **Contagem revista de 3 para 6**: os critérios exigiam mais asserções do que eu havia estimado — schema de cada extensão (2), remoção de acento, marcação de volatilidade, uso real em índice, e o descarte do `updated_at` enviado pelo cliente.
+>
+> **Evidência de discriminação**: trocar `immutable` por `stable` no envelope derruba os testes 4 e 5; remover a atribuição de `updated_at` do trigger derruba o 6. A suíte detecta as duas classes de regressão que importam nesta migration.
+>
+> **pgTAP não vai para produção**: o `supabase test db` instala a extensão por conta própria no banco local. Nenhuma migration a cria, então o banco de produção não recebe o framework de teste.
 **Commit**: `feat(db): adiciona extensões e funções auxiliares`
 
 ---
