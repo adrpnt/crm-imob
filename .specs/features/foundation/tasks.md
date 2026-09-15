@@ -239,14 +239,19 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase`
 
 **Done when**:
-- [ ] `supabase start` sobe e `npm run db:reset` executa sem erro
-- [ ] Confirmação de e-mail desativada no `config.toml` (AD-007)
-- [ ] `npm run test:db` executa a suíte pgTAP, ainda que vazia, e sai com código zero
-- [ ] `supabase/.temp/` e `supabase/.branches/` já cobertos pelo `.gitignore`
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run build`
+- [x] `supabase start` sobe e `npm run db:reset` executa sem erro
+- [x] Confirmação de e-mail desativada no `config.toml` (AD-007)
+- [x] `npm run test:db` executa a suíte pgTAP, ainda que vazia, e sai com código zero
+- [x] `supabase/.temp/` e `supabase/.branches/` já cobertos pelo `.gitignore`
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run build`
 
 **Tests**: none
 **Gate**: build
+**Status**: ✅ Done
+
+> **Incerteza do design resolvida aqui.** O risco registrado sobre como `auth.uid()` lê a claim da sessão está fechado. A definição real no CLI 2.117.0 tenta `request.jwt.claim.sub` e cai para `request.jwt.claims ->> 'sub'`. Verificado empiricamente que as duas formas devolvem o usuário e que `anon` devolve NULL. Os testes pgTAP de T7 em diante usam `request.jwt.claims` em JSON, que é o que o PostgREST define em produção. A linha correspondente em `design.md` foi marcada como resolvida.
+>
+> **Pendente para a feature `auth`**, deliberadamente fora do escopo de T6: `config.toml` ainda traz `site_url` apontando para a porta 3000, e não para a 5173 do Vite, e `minimum_password_length = 6`, enquanto a premissa do spec de `auth` fixa 8.
 **Commit**: `chore(db): inicializa Supabase local e suíte pgTAP`
 
 ---
