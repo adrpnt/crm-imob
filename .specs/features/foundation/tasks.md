@@ -371,15 +371,22 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase-postgres-best-practices`
 
 **Done when**:
-- [ ] `search_text` concatena nome, e-mail e telefone, em minúsculas e sem acento
-- [ ] Índice GIN qualifica `extensions.gin_trgm_ops` explicitamente
-- [ ] Os seis índices B-tree do design existem, todos com `owner_id` à esquerda, exceto `(id, owner_id)`
-- [ ] Teste pgTAP confirma que buscar `joao` encontra um cliente gravado como `João` e que o plano de uma busca por trigrama não é varredura sequencial
-- [ ] Contagem de testes: 5 testes pgTAP passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] `search_text` concatena nome, e-mail e telefone, em minúsculas e sem acento
+- [x] Índice GIN qualifica `extensions.gin_trgm_ops` explicitamente
+- [x] Os seis índices B-tree do design existem, todos com `owner_id` à esquerda, exceto `(id, owner_id)`
+- [x] Teste pgTAP confirma que buscar `joao` encontra um cliente gravado como `João`, e que o índice de busca usa GIN com `gin_trgm_ops`
+- [x] Contagem de testes: 17 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **Segunda lacuna de teste encontrada e fechada.** O critério original pedia que o plano "não fosse varredura sequencial". Escrevi a asserção procurando o nome do índice no plano, com `enable_seqscan` desligado. A mutação que troca o índice GIN de trigrama por um btree de mesmo nome passou intacta: sem seqscan, o planner varre o btree inteiro e o nome aparece no plano do mesmo jeito. O critério foi reescrito e a asserção substituída por duas de catálogo — método de acesso `gin` e classe de operadores `gin_trgm_ops` — que fixam o mecanismo. A asserção de plano continua presente, agora exigindo o nó de bitmap, mas o registro honesto é que sozinha ela não discrimina.
+>
+> **Demais mutações, detectadas**: tirar `immutable_unaccent` da coluna gerada derruba 2 testes; tirar o telefone da concatenação derruba 3.
+>
+> **Ajuste de ferramenta**: `results_eq` contra um array de literais falha com erro de collation ao comparar valores do tipo `name`. A lista de índices virou uma asserção por índice, o que também dá mensagem de falha precisa.
 **Commit**: `perf(db): adiciona coluna de busca e índices de clients`
 
 ---
