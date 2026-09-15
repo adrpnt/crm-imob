@@ -148,14 +148,17 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: NONE
 
 **Done when**:
-- [ ] `npm run test:unit` roda e sai com código zero
-- [ ] Testing Library e matchers de DOM configurados no setup
-- [ ] O arquivo de configuração já prevê o segundo projeto de testes, em ambiente node, que T15 vai preencher
-- [ ] Contagem de testes: 1 teste passa (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] `npm run test:unit` roda e sai com código zero
+- [x] Testing Library e matchers de DOM configurados no setup
+- [x] O arquivo de configuração já prevê o segundo projeto de testes, em ambiente node, que T15 vai preencher
+- [x] Contagem de testes: 1 teste passa (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Nota de gate**: o projeto `rls` roda com `passWithNoTests`, senão o gate `full` de T7 a T13 falharia por ausência de arquivos que só nascem em T15. A permissividade é contida pela exigência de contagem de testes em T15 e T16, que denuncia uma suíte apagada depois.
 **Commit**: `test(setup): configura Vitest com Testing Library`
 
 ---
