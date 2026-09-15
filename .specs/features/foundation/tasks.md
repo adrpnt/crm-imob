@@ -338,15 +338,22 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase-postgres-best-practices`
 
 **Done when**:
-- [ ] As nove check constraints do design existem com os limites da tabela de premissas do spec
-- [ ] `normalize_client()` apara o nome, baixa o e-mail, reduz o telefone a dígitos e colapsa a região; vazio vira nulo
-- [ ] Grant de `update` exclui `owner_id`, `created_at` e `updated_at` (AD-014)
-- [ ] Teste pgTAP cobre a matriz completa mais os edge cases: região só com espaços vira nulo, telefone com máscara vira dígitos, `income` negativo é recusado, `updated_at` enviado pelo cliente é ignorado, insert com `owner_id` alheio é recusado
-- [ ] Contagem de testes: 22 testes pgTAP passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] As nove check constraints do design existem com os limites da tabela de premissas do spec
+- [x] `normalize_client()` apara o nome, baixa o e-mail, reduz o telefone a dígitos e colapsa a região; vazio vira nulo
+- [x] Grant de `update` exclui `owner_id`, `created_at` e `updated_at` (AD-014)
+- [x] Teste pgTAP cobre a matriz completa mais os edge cases: região só com espaços vira nulo, telefone com máscara vira dígitos, `income` negativo é recusado, `updated_at` enviado pelo cliente é ignorado, insert com `owner_id` alheio é recusado
+- [x] Contagem de testes: 28 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **Lacuna de teste encontrada e fechada.** A sonda de mutação revelou que `owner_id` podia ser incluído no grant de `update` sem que nenhum teste falhasse: um update de `owner_id` para outro usuário também é barrado pela cláusula `with check` da política, então a asserção comportamental provava o resultado sem provar o mecanismo do AD-014. Substituída por asserção de catálogo sobre `has_column_privilege`, acompanhada de um controle positivo que impede a nova asserção de passar por engano se o nome do papel ou da tabela estiver errado. Com a correção, a mutação passa a ser detectada.
+>
+> **Demais mutações, todas detectadas**: política de select como `using (true)` derruba 2 testes; política de insert como `with check (true)` derruba 1; remover a normalização do telefone derruba 5; remover o `nullif` da região faz o arquivo abortar.
+>
+> **Correção de método**: `grep '# Failed test'` não enxerga aborts de arquivo, que aparecem como `Bad plan ... ran 0`. Duas mutações foram lidas como não detectadas até eu olhar a saída completa.
 **Commit**: `feat(db): adiciona tabela clients com RLS e normalização`
 
 ---
