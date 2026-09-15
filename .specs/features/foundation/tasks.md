@@ -158,7 +158,7 @@ T17 → T18 → T19 → T20 → T21 → T22
 **Gate**: quick
 **Status**: ✅ Done
 
-> **Nota de gate**: o projeto `rls` roda com `passWithNoTests`, senão o gate `full` de T7 a T13 falharia por ausência de arquivos que só nascem em T15. A permissividade é contida pela exigência de contagem de testes em T15 e T16, que denuncia uma suíte apagada depois.
+> **Nota de gate** (revista em T8): o gate `full` de T7 a T13 falharia por ausência de arquivos que só nascem em T15. A permissividade vive em `--passWithNoTests` no script `test:rls`, e não dentro do bloco do projeto: ali a opção é inerte, porque a checagem de "nenhum arquivo encontrado" acontece no nível do runner. T15 remove a flag assim que houver arquivos reais, e a exigência de contagem de testes em T15 e T16 denuncia uma suíte apagada depois.
 **Commit**: `test(setup): configura Vitest com Testing Library`
 
 ---
@@ -285,6 +285,8 @@ T17 → T18 → T19 → T20 → T21 → T22
 > **Evidência de discriminação**: trocar `immutable` por `stable` no envelope derruba os testes 4 e 5; remover a atribuição de `updated_at` do trigger derruba o 6. A suíte detecta as duas classes de regressão que importam nesta migration.
 >
 > **pgTAP não vai para produção**: o `supabase test db` instala a extensão por conta própria no banco local. Nenhuma migration a cria, então o banco de produção não recebe o framework de teste.
+>
+> **Correção registrada em T8**: o gate desta tarefa foi conferido lendo o código de saída através de um pipe, que devolve o status do `tail` e não o do comando. Isso mascarou `test:rls` saindo com 1. O gate de T7 foi reexecutado em T8, com códigos de saída capturados diretamente, e passa.
 **Commit**: `feat(db): adiciona extensões e funções auxiliares`
 
 ---
@@ -302,15 +304,23 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase-postgres-best-practices`
 
 **Done when**:
-- [ ] `id` referencia `auth.users(id)` com `on delete cascade`
-- [ ] Grant de `update` cobre apenas `full_name` e `phone`; `email` e `id` inalcançáveis (AD-008, AD-014)
-- [ ] `anon` sem grant algum; `authenticated` sem `insert` nem `delete`
-- [ ] Teste pgTAP cobre a matriz: dono lê e atualiza o próprio; outro usuário não lê, não atualiza; `anon` é negado; update em `email` é recusado
-- [ ] Contagem de testes: 9 testes pgTAP passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] `id` referencia `auth.users(id)` com `on delete cascade`
+- [x] Grant de `update` cobre apenas `full_name` e `phone`; `email` e `id` inalcançáveis (AD-008, AD-014)
+- [x] `anon` sem grant algum; `authenticated` sem `insert` nem `delete`
+- [x] Teste pgTAP cobre a matriz: dono lê e atualiza o próprio; outro usuário não lê, não atualiza; `anon` é negado; update em `email` é recusado
+- [x] Contagem de testes: 11 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **Contagem revista de 9 para 11**: acrescentei uma asserção de sanidade, que confirma `auth.uid()` reconhecendo a sessão antes de qualquer outra coisa, e uma que verifica `relrowsecurity`. Sem a primeira, toda a matriz poderia passar por engano se a claim não fosse lida.
+>
+> **Evidência de discriminação — quatro mutações de segurança, quatro detecções**:
+> incluir `email` no grant de update derruba o teste 6; trocar a política de select por `using (true)` derruba os testes 3 e 9; remover `anon` do `revoke` derruba o teste 11; não habilitar RLS derruba seis testes.
+>
+> **Correção de método**: descobri aqui que vinha lendo o código de saída dos gates através de um pipe, o que devolve o status do `tail`. Os gates passaram a ser executados capturando o código diretamente.
 **Commit**: `feat(db): adiciona tabela profiles com RLS`
 
 ---

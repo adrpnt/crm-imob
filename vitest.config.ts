@@ -26,11 +26,11 @@ export default defineConfig({
           name: 'rls',
           environment: 'node',
           include: ['tests/rls/**/*.test.ts'],
-          // A suíte de isolamento pelo cliente Supabase nasce em T15. Até lá o
-          // projeto existe e sai com zero em vez de derrubar o gate das tarefas
-          // de banco. A contagem de testes exigida por T15 e T16 é o que impede
-          // que esta permissividade esconda uma suíte apagada depois.
-          passWithNoTests: true,
+          // A suíte de isolamento pelo cliente Supabase nasce em T15. Até lá a
+          // permissividade fica no script test:rls, como --passWithNoTests:
+          // dentro do bloco do projeto a opção é inerte, porque a checagem de
+          // "nenhum arquivo encontrado" acontece no nível do runner.
+          // T15 remove a flag assim que houver arquivos reais.
         },
       },
     ],
