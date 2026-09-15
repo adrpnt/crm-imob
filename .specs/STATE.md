@@ -90,13 +90,37 @@
 - **Date**: 2026-09-15
 - **Status**: active
 
+### AD-012
+- **Decision**: A verificação de isolamento é feita em duas camadas: pgTAP (`supabase/tests/database/`, via `supabase test db`) cobre a matriz completa de políticas, e Vitest com supabase-js cobre o caminho real do cliente.
+- **Reason**: As duas camadas enxergam coisas diferentes. pgTAP escreve a matriz de tabela × operação × papel com `set local role` e rollback automático — inclusive a negação para `anon`, desajeitada de expressar por um cliente autenticado. Vitest atravessa o PostgREST e portanto detecta erro de `grant` ou de exposição de schema, que pgTAP não vê.
+- **Trade-off**: Duas ferramentas de teste para manter e dois lugares onde procurar quando uma regra de acesso muda. Aceito porque a autorização é a única fronteira de segurança do produto (AD-001).
+- **Scope**: Todas as features que adicionam tabela ou política.
+- **Date**: 2026-09-15
+- **Status**: active
+
+### AD-013
+- **Decision**: React Router v7 em data mode, com `createBrowserRouter`, sem usar `loader` nem `action`. Os dados permanecem inteiramente com o TanStack Query.
+- **Reason**: O data mode dá layouts aninhados e `ErrorBoundary` por rota. Usar loaders além disso criaria um segundo cache convivendo com o TanStack Query, com invalidação em dois lugares — contrariando o PLAN §8, que centraliza cache e invalidação em um mecanismo só.
+- **Trade-off**: Abre-se mão do carregamento antes da transição de rota que os loaders permitem; os estados de carregamento continuam sendo responsabilidade de cada tela.
+- **Scope**: Todas as features que adicionam rota.
+- **Date**: 2026-09-15
+- **Status**: active
+
+### AD-014
+- **Decision**: A autorização é sustentada por dois mecanismos independentes em toda tabela: `grant` no nível de coluna define o que o papel pode tocar, política de RLS define quais linhas. Colunas imutáveis pela aplicação — `owner_id`, `created_at`, `updated_at`, `profiles.email` — ficam simplesmente fora do grant de `update`.
+- **Reason**: Com o frontend falando direto com o banco (AD-001), uma política mal escrita é uma brecha de dados. Deixar uma coluna fora do grant torna a garantia estrutural: nenhum update a alcança, esteja a política certa ou errada.
+- **Trade-off**: Todo campo novo exige lembrar de incluí-lo no grant de `update`, sob pena de uma falha silenciosa e confusa de permissão. O custo é mitigado pela suíte de AD-012.
+- **Scope**: `profiles`, `clients`, `notes`, `error_logs` e toda tabela futura.
+- **Date**: 2026-09-15
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: `.specs/features/foundation` (fase Specify concluída para as 5 features)
-- **Phase / Task**: Specify — specs redigidos, aguardando aprovação do usuário
-- **Completed**: nenhuma tarefa de implementação
+- **Phase / Task**: Tasks de `foundation` — 22 tarefas em 4 fases, validador limpo, aguardando aprovação
+- **Completed**: Specify das 5 features (aprovado); Design de `foundation` (aprovado); Tasks de `foundation` (rascunho)
 - **In-progress** (file:line): nenhum
-- **Next step**: Obter aprovação dos specs e então rodar a fase Design de `foundation`.
+- **Next step**: Obter aprovação do `tasks.md` e confirmar a delegação em lotes, então executar T1.
 - **Blockers**: nenhum
-- **Uncommitted files**: nenhum
+- **Uncommitted files**: `.specs/features/foundation/{design.md,tasks.md}`, `.specs/STATE.md`
 - **Branch**: main
