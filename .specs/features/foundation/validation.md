@@ -2,14 +2,34 @@
 
 **Veredito: FAIL**
 
-Seis lacunas reais, das quais duas são desvios diretos do spec declarados como cumpridos
-pelo autor, e seis de oito mutações de comportamento sobreviveram à suíte inteira.
-As suítes estão verdes e o ferramental é sólido; o problema não é qualidade de código, é
-que partes explícitas do spec não têm asserção que as sustente.
+Progresso real e verificável: as **8 mutações que sobreviveram na rodada anterior morrem agora**,
+todos os gates passam, e a lacuna mais perigosa — a forma das políticas de RLS — foi fechada com
+elegância. Mas duas coisas impedem o PASS:
 
-- **Faixa de diff verificada**: `0661bac~1..HEAD` (23 commits, `0661bac` .. `d5b78d9`), branch `main`.
-- **Árvore ao final**: limpa (`git status --porcelain` vazio).
-- **Verificador**: independente do autor; cobertura re-derivada a partir de `spec.md`, não de `tasks.md`.
+1. A **lacuna 4 foi declarada fechada e não está**. O trigger de `updated_at` continua sem asserção
+   que o prenda ao evento `UPDATE`: uma regressão que faz `updated_at` parar de mudar em `clients`
+   atravessa os 134 testes pgTAP intacta, provada aqui por consulta direta ao banco.
+2. A **lacuna 6 foi declarada fechada tendo sido fechada pela metade**: dos sete itens que ela
+   listava, quatro foram resolvidos e três — FND-02, FND-13 AC2 e o `.env.example` — não foram
+   tocados. FND-02 é o caso grave: remover o pipeline inteiro do Tailwind deixa a aplicação sem
+   uma única classe utilitária e **os oito gates continuam verdes**, incluindo o E2E em navegador real.
+
+As 8 mutações novas deste sensor sobreviveram, todas em território não exercitado.
+
+- **Faixa verificada**: `cd7c4a2~1..HEAD` (4 commits de correção: `cd7c4a2`, `befe98d`, `edfc250`, `67042f2`), branch `main`.
+- **Árvore ao final**: limpa (`git status --porcelain` vazio); banco restaurado; `test:db` `Result: PASS`, `Files=9, Tests=134`.
+- **Verificador**: independente do autor e do verificador anterior. Cobertura re-derivada a partir de `spec.md`; as afirmações da rodada 1 foram tratadas como hipóteses e **uma delas foi refutada** (ver §6).
+
+---
+
+## 0. Histórico — rodada anterior (resumo)
+
+A primeira verificação reprovou a feature com **6 lacunas** e **6 de 8 mutações sobreviventes**.
+As duas contradições declaradas entre artefato e código eram o script `npm run test` inexistente
+(FND-14) e o índice `clients(id, owner_id)` exigido pelo spec mas removido do código (FND-07).
+As quatro demais eram ausência de asserção: forma das políticas de RLS, trigger de `updated_at`
+nas tabelas reais, limites de tamanho e default de `status`, e um conjunto de lacunas menores.
+O autor respondeu com T24–T27.
 
 ---
 
@@ -19,188 +39,239 @@ que partes explícitas do spec não têm asserção que as sustente.
 | ------- | ---- | ---------- |
 | `npm run lint` | 0 | `--max-warnings 0` |
 | `npm run typecheck` | 0 | |
-| `npm run test:unit` | 0 | 9 arquivos, 43 testes |
-| `npm run test:db` | 0 | `Result: PASS`, `Files=7, Tests=108` |
+| `npm run format` | 0 | `prettier --check` |
+| `npm run test:unit` | 0 | 9 arquivos, 44 testes |
+| `npm run test:db` | 0 | `Result: PASS`, `Files=9, Tests=134` |
 | `npm run test:rls` | 0 | 2 arquivos, 23 testes |
+| **`npm run test`** | **0** | **`package.json:14` — existe agora e encadeia `test:unit && test:db && test:rls`** |
+| `npm run test:e2e` | 0 | 4 testes, Chromium |
 | `npm run build` | 0 | |
-| `npm run test:e2e` | 0 | 4 testes |
-| **`npm run test`** | **1** | **`npm error Missing script: "test"`** |
 
-O último é exigido literalmente pelo spec (Goals linha 13; P2 AC3; P2 AC4) e não existe.
+Critérios de sucesso reproduzidos:
 
-Critérios de sucesso verificados por reprodução:
-
-- `supabase db reset` + `npm run db:types` **não** produz diferença no arquivo commitado — reproduzido, `TYPES_IDENTICAL`.
-- Nenhum segredo além das chaves publicáveis em arquivos `VITE_*` — confirmado; `.env.local` não é rastreado, `.env.example` tem as duas chaves vazias.
+- `supabase db reset` + `npm run db:types` não produz diferença no arquivo commitado — **`TYPES_IDENTICAL`**.
+- Nenhum segredo além das chaves publicáveis em arquivos `VITE_*` — confirmado.
 
 ---
 
-## 2. Cobertura ancorada no spec
+## 2. As 6 lacunas da rodada anterior, uma a uma
+
+| # | Lacuna | Correção | Real e suficiente? |
+| --- | --- | --- | --- |
+| 1 | `npm run test` não existe | `package.json:14` `"test": "npm run test:unit && npm run test:db && npm run test:rls"` | ✅ **Fechada.** Exit 0 reproduzido. Não inclui E2E, e isso é legítimo: o spec (P2 AC3) pede que o comando rode a suíte Vitest e saia com zero, não que rode o navegador. |
+| 2 | Índice exigido pelo spec, removido do código | `spec.md:89` reescreve o AC10; `spec.md:44` acrescenta a premissa com a medição | ⚠️ **Fechada com ressalva.** A emenda em si é legítima (§5), mas a mesma edição acrescentou um índice ao AC10 sem declarar, e sobraram duas referências obsoletas ao índice removido. |
+| 3 | Forma das políticas de RLS sem asserção | `supabase/tests/database/rls_policy_shape.test.sql:37` `is_empty(... where roles <> '{authenticated}'::name[])`; `:48` e `:57` `is_empty(... qual like '%auth.uid()%' and qual not like '%SELECT auth.uid()%')` | ✅ **Fechada, e bem.** M6 e M7 morrem. O controle positivo de `:24` (`is(count(*), 11)`) impede que a varredura passe vacuamente, e varrer o catálogo em vez de enumerar faz tabela futura entrar sozinha. |
+| 4 | Trigger de `updated_at` não verificado nas tabelas reais | `triggers_and_limits.test.sql:30,36,42` (existência por `tgname`) e `:51,58,65` (efeito) | ❌ **NÃO fechada.** A asserção de catálogo filtra por `tgrelid`, `tgname` e `not tgisinternal` — **nunca por `tgtype`**, que é onde vive o evento. E a asserção de efeito é vacuamente satisfeita por um trigger `before insert`. Ver N1 em §7. |
+| 5 | Limites de tamanho e o default só parcialmente cobertos | `triggers_and_limits.test.sql:71` (`is(status,'lead')`), `:77` (`name` 121), `:82` (`email` 254), `:88` (`phone` 21), `:98` (`income` 10⁸), `:103` (`lives_ok` no limite exato) | ✅ **Fechada** para o que a lacuna citava. M1 e M3 morrem, e o limite de renda é testado pelos dois lados. Permanece um flanco **novo**, não imputável a esta correção: os *conjuntos* de domínio são amostrados por um valor inválido só (N7, N8). |
+| 6 | Sete lacunas menores | `.gitkeep` × 2; `:126`/`:134` normalização em update; `:142` `profiles.id`; `error-log.test.ts:70` console | ❌ **Fechada pela metade.** Quatro itens resolvidos; **três não tocados**: FND-02 (tokens do Tailwind), FND-13 AC2 (coluna inexistente vira erro de compilação) e — nunca listado, mas da mesma família — o conteúdo do `.env.example`. T27 está marcada `✅ Done` com a nota "Lacuna 6". |
+
+**Placar: 3 fechadas, 1 fechada com ressalva, 2 não fechadas.**
+
+---
+
+## 3. As 8 mutações originais, reaplicadas
+
+Método: edição da fonte, `npm run db:reset` quando migration, suíte relevante, leitura de
+`Result: PASS/FAIL` e da contagem, `git checkout -- <arquivo>`, `db:reset` de novo. Nunca `git stash`.
+
+| # | Mutação | Suíte | Resultado | Morreu? |
+| --- | --- | --- | --- | --- |
+| M1 | `clients.status` default `'lead'` → `'contacted'` | `test:db` | exit 1, `Result: FAIL`, `failed 1 test of 20` | ✅ `triggers_and_limits.test.sql:71` |
+| M2 | Remover o trigger `clients_set_updated_at` | `test:db` | exit 1, `Result: FAIL`, `failed 2 tests of 20` | ✅ `triggers_and_limits.test.sql:36,58` |
+| M3 | `clients_name_length` `2..120` → `2..400` | `test:db` | exit 1, `Result: FAIL`, `failed 1 test of 20` | ✅ `triggers_and_limits.test.sql:77` |
+| M4 | `error_logs_insert_own` → `with check (true)` | `test:db` + `test:rls` | exit 1 / exit 1, `failed 1 of 14`; rls `1 failed \| 22 passed` | ✅ `error_logs.test.sql:50`, `notes-profiles-error-logs.test.ts:195` |
+| M5 | políticas de `profiles` → `using (true)` | `test:db` + `test:rls` | exit 1 / exit 1, `Bad plan ... ran 3` (abort); rls `2 failed \| 21 passed` | ✅ `profiles.test.sql:32` |
+| M6 | Remover `to authenticated` das 4 políticas de `clients` | `test:db` + `test:rls` | exit 1, `failed 1 test of 6`; rls 23/23 | ✅ **novo** `rls_policy_shape.test.sql:37` |
+| M7 | `(select auth.uid())` → `auth.uid()` em `clients` | `test:db` + `test:rls` | exit 1, `failed 2 tests of 6`; rls 23/23 | ✅ **novo** `rls_policy_shape.test.sql:48,57` |
+| M8 | Remover o `console.error` do ramo sem sessão | `test:unit` | exit 1, `1 failed \| 43 passed` | ✅ **novo** `error-log.test.ts:70` |
+
+**Placar: 8 mortas, 0 sobreviventes** (era 2 de 8). M6 e M7 continuam invisíveis para a suíte de
+comportamento — as duas atravessam `test:rls` com 23/23 — e são pegas exclusivamente pela suíte de
+catálogo nova. É a repartição correta: elas não mudam efeito observável, mudam a forma que o AD-003 exige.
+
+---
+
+## 4. Cobertura ancorada no spec, re-derivada
 
 Regra aplicada: só conta como coberto com `arquivo:linha` **e** a expressão da asserção.
+Tabela montada a partir de leitura própria dos arquivos de teste, não da rodada anterior.
 
-### P1 — Esqueleto da aplicação executável
+| Req | Evidência (`arquivo:linha` + expressão) | Coberto? |
+| --- | --- | --- |
+| **FND-01** Esqueleto executável | `e2e/smoke.spec.ts:11` `expect(page.getByRole('heading', { name: 'CRM Imobiliário' })).toBeVisible()`; `:12` `expect(errosDeConsole).toEqual([])`; gates `lint`/`typecheck`/`build` exit 0 reproduzidos | ⚠️ **Parcial.** AC5 (os seis diretórios) e AC7 (`.env.example` com as duas chaves) hoje **existem** — `git ls-files` lista `src/features/.gitkeep` e `src/components/ui/.gitkeep` —, mas nenhuma asserção os prende: N6 e N4 sobreviveram. |
+| **FND-02** Tailwind v4 + tokens `@theme` | **nenhuma** — `grep -rn "tailwind\|@theme" src/**/*.test.* e2e/` → zero | ❌ **Zero evidência de teste.** `src/styles/globals.css:1,11-42` implementa; `vite.config.ts:6` liga o plugin. N3 removeu o plugin e **os 8 gates passaram**. |
+| **FND-03** Validação de env | `src/lib/env.test.ts:17` `expect(() => parseEnv(semUrl)).toThrowError(/VITE_SUPABASE_URL/)`; `:21` variável vazia; `:27` URL malformada; `:35` `expect(env.VITE_SUPABASE_URL).toMatch(/^https?:\/\//)` | ✅ |
+| **FND-04** Tabelas e relacionamentos | `handle_new_user.test.sql:87` `is_empty($$ select id from public.profiles where id = '3333...' $$)` (cascata de `auth.users`); `notes.test.sql:118` `is_empty($$ select title from public.notes where client_id = 'aaaa...' $$)` (cascata de `clients`); `db:reset` exit 0 reproduzido 14× | ✅ |
+| **FND-05** Check constraints de domínio | `clients.test.sql:93,97,101` `throws_ok(... '23514' ...)` para `status`/`source`/`income_type`; `triggers_and_limits.test.sql:71` `is(status,'lead')` | ⚠️ **Parcial.** Cada domínio é amostrado por **um** valor inválido. Alargar o conjunto (N7) ou estreitá-lo (N8) passa despercebido. |
+| **FND-06** Triggers de `updated_at` e normalização | `triggers_and_limits.test.sql:30,36,42` `ok(exists (select 1 from pg_trigger where tgrelid = ... and tgname = ...))`; `:51,58,65` `ok(updated_at > '2020-01-01')`; `:126` `results_eq(update ... returning phone \|\| '\|' \|\| region, array['21912345678\|Barra da Tijuca'])`; `:134` região só com espaços → nulo em update; `clients.test.sql:118,123,128` no insert | ⚠️ **Parcial e enganoso.** A normalização (AC8) está sólida nos dois caminhos. O `updated_at` (AC7) **não**: nenhuma asserção fixa o evento do trigger. Ver N1. |
+| **FND-07** Índices e `pg_trgm` | `clients_search.test.sql:61,68,75,82,89,96` seis `ok(exists (select 1 from pg_indexes ... indexname = ...))`; `:124` `is(am.amname,'gin')`; `:132` `is(opc.opcname,'gin_trgm_ops')`; `notes.test.sql:107`; `extensions_and_helpers.test.sql:8` `is(... extname = 'pg_trgm' ..., 'extensions')` | ✅ **Agora sim** — o AC10 emendado (`spec.md:89`) casa exatamente com os seis índices asseridos. |
+| **FND-08** RLS de `clients` | `clients.test.sql:26` `results_eq($$ select name from public.clients $$, array['Cliente do Dono'])`; `:48,:52` `is_empty(update/delete ... returning name)`; `:56` `throws_ok(... owner_id alheio ..., '42501')`; `:68` `ok(not has_column_privilege('authenticated','public.clients','owner_id','UPDATE'))` + `:72` controle positivo; `rls_policy_shape.test.sql:37,48,57`; `tests/rls/clients.test.ts:58,83,106,152` | ✅ **Sólido nas duas camadas do AD-012, forma e comportamento.** |
+| **FND-09** RLS de `notes` | `notes.test.sql:47` `results_eq($$ select title from public.notes $$, array['Ligação inicial'])`; `:65,:69,:73` `is_empty` para select/update/delete do estranho; `:77` `throws_ok(... '42501')`; `:34,:37,:40` grants por catálogo; `tests/rls/notes-profiles-error-logs.test.ts:63,90` | ✅ As 4 operações cobertas. |
+| **FND-10** RLS de `profiles` e `error_logs` | `profiles.test.sql:32,38,44,52,59,67,83,95`; `error_logs.test.sql:24-39` seis asserções de `has_table_privilege`, `:45` `lives_ok`, `:50` `throws_ok('42501')`; `triggers_and_limits.test.sql:142` `ok(not has_column_privilege('authenticated','public.profiles','id','UPDATE'))` + `:146` controle positivo | ✅ **A imutabilidade de `profiles.id` foi genuinamente fechada** e com controle positivo. |
+| **FND-11** Suíte cruzada entre dois usuários | `tests/rls/helpers.ts:69` `criarUsuario`, `:89` `clienteDe`; 23 testes em `tests/rls/*.test.ts` atravessando o PostgREST | ✅ |
+| **FND-12** Perfil criado por trigger | `handle_new_user.test.sql:6` `is(p.prosecdef::text,'true')`; `:13` `is(array_to_string(p.proconfig,','),'search_path=""')`; `:34,:40` nome e e-mail; `:59,:71` fallback; `:78` `is_empty($$ ... where p.id is null $$)` | ✅ |
+| **FND-13** Tipos gerados e cliente tipado | AC1: `git ls-files src/types/database.types.ts` ✓ e regeneração sem diff (`TYPES_IDENTICAL`). AC2: **nenhuma asserção** | ❌ **AC2 sem cobertura.** `src/lib/supabase.ts:16` usa `createClient<Database>(...)`, mas trocar por `createClient(...)` não derruba nada (N2). |
+| **FND-14** Scripts e Vitest | `package.json:7-20` lista os nove scripts exigidos, `test` inclusive (`:14`); `npm run test` exit 0 | ✅ |
+| **FND-15** Layout base responsivo | `AppLayout.test.tsx:27` `expect(screen.getByRole('banner')).toHaveTextContent('CRM Imobiliário')`; `:42` `expect(screen.getByRole('main')).toHaveTextContent('conteúdo da rota')`; `e2e/smoke.spec.ts:41` e `:54` `expect(larguraDoDocumento).toBeLessThanOrEqual(larguraDaJanela)` a 320px e 1440px | ✅ Medida em navegador real, não em jsdom. |
+| **FND-16** Error boundary com registro | `error-log.test.ts:44` `expect(insert).toHaveBeenCalledWith(expect.objectContaining({ owner_id, message, stack, route }))`; `:58` `expect(from).not.toHaveBeenCalled()`; `:70` `expect(console.error).toHaveBeenCalledWith('[erro sem sessão, não persistido]', erro)`; `:96-98` truncamento; `RootErrorBoundary.test.tsx:44,61,92`; `ErroDeRota.test.tsx:36,67` | ✅ **AC4 agora coberto nas duas metades** (não escreve **e** registra no console). |
 
-| Requisito / AC | Evidência | Esperado pelo spec | Coberto? |
-| --- | --- | --- | --- |
-| FND-01 AC1 — `npm run dev` serve a raiz sem erro de console | `e2e/smoke.spec.ts:11` `await expect(page.getByRole('heading', { name: 'CRM Imobiliário' })).toBeVisible()` e `:12` `expect(errosDeConsole).toEqual([])` | Rota raiz renderiza, console limpo | ✅ |
-| FND-01 AC3 — build com exit zero | Reproduzido: `EXITCODE[build]=0` | Exit zero | ✅ |
-| FND-01 AC4 — lint/typecheck exit zero, sem aviso | Reproduzido: `EXITCODE[lint]=0`, `EXITCODE[typecheck]=0`; `package.json:11` `eslint . --max-warnings 0` | Exit zero e nenhum aviso | ✅ |
-| FND-01 AC5 — diretórios `src/app`, `src/components`, `src/features`, `src/lib`, `src/styles`, `src/types` | `git ls-files src/features src/components/ui` → **vazio** | Os seis diretórios organizam o código | ❌ **`src/features/` e `src/components/ui/` existem só na máquina do autor; git não versiona diretório vazio, então um clone não os tem.** Nenhum teste os verifica. |
-| FND-02 AC2 — Tailwind v4 via `@tailwindcss/vite`, tokens por `@theme` em `globals.css` | `src/styles/globals.css:1,11-42`; verificação manual minha em `dist/assets/index-*.css` (`--color-ink-muted:#5b6472` presente) | Tokens de cor, espaçamento e tipografia aplicados | ⚠️ **Sem teste.** `tasks.md:189` declara `**Tests**: none`. Evidência é manual, reproduzível, mas não regride. |
-| FND-03 AC6 — variável ausente/vazia lança nomeando-a | `src/lib/env.test.ts:17` `expect(() => parseEnv(semUrl)).toThrowError(/VITE_SUPABASE_URL/)`; `:21` idem para `VITE_SUPABASE_ANON_KEY` vazia; `:27` URL malformada | Erro nomeando a variável | ✅ |
-| FND-03 AC7 — `.env.example` versionado, `.env.local` fora do VCS | `git ls-files` lista `.env.example`; `git ls-files --error-unmatch .env.local` → `did not match`; `.gitignore:26-28` | Versionado / ignorado | ✅ (verificado por reprodução, não por teste) |
+**Resumo: 10 de 16 requisitos plenamente cobertos; 4 parciais (FND-01, FND-05, FND-06); 2 sem cobertura (FND-02, FND-13 AC2).**
 
-### P1 — Schema versionado e reproduzível
-
-| Requisito / AC | Evidência | Esperado pelo spec | Coberto? |
-| --- | --- | --- | --- |
-| FND-04 AC1 — `db reset` reconstrói as 4 tabelas sem passo manual | Reproduzido 9× durante o sensor: `npm run db:reset` exit 0, seguido de `test:db` `Result: PASS` | Reconstrução completa | ✅ |
-| FND-04 AC2 — `profiles.id` PK → `auth.users(id)` `on delete cascade` | `supabase/tests/database/handle_new_user.test.sql:87` `select is_empty($$ select id from public.profiles where id = '3333...' $$, 'excluir o usuário apaga o perfil por cascata')` | Cascata do auth.users | ✅ |
-| FND-04 AC3 — `notes.client_id` FK → `clients(id)` `on delete cascade` | `supabase/tests/database/notes.test.sql:118` `select is_empty($$ select title from public.notes where client_id = 'aaaa...' $$, ...)`; `tests/rls/notes-profiles-error-logs.test.ts:119` `expect(count).toBe(0)` | Cascata do cliente | ✅ |
-| FND-05 AC4 — `status` restrito aos 5 valores | `supabase/tests/database/clients.test.sql:93` `throws_ok(... status 'arquivado' ..., '23514', ...)` | Domínio fechado | ✅ (parcial) |
-| FND-05 AC4 — **`lead` como padrão** | busca: `grep -n "default\|'lead'" supabase/tests/database/clients.test.sql` → só inserts com `status` explícito (`:12`) | Default `lead` | ❌ **Nenhuma asserção. Mutação M1 sobreviveu.** |
-| FND-05 AC5 — `source` restrito aos 6 valores | `clients.test.sql:97` `throws_ok(... source 'tiktok' ..., '23514', ...)` | Domínio fechado | ✅ |
-| FND-05 AC6 — `income_type` restrito, aceitando nulo | `clients.test.sql:101` `throws_ok(... income_type 'autonomo' ..., '23514', ...)`; nulo exercido implicitamente em todo insert sem a coluna | Domínio fechado + nulo | ✅ |
-| FND-05 AC9 — limites de tamanho da tabela de premissas | Cobertos: `name` mín 2 (`clients.test.sql:89`), `region` ≤ 80 (`:113`), `notes.title` ≤ 120 (`notes.test.sql:88`), `notes.description` ≤ 5000 (`:93`), `income ≥ 0` (`clients.test.sql:105`) | 7 limites declarados | ⚠️ **Parcial: `name` máx 120, `email` ≤ 254, `phone` ≤ 20 dígitos e `income` ≤ 99.999.999,99 não têm asserção. Mutação M3 sobreviveu.** |
-| FND-06 AC7 — `updated_at` por trigger, ignorando o valor do cliente | `extensions_and_helpers.test.sql:59` `ok((select updated_at from _t7_touch where id = 1) > '2020-01-01'::timestamptz, ...)` — **tabela temporária `_t7_touch`, não `profiles`/`clients`/`notes`** | Nas três tabelas do produto | ❌ **A função é testada; a presença do trigger nas tabelas reais não. Mutação M2 sobreviveu.** |
-| FND-06 AC8 — normalizar `region` e `phone` | `clients.test.sql:118` `results_eq(... region '     ' returning region $$, array[null::text], ...)`; `:123` `... phone '(11) 98765-4321' ... array['11987654321']`; `:128` `'  Zona    Sul  '` → `array['Zona Sul']` | Insert **e** update | ⚠️ **Só o caminho de insert é asserido. Nenhuma asserção normaliza em `update`, embora o spec diga "inserido ou atualizado".** |
-| FND-07 AC10 — índices `(owner_id, created_at desc)`, `(owner_id, status)`, `(owner_id, source)`, `(owner_id, lower(region))`, **`(id, owner_id)`**, `notes(client_id, created_at desc)` | `clients_search.test.sql:61,68,75,82,89` (`ok(exists (select 1 from pg_indexes ... indexname = 'clients_owner_*_idx'))`); `notes.test.sql:107` | Seis índices, incluindo `(id, owner_id)` | ❌ **`clients_id_owner_idx` foi REMOVIDO** por `b5e3b71` / migration `20260915185522_drop_clients_id_owner_idx.sql:14`. O spec continua exigindo-o e não foi emendado; nenhum AD registra a mudança de requisito. |
-| FND-07 AC11 — `pg_trgm` + índice GIN sobre `name` e `email` | `extensions_and_helpers.test.sql:8` `is(... extname = 'pg_trgm' ..., 'extensions', ...)`; `clients_search.test.sql:124` `is(am.amname, 'gin', ...)`; `:132` `is(opc.opcname, 'gin_trgm_ops', ...)`; `:141` plano exige `Bitmap Index Scan on clients_search_trgm_idx` | Busca textual indexada | ✅ (implementado via coluna gerada `search_text`, que cobre `name`, `email` **e** `phone` — superconjunto do exigido) |
-
-### P1 — Isolamento de dados por usuário
-
-| Requisito / AC | Evidência | Esperado pelo spec | Coberto? |
-| --- | --- | --- | --- |
-| FND-08/09/10 AC1 — RLS habilitada nas 4 tabelas | `clients.test.sql:22`, `notes.test.sql:27`, `profiles.test.sql:26`, `error_logs.test.sql:17` — todos `ok((select relrowsecurity from pg_class where oid = '...'::regclass), ...)` | RLS on | ✅ |
-| **AC2 — toda política com `(select auth.uid())` e `to authenticated`** | busca: `grep -rn "polroles\|pg_policies\|policies_are\|polqual" supabase/tests/` → **zero resultados** | Forma da política (AD-003) | ❌ **Zero evidência. Mutações M6 e M7 sobreviveram.** |
-| FND-08 AC3 — select devolve só as linhas do dono | `clients.test.sql:26` `results_eq($$ select name from public.clients $$, array['Cliente do Dono'], ...)`; `tests/rls/clients.test.ts:58` `expect(data).toHaveLength(1)` + `:60` `expect(data![0].owner_id).toBe(alice.id)` | Só as próprias | ✅ |
-| FND-08 AC4 — insert com `owner_id` alheio é recusado | `clients.test.sql:56` `throws_ok(... owner_id '2222...' ..., '42501', ...)`; `tests/rls/clients.test.ts:83` `expect(error!.code).toBe('42501')` | Violação de política | ✅ |
-| FND-08 AC5 — update/delete de cliente alheio afeta zero linhas | `clients.test.sql:48` e `:52` `is_empty(... returning name $$, ...)`; `tests/rls/clients.test.ts:106` `expect(data).toEqual([])` + `:114` `expect(real!.name).toBe('Cliente do Bruno')` | Zero linhas | ✅ |
-| FND-09 AC6 — select de `notes` só de clientes do dono | `notes.test.sql:47` `results_eq($$ select title from public.notes $$, array['Ligação inicial'], ...)`; `tests/rls/notes-...ts:63` `expect(data![0].title).toBe('Ligação da Alice')` | Derivado de `clients.owner_id` | ✅ |
-| FND-09 AC7 — nota apontando para cliente alheio é recusada | `notes.test.sql:77` `throws_ok(... client_id 'bbbb...' ..., '42501', ...)`; `tests/rls/notes-...ts:90` `expect(error!.code).toBe('42501')` | Violação de política | ✅ |
-| FND-10 AC8 — só o próprio `profiles`; insert/delete negados a `authenticated` | `profiles.test.sql:32` `results_eq($$ select full_name from public.profiles $$, array['Dono da Conta'], ...)`; `:38` update próprio; `:59` `throws_ok(insert ..., '42501', ...)`; `:67` `throws_ok(delete ..., '42501', ...)`; `:83` `is_empty(update ... where id = '1111...' returning full_name)` | Leitura/atualização só do próprio | ✅ |
-| FND-10 AC9 — `profiles.id`, `clients.owner_id`, `clients.created_at` preservados no update | `clients.test.sql:68` `ok(not has_column_privilege('authenticated','public.clients','owner_id','UPDATE'), ...)`; `:72` controle positivo em `name`; `:80` `throws_ok(update ... created_at ..., '42501', ...)`; `profiles.test.sql:52` e-mail | `clients` coberto | ⚠️ **`profiles.id` não tem asserção de imutabilidade** (nem por catálogo nem por comportamento); `clients.owner_id` e `created_at` estão sólidos. |
-| FND-10 AC10 — `error_logs` só insert com o próprio id; `anon` sem acesso | `error_logs.test.sql:24-40` seis asserções de catálogo (`has_table_privilege` / `not has_table_privilege` para insert/select/update/delete × authenticated/anon); `:50` `throws_ok(... owner_id alheio ..., '42501', ...)`; `tests/rls/notes-...ts:201` `expect(error!.code).toBe('42501')` | Escrita de mão única | ✅ (melhor coberto do conjunto) |
-| FND-10 AC11 — sem sessão, nega leitura e escrita nas 4 tabelas | `clients.test.sql:147`, `notes.test.sql:127`, `profiles.test.sql:95`, `error_logs.test.sql:36,39` (catálogo); `tests/rls/clients.test.ts:152` `expect(error!.code).toBe('42501')` após `signOut()` | Negação total ao anônimo | ✅ para as 4 tabelas em `select`; a negação de **escrita** anônima é coberta por catálogo, não por comportamento |
-| FND-11 — suíte cruzada entre dois usuários atravessando o cliente Supabase | `tests/rls/helpers.ts:69` `criarUsuario`, `:89` `clienteDe`; 23 testes em `tests/rls/*.test.ts` | Dois usuários, operações cruzadas | ✅ |
-
-### P1 — Perfil criado automaticamente
-
-| Requisito / AC | Evidência | Esperado pelo spec | Coberto? |
-| --- | --- | --- | --- |
-| FND-12 AC1 — insert em `auth.users` cria `profiles` com id, email, full_name | `handle_new_user.test.sql:34` `results_eq(... full_name ..., array['Joana Silva'], ...)`; `:40` `... email ..., array['joana.silva@exemplo.com']`; `:78` `is_empty($$ ... left join ... where p.id is null $$, 'nenhum usuário existe sem perfil correspondente')`; `tests/rls/notes-...ts:130` `expect(data![0].full_name).toBe('Alice Martins')` | Três campos corretos | ✅ |
-| FND-12 AC2 — `security definer` + `set search_path = ''` | `handle_new_user.test.sql:6` `is(p.prosecdef::text, 'true', ...)`; `:13` `is(array_to_string(p.proconfig, ','), 'search_path=""', ...)` | Padrão Supabase | ✅ |
-| FND-12 AC3 — sem `full_name`, usa a parte antes do `@` | `handle_new_user.test.sql:59` `results_eq(... array['sem.nome'], ...)`; `:71` `array['vazio']` para `full_name` só com espaços | Fallback, sem falhar o cadastro | ✅ |
-| FND-12 AC4 — `email` só pelo trigger, sem caminho de atualização | `profiles.test.sql:52` `throws_ok($$ update public.profiles set email = ... $$, '42501', ...)`; `handle_new_user.test.sql:93` `ok(not has_table_privilege('authenticated','public.profiles','INSERT'), ...)`; `tests/rls/notes-...ts:153` | AD-008 estrutural | ✅ |
-
-### P2 — Tipos gerados e ferramental
-
-| Requisito / AC | Evidência | Esperado pelo spec | Coberto? |
-| --- | --- | --- | --- |
-| FND-13 AC1 — `db:types` escreve e o arquivo é commitado | `git ls-files src/types/database.types.ts` ✓; reproduzido: regerar não muda o arquivo | Sem diff | ✅ (por reprodução) |
-| FND-13 AC2 — cliente tipado; coluna inexistente vira erro de compilação | `src/lib/supabase.ts:16` `createClient<Database>(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_ANON_KEY)`; `tests/rls/helpers.ts:32` `createClient<Database>(...)` | Erro de compilação | ⚠️ **Sem asserção permanente.** `tasks.md:544` documenta seis sondas manuais; nenhuma virou teste (ex.: `@ts-expect-error` sobre coluna inexistente). O gate `typecheck` só protege o código que existe hoje. |
-| FND-14 AC3 — **`npm run test`** roda Vitest e sai com zero | Reproduzido: `npm error Missing script: "test"`, exit **1** | Exit zero | ❌ **Script inexistente.** |
-| FND-14 AC4 — scripts `dev, build, lint, format, typecheck, **test**, test:e2e, db:reset, db:types` | `package.json:7-19` — presentes todos menos `test` | Nove scripts nomeados | ❌ **`test` ausente.** `tasks.md:125` alterou o critério para `test:unit/test:db/test:rls` sem emendar o spec nem registrar um AD. |
-
-### P2 — Layout base e captura de erros
-
-| Requisito / AC | Evidência | Esperado pelo spec | Coberto? |
-| --- | --- | --- | --- |
-| FND-15 AC1 — layout com cabeçalho e conteúdo, 320px→desktop, sem rolagem horizontal | `AppLayout.test.tsx:27` `expect(screen.getByRole('banner')).toHaveTextContent('CRM Imobiliário')`; `:42` `expect(screen.getByRole('main')).toHaveTextContent('conteúdo da rota')`; `e2e/smoke.spec.ts:41` `expect(larguraDoDocumento).toBeLessThanOrEqual(larguraDaJanela)` em 320px e `:54` em 1440px | Legível sem scroll horizontal | ✅ (bem feito: a verificação de largura está no navegador real, não no jsdom) |
-| FND-16 AC2 — erro não tratado exibe tela com ação de recarregar | `RootErrorBoundary.test.tsx:44` `expect(screen.getByRole('alert')).toHaveTextContent('Algo deu errado')`; `:61` `expect(reload).toHaveBeenCalledOnce()`; `ErroDeRota.test.tsx:36` idem para erro dentro de rota; `:64` `for (const rota of rotas) expect(rota.ErrorBoundary).toBe(ErroDeRota)` | Tela de erro, não desmontagem | ✅ |
-| FND-16 AC3 — com sessão, grava `owner_id`, mensagem, stack e rota | `error-log.test.ts:44` `expect(insert).toHaveBeenCalledWith(expect.objectContaining({ owner_id: 'user-1', message: ..., stack: 'Error: x\n  at foo', route: '/clients/1' }))`; `RootErrorBoundary.test.tsx:76` `expect(registrar).toHaveBeenCalledWith(expect.objectContaining({ message: 'componente quebrou' }), '/clients/7')` | Quatro campos | ✅ |
-| FND-16 AC4 — sem sessão, só console; **não** tenta escrever | `error-log.test.ts:58` `expect(from).not.toHaveBeenCalled()` | Registra no console **e** não escreve | ⚠️ **Metade coberta: a não-escrita é asserida; o "registrar apenas no console" não. Mutação M8 sobreviveu.** |
-| FND-16 AC5 — falha da própria gravação não lança segunda exceção | `error-log.test.ts:65` `await expect(registrarErroDoCliente(...)).resolves.toBe('falhou')`; `:71` idem para `getSession` rejeitando; `RootErrorBoundary.test.tsx:91` `expect(() => render(...)).not.toThrow()` | Sem segunda exceção | ✅ |
-
-### Edge Cases do spec
+### Edge cases do spec
 
 | Edge case | Evidência | Coberto? |
 | --- | --- | --- |
-| Supabase local fora do ar → mensagem indicando `supabase start` | `tests/rls/helpers.ts:42-58` implementa `exigirSupabaseLocal()` com a mensagem `"Rode 'npx supabase start' ..."` | ⚠️ **Implementado, não testado.** Busca: `grep -rn "exigirSupabaseLocal" tests/` → só as chamadas em `beforeAll`. Nenhuma asserção sobre a mensagem. |
-| Duas migrations com o mesmo prefixo de timestamp → `db reset` falha | Busca: `grep -rn "timestamp\|prefixo" supabase/tests/ tests/ e2e/` → nenhum caso | ❌ **Zero evidência.** Nem teste, nem verificação manual registrada. |
-| `region` só com espaços → nulo | `clients.test.sql:118` `results_eq(... array[null::text], 'região com apenas espaços é gravada como nulo')` | ✅ |
-| `phone` com máscara → só dígitos | `clients.test.sql:123` `results_eq(... array['11987654321'], ...)` | ✅ |
-| `income` negativo → rejeitado por check | `clients.test.sql:105` `throws_ok(... income -1 ..., '23514', ...)` | ✅ |
-| Falha do trigger de perfil aborta a transação de cadastro inteira | `handle_new_user.test.sql:78` assere a invariante (`nenhum usuário sem perfil`), mas nenhum teste **força** o trigger a falhar e verifica que o usuário também não nasce | ⚠️ **Só a invariante no caminho feliz.** `tasks.md:514` demonstra o comportamento por mutação descartada, não por teste permanente. |
+| Supabase fora do ar → mensagem citando `supabase start` | `tests/rls/helpers.ts:52-56` implementa a mensagem | ⚠️ Implementado, **sem asserção** (N5 sobreviveu). |
+| Prefixo de timestamp duplicado → `db reset` falha | **Verificado por reprodução nesta rodada**: com um segundo arquivo `20260915185522_*.sql`, `npm run db:reset` sai com **exit 1** e `duplicate key value violates unique constraint "schema_migrations_pkey" ... Key (version)=(20260915185522) already exists` | ✅ **A rodada 1 errou ao marcar isto como "zero evidência".** A garantia existe, vem do CLI e é reproduzível — só não é um teste do projeto. |
+| `region` só com espaços → nulo | `clients.test.sql:118`; agora também em update, `triggers_and_limits.test.sql:134` | ✅ |
+| `phone` com máscara → só dígitos | `clients.test.sql:123`; em update, `triggers_and_limits.test.sql:126` | ✅ |
+| `income` negativo → rejeitado | `clients.test.sql:105` `throws_ok(... '23514')` | ✅ |
+| Falha do trigger de perfil aborta o cadastro | `handle_new_user.test.sql:78` assere a invariante; nenhum teste **força** a falha | ⚠️ Inalterado desde a rodada 1. |
 
 ---
 
-## 3. Sensor de discriminação
+## 5. A emenda ao AC10 é legítima ou é mover a trave?
 
-Oito mutações, todas em áreas que o autor **não** sondou (as sondas dele estão em
-`tasks.md:222,285,320,354,387,418,478,514,544,578,611,646,678,715,748,781`).
+**Veredito: a remoção é legítima; a adição junto com ela não foi declarada.**
 
-Método: edição da fonte, `npm run db:reset`, suíte relevante, leitura de
-`Result: PASS/FAIL` + contagem (não de `# Failed test`), `git checkout -- <arquivo>`,
-e `npm run db:reset` final. Nunca `git stash`.
+A favor da emenda, e é substancial: a medição que a motiva foi feita **antes** da verificação, durante
+T11, está registrada em `AD-004` e em `tasks.md:429`, e o texto do próprio AD-004 foi corrigido para
+admitir que o trade-off original estava errado — "O texto original desta linha afirmava avaliação por
+linha e estava errado". A remoção do índice foi consultada com o usuário antes (`tasks.md:460`), e a
+premissa entrou em `spec.md:44` com motivo e referência. Isso é o oposto de mover a trave: é um
+requisito derivado de uma suposição de desempenho que a medição refutou, retirado com o rastro exposto.
 
-| # | Mutação | Arquivo | Suíte | Resultado | Morreu? |
+Três ressalvas, em ordem de importância:
+
+1. **A mesma edição acrescentou `clients(owner_id, name)` ao AC10** (`spec.md:89`), índice que o
+   código sempre teve (`20260915180608_clients_search_and_indexes.sql:27`) e que `design.md:275`
+   sempre listou — mas que o AC10 nunca mencionou. Alinhar o spec ao design é correto; fazê-lo na
+   mesma linha da remoção, com a nota de T24 (`tasks.md:858`) falando **apenas** da remoção, não é.
+   Uma leitura do registro de execução não revela que o AC ganhou uma exigência.
+2. **Sobraram duas referências obsoletas ao índice removido.** `design.md:407` ainda diz que as
+   políticas de `notes` são "apoiadas no índice `clients (id, owner_id)`", e
+   `20260915182431_notes.sql:5-6` ainda afirma "resolvida pelo índice clients (id, owner_id)". A
+   contradição spec↔código foi resolvida; a contradição design↔código e comentário↔código permaneceu.
+3. **Nenhum AD novo foi aberto.** A emenda se apoia em AD-004, cujo `Scope` é `notes` e cuja decisão
+   é sobre não desnormalizar `owner_id` — não sobre índice. A rastreabilidade é mais fina do que
+   "Ver AD-004" sugere. Detalhe de forma: a premissa em `spec.md:44` está separada da tabela de
+   premissas por uma linha em branco, então ela renderiza como uma tabela própria de uma linha, e
+   não como a última linha da tabela a que diz pertencer.
+
+Nada disso justifica reprovar por si só. Mas a lição da rodada 1 — o artefato é a fonte da verdade e
+mudanças nele precisam ser declaradas — foi aplicada a 90%.
+
+---
+
+## 6. Sensor de discriminação — 8 mutações NOVAS
+
+Escolhidas fora das 8 da rodada anterior e fora das sondas do autor
+(`tasks.md:231,294,329,361,363,394,396,427,487,523,553,587,620,655,687,718,724,757,790,886,917,948`).
+Alvo: território não exercitado.
+
+| # | Mutação | Arquivo | Suítes rodadas | Resultado | Morreu? |
 | --- | --- | --- | --- | --- | --- |
-| M1 | `clients.status` default `'lead'` → `'contacted'` | `20260915175043_clients.sql:13` | `test:db` | exit 0, `Result: PASS`, `Tests=108` | ❌ **SOBREVIVEU** |
-| M2 | Remover o trigger `clients_set_updated_at` | `20260915175043_clients.sql:66-68` | `test:db` | exit 0, `Result: PASS`, `Tests=108` | ❌ **SOBREVIVEU** |
-| M3 | `clients_name_length` `between 2 and 120` → `between 2 and 400` | `20260915175043_clients.sql:21` | `test:db` | exit 0, `Result: PASS`, `Tests=108` | ❌ **SOBREVIVEU** |
-| M4 | `error_logs_insert_own` → `with check (true)` | `20260915190259_error_logs.sql:41` | `test:db` + `test:rls` | exit 1, `Result: FAIL`, `Looks like you failed 1 test of 14`; rls `1 failed \| 22 passed` | ✅ Morreu — `error_logs.test.sql:50` (`throws_ok`, owner_id alheio) e `tests/rls/notes-profiles-error-logs.test.ts:195` |
-| M5 | `profiles` policies → `using (true)` | `20260915174330_profiles.sql:42,46` | `test:db` + `test:rls` | exit 1, `Result: FAIL`, `Bad plan. You planned 11 tests but ran 3` (abort do arquivo); rls `2 failed \| 21 passed` | ✅ Morreu — `profiles.test.sql:32` (`results_eq` com um único `full_name`) e `tests/rls/notes-...ts:127,157` |
-| M6 | Remover `to authenticated` das 4 políticas de `clients` | `20260915175043_clients.sql:82,86,90,95` | `test:db` + `test:rls` | exit 0 / exit 0, `Result: PASS`, `Tests=108`, rls `23 passed` | ❌ **SOBREVIVEU** |
-| M7 | `(select auth.uid())` → `auth.uid()` nas 5 cláusulas de `clients` | `20260915175043_clients.sql:83,87,91,92,96` | `test:db` + `test:rls` | exit 0 / exit 0, `Result: PASS`, `Tests=108`, rls `23 passed` | ❌ **SOBREVIVEU** |
-| M8 | Remover o `console.error` do ramo sem sessão | `src/lib/error-log.ts:39` | `test:unit` | exit 0, `43 passed` | ❌ **SOBREVIVEU** |
+| N1 | `clients_set_updated_at`: `before update` → `before insert` | `20260915175043_clients.sql:67` | `test:db` | exit 0, `Result: PASS`, `Files=9, Tests=134` | ❌ **SOBREVIVEU** |
+| N2 | `createClient<Database>(...)` → `createClient(...)` | `src/lib/supabase.ts:16` | `typecheck`, `lint`, `test:unit`, `build` | todos exit 0; `44 passed` | ❌ **SOBREVIVEU** |
+| N3 | Remover `tailwindcss()` dos plugins do Vite | `vite.config.ts:6` | `lint`, `typecheck`, `test:unit`, `build`, `test:e2e` | todos exit 0; `44 passed`; e2e `4 passed` | ❌ **SOBREVIVEU** |
+| N4 | Remover `VITE_SUPABASE_ANON_KEY` do `.env.example` | `.env.example:5` | `lint`, `format`, `test:unit`, `build` | todos exit 0 | ❌ **SOBREVIVEU** |
+| N5 | Mensagem do guard → erro cru, sem citar `supabase start` | `tests/rls/helpers.ts:52` | `typecheck`, `test:rls` | exit 0; `23 passed` | ❌ **SOBREVIVEU** |
+| N6 | Apagar `src/features/.gitkeep` | `src/features/.gitkeep` | `lint`, `test:unit`, `build` | todos exit 0 | ❌ **SOBREVIVEU** |
+| N7 | `clients_status_allowed`: acrescentar `'archived'` ao conjunto | `20260915175043_clients.sql:29` | `test:db` | exit 0, `Result: PASS`, `Tests=134` | ❌ **SOBREVIVEU** |
+| N8 | `clients_source_allowed`: remover `'portal'` do conjunto | `20260915175043_clients.sql:32` | `test:db` | exit 0, `Result: PASS`, `Tests=134` | ❌ **SOBREVIVEU** |
 
-**Placar: 2 mortas, 6 sobreviventes.**
+**Placar: 0 mortas, 8 sobreviventes.**
 
-Sobre M6 e M7: nenhuma das duas muda o comportamento observável hoje — `anon` continua
-barrado pelos `revoke`/`grant`, e `auth.uid()` sem subconsulta devolve o mesmo valor. É
-exatamente por isso que são perigosas: o AC2 do spec e o AD-003 pedem a **forma** da
-política (avaliação por initPlan, papel explícito), e essa forma pode ser desfeita por
-qualquer refatoração futura sem que um único teste reclame. É a regressão de desempenho e
-de defesa em profundidade que ninguém percebe até a tabela crescer.
+### N1, provada por consulta direta — a mais grave
 
-Árvore ao final do sensor: `git status --porcelain` vazio; `test:db` `Result: PASS`,
-`test:rls` 23/23, `test:unit` 43/43 reconfirmados após o `db:reset` final.
+Não é teoria. Com a mutação aplicada e `db:reset` rodado:
+
+```
+insert into public.clients (...) values (...);
+ antes  = 2026-09-15 20:47:45.336084+00
+update public.clients set name='Alvo Editado' where id=...;
+ depois = 2026-09-15 20:47:45.336084+00      <-- não mudou
+ trigger tgtype=7                            <-- ROW|BEFORE|INSERT (era 19: ROW|BEFORE|UPDATE)
+```
+
+`npm run test:db` no mesmo banco: **exit 0, `Result: PASS`**.
+
+Por que a correção de T26 não pega: a asserção de catálogo (`triggers_and_limits.test.sql:30,36,42`)
+filtra por `tgrelid`, `tgname` e `not tgisinternal`, e **nunca por `tgtype`** — um trigger de nome
+certo e evento errado a satisfaz. E a asserção de efeito (`:51,58,65`) é vacuamente satisfeita:
+a fixture insere `updated_at = '2001-01-01'` em `:20` e `:24`, mas um trigger `before insert`
+sobrescreve esse valor com `now()` já no insert, então `updated_at > '2020-01-01'` passa **sem que
+nenhum update tenha acontecido**. As duas asserções são verdadeiras e nenhuma prende o requisito.
+
+Observação que confirma o diagnóstico: mutar as **três** tabelas mataria a suíte, porque a linha de
+`profiles` já existe quando `:26` a atualiza. É exatamente o tipo de assimetria que faz a mutação
+única em `clients` passar — e `clients` é a tabela que as features seguintes vão ordenar por
+"última atualização".
+
+### N3 é uma regressão total, não cosmética
+
+Verificado comparando o CSS construído com e sem o plugin:
+
+| | Bytes | `.max-w-3xl{...}` presente? |
+| --- | --- | --- |
+| Baseline | 10.783 | sim — `.max-w-3xl{max-width:var(--container-3xl)}` |
+| Com N3 | 22.314 | **não** (`grep -c` → 0) |
+
+Sem o plugin, o `@import 'tailwindcss'` é copiado cru para o bundle e **nenhuma classe utilitária é
+gerada**: a aplicação vai ao ar sem estilo algum. `lint`, `typecheck`, `test:unit`, `build` e o E2E
+em Chromium continuam verdes — o teste de 320px passa justamente porque uma página sem layout não
+rola horizontalmente. É o FND-02 inteiro sem rede.
+
+### N7 e N8 — os conjuntos de domínio são amostrados, não fixados
+
+`clients.test.sql:93` rejeita `'arquivado'` e `:97` rejeita `'tiktok'`. Nenhuma asserção verifica que
+os cinco valores de `status` e os seis de `source` do spec **são aceitos**, nem que **só** eles são.
+Resultado: alargar o domínio com um sexto status passa, e estreitá-lo removendo `'portal'` — que
+quebraria a feature `clients` em produção — também passa. Um `results_eq` sobre
+`pg_get_constraintdef` ou um `lives_ok` por valor válido fecharia os dois lados.
 
 ---
 
-## 4. Lacunas ranqueadas
+## 7. Lacunas remanescentes, ranqueadas
 
-1. **`npm run test` não existe** (FND-14 AC3 e AC4, Goals linha 13). Exit 1 com
-   `Missing script: "test"`. O `tasks.md:125` trocou o critério por `test:unit/test:db/test:rls`
-   e marcou `[x]`, sem emendar o spec nem abrir um AD. Um desenvolvedor que siga o spec
-   ou o "Independent Test" bate nisso no primeiro minuto. **Declarado cumprido e não está.**
-2. **Índice `clients(id, owner_id)` exigido pelo spec foi removido** (FND-07 AC10,
-   `20260915185522_drop_clients_id_owner_idx.sql:14`). A medição que motivou a remoção é
-   boa e está registrada em `AD-004`/`tasks.md:420`, mas o spec continua listando o índice
-   como obrigatório. O spec é a fonte da verdade: ou ele é emendado com um AD novo, ou o
-   índice volta. Hoje o artefato e o código se contradizem.
-3. **A forma das políticas de RLS não tem nenhuma asserção** (FND-08 AC2 / AD-003).
-   Duas mutações independentes (M6, M7) atravessaram 131 testes intactas. O produto
-   inteiro apoia a autorização nessas políticas (AD-001); a decisão que as governa é a
-   única sem rede. Correção barata: assertar `polroles` e a presença de `SubPlan`/`InitPlan`
-   em `pg_policies.qual` para as 13 políticas.
-4. **Trigger `updated_at` não é verificado nas tabelas reais** (FND-06 AC7). A função é
-   testada numa tabela temporária (`extensions_and_helpers.test.sql:53-61`); a ligação com
-   `profiles`, `clients` e `notes` não. M2 removeu o trigger de `clients` e a suíte passou.
-   Consequência prática: `updated_at` pode parar de dizer a verdade em silêncio, e a
-   ordenação por "última atualização" das features seguintes herda o defeito.
-5. **Limites de tamanho e o default só parcialmente cobertos** (FND-05 AC4 e AC9).
-   Sem asserção: `name` máx 120 (M3 sobreviveu), `email` ≤ 254, `phone` ≤ 20 dígitos,
-   `income` ≤ 99.999.999,99, e o default `lead` de `status` (M1 sobreviveu). O spec chama
-   estes números um a um na tabela de premissas.
-6. **Lacunas menores, em ordem**: `src/features/` e `src/components/ui/` não chegam a um
-   clone (FND-01 AC5 — bastam `.gitkeep`); normalização testada só em `insert`, nunca em
-   `update` (FND-06 AC8); imutabilidade de `profiles.id` sem asserção (FND-10 AC9);
-   `console.error` sem sessão sem asserção (FND-16 AC4, M8); edge case do prefixo de
-   timestamp duplicado sem nenhuma evidência; falha do trigger de perfil coberta só pela
-   invariante do caminho feliz; FND-02 (tokens do Tailwind) e FND-13 AC2 (erro de
-   compilação em coluna inexistente) verificados por sonda manual documentada, sem teste
-   que regrida.
+1. **O trigger de `updated_at` continua sem asserção de evento** (FND-06 AC7) — e foi declarado
+   coberto em T26. N1 sobrevive e `updated_at` para de dizer a verdade em `clients`. Correção
+   barata: assertar `tgtype` no catálogo, ou seedar `updated_at` **depois** do insert (`update ...
+   set updated_at = '2001-01-01'` seguido do update real), o que torna a asserção de efeito honesta.
+2. **FND-02 não tem nenhuma asserção** — remover o pipeline inteiro do Tailwind passa em oito gates
+   (N3). Item da lacuna 6 da rodada 1 não tocado por T27. Uma asserção sobre o CSS construído
+   (a classe utilitária existe, o token virou variável) custa poucas linhas e é o que separa
+   "verificado uma vez à mão" de "não regride".
+3. **FND-13 AC2 não tem asserção** — o cliente pode deixar de ser tipado sem que nada caia (N2).
+   Também item não tocado da lacuna 6. Um `@ts-expect-error` sobre coluna inexistente resolveria,
+   e o gate `typecheck` passaria a proteger a decisão, e não só o código de hoje.
+4. **Os conjuntos de domínio de `status` e `source` são amostrados por um valor inválido só**
+   (FND-05 AC4/AC5) — N7 e N8 sobrevivem. Flanco novo, não uma correção falha.
+5. **Referências obsoletas ao índice removido** em `design.md:407` e
+   `20260915182431_notes.sql:5-6`; e a adição de `clients(owner_id, name)` ao AC10 não declarada na
+   nota de T24.
+6. **Menores, sem asserção**: conteúdo do `.env.example` (FND-01 AC7, N4); presença dos diretórios
+   versionados (FND-01 AC5, N6 — a correção é real, um clone os recebe, mas nada a segura); mensagem
+   do guard de Supabase local (edge case, N5); falha do trigger de perfil coberta só pela invariante
+   do caminho feliz.
 
-## 5. O que está genuinamente bom
+---
 
-Registrado porque um veredito FAIL sem isto seria injusto e enganoso: a matriz de RLS de
-`clients`, `notes` e `error_logs` é sólida e discriminante nas duas camadas do AD-012; as
-asserções de catálogo de `error_logs` (`error_logs.test.sql:24-40`) fixam a promessa do
-AD-011 no mecanismo, e não no efeito; o teste de responsividade a 320px foi corretamente
-colocado no navegador real em vez do jsdom (`e2e/smoke.spec.ts:32-43`); e as duas
-lacunas que o próprio autor encontrou e fechou durante a execução (`tasks.md:352` e
-`tasks.md:385`) são exatamente o tipo de honestidade que o processo deveria produzir. O
-método de sonda dele funcionou; o problema é que ele não foi aplicado às áreas acima.
+## 8. O que está genuinamente bom
+
+Registrado porque um FAIL sem isto seria injusto, e porque a distância entre as duas rodadas é grande.
+
+- **A suíte de forma das políticas é a melhor coisa desta rodada.** `rls_policy_shape.test.sql`
+  mata M6 e M7, que atravessavam 131 testes; varre o catálogo em vez de enumerar, então tabela nova
+  entra sozinha; e traz controle positivo (`:24`) para não passar vacuamente. O autor ainda corrigiu
+  o próprio número — afirmou 13 políticas, são 11 — por causa desse controle. A fronteira de
+  autorização do produto inteiro (AD-001) deixou de ter a decisão que a governa sem rede.
+- **8 de 8 mutações da rodada anterior morrem**, incluindo as três que exigiam asserção nova.
+- **A imutabilidade de `profiles.id` e a normalização em update** foram fechadas pelo método certo:
+  catálogo com controle positivo para a camada de grant (`triggers_and_limits.test.sql:142,146`),
+  comportamento para a de dados (`:126,134`) — exatamente a repartição que o AD-012 e o AD-014 pedem.
+- **O limite de renda é testado pelos dois lados** (`:98` rejeita 10⁸, `:103` aceita 99.999.999,99).
+  É o padrão que falta em FND-05 e que o autor já demonstrou saber aplicar.
+- **A emenda ao AC10 foi feita no lugar certo** — no spec, com motivo e medição — em vez de
+  silenciosamente no código, que é o que a rodada 1 encontrou.
+- **`npm run test` existe e é honesto sobre não incluir E2E**, com a razão registrada.

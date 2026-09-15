@@ -53,3 +53,31 @@ test('o layout também cabe em uma janela larga', async ({ page }) => {
 
   expect(larguraDoDocumento).toBeLessThanOrEqual(larguraDaJanela)
 })
+
+/**
+ * O pipeline do Tailwind gera estilo de verdade (FND-02).
+ *
+ * A segunda verificação independente mostrou que remover o plugin de
+ * `vite.config.ts` fazia a aplicação ir ao ar sem uma única classe utilitária,
+ * e os oito gates continuavam verdes — inclusive o teste de 320px, que passa
+ * justamente porque página sem layout não rola horizontalmente.
+ *
+ * A asserção olha estilo computado, e não classe no HTML: a classe está lá de
+ * qualquer jeito; o que some é o CSS por trás dela.
+ */
+test('os tokens do Tailwind chegam como estilo computado', async ({ page }) => {
+  await page.goto('/')
+
+  const cabecalho = page.getByRole('banner')
+  await expect(cabecalho).toHaveCSS('border-bottom-width', '1px')
+  await expect(cabecalho).toHaveCSS('border-bottom-color', 'rgb(223, 227, 232)')
+
+  // Exatamente uma marca principal: o layout fornece o <main>, e a tela
+  // renderiza uma <section> dentro dele. Dois <main> aninhados são HTML
+  // inválido, e foi o que esta asserção encontrou ao ser escrita.
+  await expect(page.getByRole('main')).toHaveCount(1)
+  await expect(page.getByRole('main')).toHaveCSS('padding-left', '16px')
+
+  const titulo = page.getByRole('heading', { name: 'CRM Imobiliário' })
+  await expect(titulo).toHaveCSS('font-weight', '600')
+})

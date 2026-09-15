@@ -82,7 +82,7 @@ Fase inserida após o Verifier independente reprovar a feature. Fecha as seis
 lacunas que ele encontrou, em ordem de gravidade.
 
 ```
-T24 → T25 → T26 → T27
+T24 → T25 → T26 → T27 → T28
 ```
 
 ---
@@ -856,6 +856,8 @@ T24 → T25 → T26 → T27
 > **`test` roda unit, db e rls, mas não e2e.** O E2E precisa de servidor e navegador; incluí-lo faria o comando mais usado do projeto levar dezenas de segundos. O spec pede que `npm run test` rode a suíte Vitest e saia com zero, o que está cumprido.
 >
 > **O AC10 foi emendado, não apagado.** A premissa correspondente entrou na tabela do spec com o motivo e a referência ao AD-004, para que a remoção do índice fique rastreável a partir da fonte da verdade, e não só do histórico do git.
+>
+> **A mesma edição fez uma segunda mudança que eu não declarei na primeira redação**, apontada pela segunda verificação: o AC10 passou a listar `clients(owner_id, name)`, que existe no código desde T10 e no `design.md`, mas estava ausente da redação original do critério. Correção de omissão, não ampliação de escopo.
 **Commit**: `fix(specs): alinha spec e código após verificação`
 
 ---
@@ -952,6 +954,45 @@ T24 → T25 → T26 → T27
 
 ---
 
+#### T28: Fechar as lacunas da segunda verificação
+
+**What**: Corrigir a asserção vacuamente satisfeita do trigger, cobrir os conjuntos de domínio, o pipeline do Tailwind e a tipagem do cliente.
+**Where**: `supabase/tests/database/triggers_and_limits.test.sql`
+**Depends on**: T27
+**Reuses**: suítes existentes
+**Requirement**: FND-02, FND-05, FND-06, FND-13
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Tarefa inserida após a segunda verificação independente**, que reprovou a feature com 8 de 8 mutações novas sobreviventes e mostrou que duas correções de T26 e T27 eram superficiais.
+
+**Done when**:
+- [x] O trigger de `updated_at` é verificado por `tgtype`, e não apenas por nome
+- [x] A asserção de efeito semeia o valor antigo com o trigger desligado, em vez de comparar contra data fixa
+- [x] Os três conjuntos de domínio são asseridos pela definição exata da constraint
+- [x] Existe asserção que falha se o plugin do Tailwind sair do `vite.config.ts`
+- [x] Existe asserção de tipo que falha se o cliente Supabase perder `<Database>`
+- [x] As referências obsoletas ao índice removido saem do `design.md` e da migration de `notes`
+- [x] Contagem de testes: 137 pgTAP, 44 unitários, 23 de RLS, 5 E2E
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e && npm run build`
+
+**Tests**: integration
+**Gate**: full
+**Status**: ✅ Done
+**Commit**: `test: fecha lacunas da segunda verificação`
+
+> **Por que a correção anterior era vacuamente satisfeita.** A asserção comparava `updated_at` contra uma data fixa, depois de semear `2001-01-01` no insert. Com o trigger no evento errado — `before insert` em vez de `before update` — o próprio insert sobrescrevia o valor semeado com `now()`, e a comparação passava sem que o update tivesse feito nada. Comparar antes e depois dentro da transação também não resolve: `now()` devolve o instante de início da transação e não avança. A forma que funciona é semear com o trigger desligado.
+>
+> **É o mesmo defeito que venho caçando nos outros**: asserção que prova o resultado sem provar o mecanismo. Cometi ao corrigir uma lacuna dessa exata natureza.
+>
+> **Um defeito real encontrado pelo teste novo, que nenhum verificador apontou**: havia dois elementos `<main>` aninhados, porque `AppLayout` fornece a marca principal e `App.tsx` criava outra. HTML inválido e problema de acessibilidade. Corrigido, com asserção de que existe exatamente um.
+>
+> **Cinco mutações, cinco detecções**: trigger no evento errado, domínio alargado com `archived`, domínio encurtado sem `portal`, plugin do Tailwind removido, e cliente Supabase sem `<Database>`.
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -961,7 +1002,7 @@ Phase 1:  T1 → T2 → T3 → T4 → T5
 Phase 2:  T6 → T7 → T8 → T9 → T10 → T11 → T23 → T12 → T13
 Phase 3:  T14 → T15 → T16
 Phase 4:  T17 → T18 → T19 → T20 → T21 → T22
-Phase 5:  T24 → T25 → T26 → T27
+Phase 5:  T24 → T25 → T26 → T27 → T28 → T28
 ```
 
 A execução é estritamente sequencial — não há paralelismo dentro de uma fase.

@@ -404,7 +404,7 @@ Onde cada requisito do spec é realizado. A fase Tasks converte esta tabela em t
 | FND-06 | `public.set_updated_at()`, `public.normalize_client()`, `public.normalize_note()` e seus triggers `before` |
 | FND-07 | Nove índices da tabela de índices; `pg_trgm`, `immutable_unaccent()` e a coluna gerada `search_text` |
 | FND-08 | Quatro políticas de `clients` na forma canônica, mais o grant de `update` por coluna (AD-014) |
-| FND-09 | Quatro políticas de `notes` com `exists` sobre `clients` (AD-004), apoiadas no índice `clients (id, owner_id)` |
+| FND-09 | Quatro políticas de `notes` com `exists` sobre `clients` (AD-004), elevado pelo planner a um SubPlan com hash sobre `clients(owner_id, …)` |
 | FND-10 | Grants e políticas de `profiles` e `error_logs`; ausência de `owner_id`, `created_at` e `updated_at` nos grants de `update`; `revoke all ... from anon` nas quatro tabelas |
 | FND-11 | `supabase/tests/database/*.test.sql` (pgTAP) e `tests/rls/*.test.ts` (Vitest), conforme AD-012 |
 | FND-12 | `public.handle_new_user()` e o trigger `on_auth_user_created` (AD-005) |

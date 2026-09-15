@@ -2,8 +2,9 @@
 --
 -- notes não tem owner_id próprio. A propriedade é derivada do cliente, o que
 -- mantém uma única fonte de verdade sobre a quem a nota pertence (AD-004).
--- O custo é uma subconsulta por linha nas políticas, resolvida pelo índice
--- clients (id, owner_id).
+-- Medido depois: o planner não avalia esse `exists` por linha — ele o eleva a
+-- um SubPlan com hash, atendido por varredura de bitmap sobre clients
+-- filtrando owner_id.
 
 create table public.notes (
   id uuid primary key default gen_random_uuid(),
