@@ -465,14 +465,19 @@ T17 → T18 → T19 → T20 → T21 → T22
 - Skill: `supabase-postgres-best-practices`
 
 **Done when**:
-- [ ] `authenticated` tem grant apenas de `insert`; nenhum grant de `select`
-- [ ] `anon` sem grant algum (AD-011)
-- [ ] Teste pgTAP confirma: dono insere o próprio, insert com `owner_id` alheio é recusado, leitura é negada mesmo para o dono, `anon` é negado
-- [ ] Contagem de testes: 6 testes pgTAP passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
+- [x] `authenticated` tem grant apenas de `insert`; nenhum grant de `select`
+- [x] `anon` sem grant algum (AD-011)
+- [x] Teste pgTAP confirma: dono insere o próprio, insert com `owner_id` alheio é recusado, leitura é negada mesmo para o dono, `anon` é negado
+- [x] Contagem de testes: 14 testes pgTAP passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db && npm run test:rls`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **Contagem revista de 6 para 14.** Seis asserções de catálogo fixam a promessa do AD-011 diretamente — `authenticated` insere e não lê, não altera, não apaga; `anon` não insere nem lê. Quatro mutações sondadas, quatro detectadas.
+>
+> **Consequência de não haver grant de `select`**: `insert ... returning` exige privilégio de leitura nas colunas retornadas. O insert é verificado com `lives_ok` e a linha é conferida voltando ao papel `postgres`, que é exatamente como a inspeção acontece em produção.
 **Commit**: `feat(db): adiciona tabela error_logs somente de escrita`
 
 ---
