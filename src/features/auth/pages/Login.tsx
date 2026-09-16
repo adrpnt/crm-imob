@@ -8,7 +8,7 @@ import { Botao } from '../../../components/ui/Botao'
 import { Campo } from '../../../components/ui/Campo'
 import { consumirSessaoExpirada } from '../../../lib/sessao-expirada'
 import { destinoSeguro } from '../destino'
-import { schemaDeLogin, type DadosDeLogin } from '../schemas'
+import { schemaDeLogin, type DadosDeLogin, type EntradaDeLogin } from '../schemas'
 import { entrar } from '../services/auth-service'
 
 export function Login() {
@@ -24,7 +24,7 @@ export function Login() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<DadosDeLogin>({ resolver: zodResolver(schemaDeLogin) })
+  } = useForm<EntradaDeLogin, unknown, DadosDeLogin>({ resolver: zodResolver(schemaDeLogin) })
 
   async function aoEnviar(dados: DadosDeLogin) {
     setErroDoEnvio(null)

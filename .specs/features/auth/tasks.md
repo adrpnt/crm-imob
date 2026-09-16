@@ -483,14 +483,23 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Validação por campo antes de qualquer chamada: nome vazio, e-mail inválido, senha curta, confirmação divergente
-- [ ] E-mail já cadastrado exibe orientação e preserva o que foi digitado
-- [ ] Após cadastrar, entra no CRM sem passo intermediário (AD-007)
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Validação por campo antes de qualquer chamada: nome vazio, e-mail inválido, senha curta, confirmação divergente
+- [x] E-mail já cadastrado exibe orientação e preserva o que foi digitado
+- [x] Após cadastrar, entra no CRM sem passo intermediário (AD-007)
+- [x] Contagem de testes: 10 da tela mais 1 acrescentado ao schema (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **O AUTH-01 AC8 não é cumprido por código da aplicação, e isso é deliberado.** O critério pede garantir que o perfil exista antes de renderizar o CRM. Ele nasce do trigger na mesma transação que o usuário (AD-005), e o próprio edge case do spec manda exibir o CRM mesmo que a leitura do perfil falhe. Checar aqui seria uma ida ao banco para confirmar o que o banco já garantiu — e ainda contrariaria o edge case. A evidência vive em `tests/rls/auth-service.test.ts`, que assere o perfil criado com o nome enviado pelo serviço.
+>
+> **Um helper genérico foi removido dos schemas, por dano real de tipagem.** `confirmacaoCoincide` recebia `z.ZodType<T>`, e aquele parâmetro descreve apenas a saída: o tipo de ENTRADA virava `unknown`, deixando os campos do formulário sem tipagem. Substituído por um objeto de opções compartilhado, que preserva os dois tipos. Os 173 testes anteriores seguiram passando, o que confirma que a troca não mudou comportamento.
+>
+> **O nome passou a colapsar espaços internos.** O banco já faz isso com `clients.name` pelo trigger de normalização; manter `profiles.full_name` diferente faria o mesmo consultor aparecer grafado de dois jeitos conforme a tela que o cadastrou. Mudança no entregável de T2, registrada aqui.
+>
+> **Três mutações, três detecções**: formulário limpo na recusa, cadastro que não navega, e nome sem colapso de espaços.
 **Commit**: `feat(auth): adiciona tela de cadastro`
 
 ---

@@ -55,6 +55,11 @@ describe('schemaDeCadastro', () => {
     expect(schemaDeCadastro.safeParse(cadastroValido).success).toBe(true)
   })
 
+  it('colapsa espaços internos do nome, como o banco faz com o de cliente', () => {
+    const r = schemaDeCadastro.safeParse({ ...cadastroValido, nomeCompleto: '  Joana   Silva  ' })
+    expect(r.success && r.data.nomeCompleto).toBe('Joana Silva')
+  })
+
   it('exige nome completo', () => {
     const r = schemaDeCadastro.safeParse({ ...cadastroValido, nomeCompleto: '   ' })
     expect(erroDe(r, 'nomeCompleto')).toBe('Informe seu nome completo')
