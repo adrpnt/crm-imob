@@ -517,13 +517,22 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] A confirmação exibida é idêntica para e-mail com e sem conta
-- [ ] O redirecionamento pedido ao Supabase aponta para `/reset-password`
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] A confirmação exibida é idêntica para e-mail com e sem conta
+- [x] O redirecionamento pedido ao Supabase aponta para `/reset-password`
+- [x] Contagem de testes: 8 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **A discrição tem duas camadas, e ambas são testadas.** O serviço já silencia recusas do Supabase (T3); a tela usa frase condicional — "se houver uma conta" — em vez de "enviamos para você". A asserção não verifica só que a frase certa aparece: verifica também que a frase **errada** não aparece, com uma expressão que rejeita "enviamos para você", "conta encontrada" e "não existe". Trocar o texto por um que confirme a existência derruba o teste.
+>
+> **A origem vem do navegador, não de configuração.** `globalThis.location.origin` faz o mesmo código montar o endereço certo em desenvolvimento e em produção. O teste assere a URL completa, então perder a origem — o que faria o Supabase recusar o redirecionamento — é detectado.
+>
+> **O formulário some depois do envio.** Sem isso, o consultor reenviaria por reflexo e bateria no limite de envio de e-mail do Supabase, recebendo um erro onde deveria ver uma confirmação.
+>
+> **Quatro mutações, quatro detecções**.
 **Commit**: `feat(auth): adiciona tela de solicitação de recuperação`
 
 ---
