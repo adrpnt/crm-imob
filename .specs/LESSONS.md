@@ -80,6 +80,12 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M8 rodada 1 / L3 (processo)
 - last seen: 2026-09-16T18:54:42Z
 
+### L-012 - Encadear verificação e commit no mesmo comando elimina o ponto de decisão entre eles: rode o gate, leia a saída, e só então commite numa invocação separada.
+- signal: `gate_fail` · recurrence: 1 feature(s) · scope: `processo` · harmful: 0
+- features: auth
+- evidence: T28 foundation, T3 auth, T22 auth (processo)
+- last seen: 2026-09-16T19:21:27Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

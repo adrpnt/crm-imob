@@ -472,3 +472,25 @@ padrão da biblioteca está explícito, nenhum consumidor lê o token do context
 mais provável já é detectada. O que falta é prender a asserção ao cliente construído em vez
 da constante, e fazer o teste de `TOKEN_REFRESHED` emitir uma sessão diferente. São duas
 mudanças pequenas, e nenhuma delas justifica segurar a feature.
+
+---
+
+## Adendo do autor — correções posteriores ao relatório
+
+Duas dívidas apontadas nesta rodada foram fechadas em T22, **depois** de o relatório ter
+sido escrito. O veredito PASS não muda; este adendo existe para que o artefato não fique
+desatualizado em relação ao código.
+
+| Achado | O que foi feito | Evidência |
+| --- | --- | --- |
+| **D1** — dois critérios numerados `7.` no AUTH-04, introduzidos pela emenda de T21 | Renumerados para 1 a 8; o critério da rota de redefinição virou o AC8 e perdeu o anglicismo `SHALL never` | `spec.md`, AUTH-04; `validate_spec.py` limpo |
+| **D2 / L2 parcial** — a asserção prendia a constante, não o cliente construído; **M5b** sobrevivia | O teste passou a mockar `createClient` e assertar as opções que ele de fato recebeu | `src/lib/supabase.test.ts`, seção "o cliente é construído com essas opções" |
+
+Reaplicando **M5b** — cliente construído com opções inline, ignorando a constante, e
+`autoRefreshToken` desligado — a suíte unitária agora falha em `entrega as opções
+declaradas ao createClient`. Antes de T22 os cinco gates passavam.
+
+Permanecem como débito registrado: **N3** (o teste do `TOKEN_REFRESHED` emite o mesmo
+objeto de sessão e não distingue "preservou a marca" de "não fez nada"), **N5** e **N8**
+(ambas verificadas como benignas pelo próprio relatório), **M10** e os demais itens de L4
+a L8 da primeira rodada.

@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 12,
+  "next_id": 13,
   "lessons": [
     {
       "id": "L-001",
@@ -202,6 +202,24 @@
       ],
       "created": "2026-09-16T18:54:42Z",
       "last_seen": "2026-09-16T18:54:42Z"
+    },
+    {
+      "id": "L-012",
+      "key": "gate_fail::encadear verificacao e commit no mesmo comando elimina o ponto de decisao entre eles rode o gate leia a saida e so entao commite numa invocacao separada",
+      "text": "Encadear verificação e commit no mesmo comando elimina o ponto de decisão entre eles: rode o gate, leia a saída, e só então commite numa invocação separada.",
+      "signal": "gate_fail",
+      "scope": "processo",
+      "status": "candidate",
+      "features": [
+        "auth"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "T28 foundation, T3 auth, T22 auth (processo)"
+      ],
+      "created": "2026-09-16T19:21:27Z",
+      "last_seen": "2026-09-16T19:21:27Z"
     }
   ]
 }
