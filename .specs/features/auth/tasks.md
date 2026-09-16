@@ -858,6 +858,8 @@ T19 → T20 → T21 → T22
 > **A correção de T20 estava a meio caminho, e o verificador provou.** Prender a constante deixava passar um cliente construído com opções inline: a constante certa, o cliente errado, e nenhum teste reclamando. O teste passou a mockar `createClient` e assertar o que ele de fato recebeu. Agora há dois níveis — o valor das opções e o fato de serem estas as entregues.
 >
 > **É a mesma forma de defeito que venho caçando desde a `foundation`**: asserção que prova o resultado sem provar o mecanismo. Provar que a constante tem os valores certos não prova que o cliente os usa.
+>
+> **Terceira falha de processo do mesmo tipo.** Commitei com o `validate_tasks.py` acusando uma aresta duplicada no diagrama, porque rodei o validador e o commit na mesma invocação e não parei diante do erro. As duas anteriores foram em T28 da `foundation` e em T3 desta feature. A causa é sempre a mesma: encadear verificação e commit num único comando elimina o ponto de decisão entre eles. A substituição de texto que gera a duplicação também reincide — ela aplica o sufixo à linha do mapa que já o recebera.
 
 ---
 
@@ -870,7 +872,7 @@ Phase 1:  T1 → T2 → T3 → T4 → T5
 Phase 2:  T6 → T7 → T8 → T9 → T10
 Phase 3:  T11 → T12 → T13 → T14 → T15 → T16
 Phase 4:  T17 → T18
-Phase 5:  T19 → T20 → T21 → T22 → T22
+Phase 5:  T19 → T20 → T21 → T22
 ```
 
 A execução é estritamente sequencial dentro de cada fase.
