@@ -620,14 +620,21 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Exibe o nome do consultor autenticado
-- [ ] A ação de sair encerra a sessão, limpa o cache e leva a `/login`
-- [ ] Oferece acesso à tela de perfil
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Exibe o nome do consultor autenticado
+- [x] A ação de sair encerra a sessão; a limpeza de cache e o redirecionamento ficam a cargo do provedor e da guarda — ver nota
+- [x] Oferece acesso à tela de perfil
+- [x] Contagem de testes: 6 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run build`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done — encerra a Fase 3
+
+> **Sair não navega, de propósito, e há teste que guarda isso.** Navegar para `/login` daqui faria a guarda pública devolver o consultor ao CRM no instante entre a navegação e a chegada do evento `SIGNED_OUT` — um piscar visível. Encerrar a sessão basta: o provedor limpa o cache (T4) e a guarda redireciona (T9). O teste assere que a rota **não muda** ao clicar em sair, o que é uma asserção incomum mas é exatamente a propriedade desejada.
+>
+> **A chave de consulta compartilhada é testada como tal.** O teste invalida a chave e verifica que o nome exibido muda — trocar por uma chave própria do cabeçalho derruba o teste. Sem essa forma, um `queryKey` diferente passaria por qualquer asserção que apenas verificasse o nome inicial.
+>
+> **Três mutações, três detecções.**
 **Commit**: `feat(auth): adiciona identificação do consultor no cabeçalho`
 
 ---
