@@ -584,16 +584,25 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Exibe nome, e-mail e telefone vindos de `profiles`
-- [ ] O e-mail é somente leitura, com a indicação de que não muda por aqui (AD-008)
-- [ ] Salvar nome ou telefone persiste e exibe confirmação
-- [ ] Nome vazio ou acima de 120 caracteres reporta no campo, sem enviar
-- [ ] A alteração reflete no cabeçalho sem recarregar a página
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Exibe nome, e-mail e telefone vindos de `profiles`
+- [x] O e-mail é somente leitura, com a indicação de que não muda por aqui (AD-008)
+- [x] Salvar nome ou telefone persiste e exibe confirmação
+- [x] Nome vazio ou acima de 120 caracteres reporta no campo, sem enviar
+- [x] A alteração reflete no cabeçalho sem recarregar a página — garantida pela invalidação da chave compartilhada; o consumo pelo cabeçalho é T16
+- [x] Contagem de testes: 13 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **`readOnly` e não `disabled`, e a distinção é testada.** Campo desabilitado sai da ordem de tabulação e alguns leitores de tela o ignoram — esconderia justamente a informação que o consultor veio conferir. O teste assere as duas coisas: que digitar não muda o valor **e** que o campo não está desabilitado. Trocar por `disabled` derruba o teste, assim como remover a proteção por completo. São dois defeitos diferentes, e a asserção separa ambos.
+>
+> **A busca não filtra por identificador.** A política de RLS já restringe a leitura ao próprio registro (AD-014). Filtrar no cliente repetiria uma regra que o banco impõe e daria a impressão falsa de que é o filtro que protege. O update filtra porque precisa de alvo, não de proteção.
+>
+> **Invalidação em vez de escrita no cache.** Escrever o perfil novo diretamente seria mais rápido, mas o cabeçalho de T16 lê a mesma chave e pode montar depois; invalidar garante que qualquer leitor da chave busque o valor atual.
+>
+> **Cinco mutações, cinco detecções**, incluindo as duas variantes distintas do campo de e-mail.
 **Commit**: `feat(auth): adiciona tela de perfil`
 
 ---
