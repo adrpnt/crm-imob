@@ -3,7 +3,7 @@
   "promote_threshold": 2,
   "window_days": 45,
   "quarantine_threshold": 2,
-  "next_id": 9,
+  "next_id": 12,
   "lessons": [
     {
       "id": "L-001",
@@ -148,6 +148,60 @@
       ],
       "created": "2026-09-16T13:42:19Z",
       "last_seen": "2026-09-16T13:42:19Z"
+    },
+    {
+      "id": "L-009",
+      "key": "surviving_mutant::servico novo sem teste proprio e invisivel quando todo consumidor o substitui por mock ao criar um servico crie junto o teste unitario e o de pilha real como ja foi feito para o servico irmao",
+      "text": "Serviço novo sem teste próprio é invisível quando todo consumidor o substitui por mock: ao criar um serviço, crie junto o teste unitário e o de pilha real, como já foi feito para o serviço irmão.",
+      "signal": "surviving_mutant",
+      "scope": "servicos",
+      "status": "candidate",
+      "features": [
+        "auth"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M1,M2,M3 rodada 1 (servicos)"
+      ],
+      "created": "2026-09-16T18:54:42Z",
+      "last_seen": "2026-09-16T18:54:42Z"
+    },
+    {
+      "id": "L-010",
+      "key": "surviving_mutant::opcao que coincide com o padrao da biblioteca e indetectavel torne a explicita no codigo e assere a senao desliga la nao quebra nada",
+      "text": "Opção que coincide com o padrão da biblioteca é indetectável: torne-a explícita no código e assere-a, senão desligá-la não quebra nada.",
+      "signal": "surviving_mutant",
+      "scope": "configuracao",
+      "status": "candidate",
+      "features": [
+        "auth"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M5 rodada 1 (configuracao)"
+      ],
+      "created": "2026-09-16T18:54:42Z",
+      "last_seen": "2026-09-16T18:54:42Z"
+    },
+    {
+      "id": "L-011",
+      "key": "spec_deviation::quando o codigo diverge do spec e um teste protege o codigo a contradicao some de vista teste que falha ao restaurar o comportamento do spec e sinal de spec desatualizado nao de regressao",
+      "text": "Quando o código diverge do spec e um teste protege o código, a contradição some de vista: teste que falha ao restaurar o comportamento do spec é sinal de spec desatualizado, não de regressão.",
+      "signal": "spec_deviation",
+      "scope": "processo",
+      "status": "candidate",
+      "features": [
+        "auth"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M8 rodada 1 / L3 (processo)"
+      ],
+      "created": "2026-09-16T18:54:42Z",
+      "last_seen": "2026-09-16T18:54:42Z"
     }
   ]
 }

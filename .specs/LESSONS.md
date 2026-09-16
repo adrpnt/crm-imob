@@ -62,6 +62,24 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: T24 / AD-004 (processo)
 - last seen: 2026-09-16T13:42:19Z
 
+### L-009 - Serviço novo sem teste próprio é invisível quando todo consumidor o substitui por mock: ao criar um serviço, crie junto o teste unitário e o de pilha real, como já foi feito para o serviço irmão.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `servicos` · harmful: 0
+- features: auth
+- evidence: M1,M2,M3 rodada 1 (servicos)
+- last seen: 2026-09-16T18:54:42Z
+
+### L-010 - Opção que coincide com o padrão da biblioteca é indetectável: torne-a explícita no código e assere-a, senão desligá-la não quebra nada.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `configuracao` · harmful: 0
+- features: auth
+- evidence: M5 rodada 1 (configuracao)
+- last seen: 2026-09-16T18:54:42Z
+
+### L-011 - Quando o código diverge do spec e um teste protege o código, a contradição some de vista: teste que falha ao restaurar o comportamento do spec é sinal de spec desatualizado, não de regressão.
+- signal: `spec_deviation` · recurrence: 1 feature(s) · scope: `processo` · harmful: 0
+- features: auth
+- evidence: M8 rodada 1 / L3 (processo)
+- last seen: 2026-09-16T18:54:42Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

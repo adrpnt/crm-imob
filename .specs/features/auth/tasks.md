@@ -424,7 +424,7 @@ T19 → T20 → T21
 - [x] Em `carregando`, não renderiza nada de decisivo
 - [x] Em `autenticado`, redireciona para `/clients`
 - [x] WHILE `emRecuperacao`, `/reset-password` é acessível mesmo autenticado
-- [x] Autenticado normalmente, sem a marca, `/reset-password` também redireciona
+- [x] ~~Autenticado normalmente, sem a marca, `/reset-password` também redireciona~~ — **revisto em T18 e T21**: a rota nunca é redirecionada; quem recusa o formulário a uma sessão comum é a tela. Ver a emenda no `spec.md`
 - [x] Contagem de testes: 9 testes passam (sem deleções silenciosas)
 - [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run build`
 
@@ -779,12 +779,20 @@ T19 → T20 → T21
 **Lacuna L2.** Desligar a renovação automática de token não derruba teste algum, e é o AUTH-12 AC5.
 
 **Done when**:
-- [ ] `persistSession` e `autoRefreshToken` ficam explícitos no código, em vez de implícitos por padrão
-- [ ] Teste assere as duas opções, de modo que desligar qualquer uma derrube a suíte
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test`
+- [x] `persistSession` e `autoRefreshToken` ficam explícitos no código, em vez de implícitos por padrão
+- [x] Teste assere as duas opções, de modo que desligar qualquer uma derrube a suíte
+- [x] **Acrescentado**: `detectSessionInUrl`, de que o fluxo de recuperação inteiro depende
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Padrão implícito é indetectável.** As três opções já valiam por padrão da biblioteca, e era exatamente por isso que desligá-las não quebrava nada: não havia nada afirmando que valiam. Torná-las explícitas custa três linhas e transforma cada uma em compromisso verificável.
+>
+> **A terceira não estava no pedido.** `detectSessionInUrl` é o que faz o supabase-js ler o token do link de recuperação; desligá-la quebraria o fluxo inteiro de redefinição, e também não tinha guardião.
+>
+> **Três mutações, três detecções**, uma por opção.
 **Commit**: `fix(auth): fixa a configuração de sessão do cliente`
 
 ---
@@ -800,14 +808,23 @@ T19 → T20 → T21
 **Lacuna L3.** O spec exige redirecionar `/reset-password` para sessão autenticada; a implementação a isenta incondicionalmente, e um teste fixa a divergência em vez de denunciá-la.
 
 **Done when**:
-- [ ] O AC6 do AUTH-11 deixa de listar `/reset-password` entre as rotas redirecionadas
-- [ ] A premissa correspondente registra a razão medida em T18
-- [ ] O checkbox de T10 deixa de afirmar o comportamento antigo
-- [ ] `validate_spec.py` sai limpo
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test`
+- [x] O AC6 do AUTH-11 deixa de listar `/reset-password` entre as rotas redirecionadas
+- [x] A premissa correspondente registra a razão medida em T18
+- [x] O checkbox de T10 deixa de afirmar o comportamento antigo
+- [x] `validate_spec.py` sai limpo
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test`
 
 **Tests**: none
 **Gate**: build
+**Status**: ✅ Done — encerra a Fase 5
+
+> **A suíte estava fixando uma divergência em vez de denunciá-la.** O verificador restaurou o comportamento que o spec descrevia e um teste meu falhou — sinal invertido: quando o código diverge do spec e o teste protege o código, a contradição some de vista. A emenda alinha os três.
+>
+> **Um AC novo, não uma exclusão.** O AC6 deixou de listar `/reset-password`, e um AC7 diz explicitamente que aquela rota nunca é redirecionada. Apagar a menção deixaria a rota sem regra; declarar a exceção a torna verificável.
+>
+> **O AC6 também ganhou o destino pretendido**, que T18 provou necessário: a guarda redireciona antes de a tela navegar, então é ela quem precisa respeitar o `?redirect=`.
+>
+> **L-008 reincidiu** — "ao remover ou mudar algo que o spec exige, emende o spec na mesma tarefa". Cometi na `foundation` com o índice e de novo aqui com a rota. O relatório registra que a lição qualifica para `confirmed`.
 **Commit**: `docs(auth): emenda o spec sobre a rota de redefinição`
 
 ---

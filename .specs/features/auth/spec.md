@@ -44,7 +44,7 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 | Tela de perfil, ausente no PLAN §7 embora `/profile` seja rota privada no PLAN §6 | Exibe nome, e-mail e telefone; permite editar nome e telefone; e-mail somente leitura | Fecha a inconsistência entre §6 e §7 pelo escopo mínimo que torna a rota útil, respeitando AD-008 | y |
 
 | Distinguir sessão expirada de permissão negada, indistintos na redação original do AUTH-12 AC3 | 401 e 403 encerram a sessão; `42501` é erro de permissão e a mantém | `42501` é o que a RLS devolve para "esta linha não é sua", com sessão perfeitamente válida. Inserir um cliente com `owner_id` alheio produz esse código e é comportamento esperado, já coberto por teste na `foundation`. Tratá-lo como expiração derrubaria o consultor para o login por um erro legítimo | y |
-| O link de recuperação de senha autentica o usuário, colidindo com o AUTH-11 | O provedor marca a sessão como de recuperação ao receber `PASSWORD_RECOVERY`; enquanto a marca vale, `/reset-password` é acessível e a regra de redirecionamento não se aplica | É o único caminho que distingue "autenticado por link de recuperação" de "autenticado normalmente", e portanto o único que cumpre o AUTH-08 AC7 como escrito | y |
+| O link de recuperação de senha autentica o usuário, colidindo com o AUTH-11 | `/reset-password` nunca é redirecionada pela guarda; a tela distingue os três casos pela marca `emRecuperacao` e pelo erro que o Supabase devolve no fragmento da URL | Redação original dizia "enquanto a marca vale", e a implementação mostrou que isso não funciona: medido em T18, o supabase-js emite `INITIAL_SESSION` com a sessão do link ANTES de `PASSWORD_RECOVERY`, e nesse intervalo a guarda veria "autenticado sem marca" e expulsaria o consultor da tela um instante após ele clicar no link. O AUTH-08 AC7 já pedia orientar quem chega "sem sessão de recuperação", o que inclui sessão comum | y |
 
 **Open questions:** none — todas resolvidas ou registradas acima.
 
@@ -86,7 +86,8 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 3. WHEN o consultor reabre a aplicação com sessão válida armazenada THEN o sistema SHALL restaurar a sessão sem pedir credenciais.
 4. WHEN o consultor aciona sair THEN o sistema SHALL encerrar a sessão, SHALL descartar todo o cache de dados em memória e SHALL redirecionar para `/login`.
 5. WHILE a autenticação estiver em andamento, o sistema SHALL desabilitar o botão de envio e SHALL exibir indicação de carregamento.
-6. WHEN um usuário autenticado acessa `/login`, `/signup`, `/forgot-password` ou `/reset-password` THEN o sistema SHALL redirecioná-lo para `/clients`.
+6. WHEN um usuário autenticado acessa `/login`, `/signup` ou `/forgot-password` THEN o sistema SHALL redirecioná-lo para `/clients`, ou para a rota pretendida quando houver uma em `?redirect=`.
+7. The system SHALL never redirecionar `/reset-password`, qualquer que seja o estado da sessão; é a tela que decide entre o formulário e a orientação de pedir um novo link.
 7. IF a chamada de autenticação falhar por rede THEN o sistema SHALL exibir mensagem de falha temporária, distinta da mensagem de credencial inválida.
 
 **Independent Test**: Entrar, recarregar a página e continuar em `/clients`; sair e confirmar que voltar pelo histórico do navegador não devolve o conteúdo.
