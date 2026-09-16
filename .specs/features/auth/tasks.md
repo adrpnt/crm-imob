@@ -550,16 +550,23 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Com `emRecuperacao`, apresenta o formulário de nova senha
-- [ ] Sem a marca, exibe a orientação de solicitar um link em `/forgot-password`
-- [ ] Senha curta ou divergente da confirmação reporta no campo, sem chamar o Supabase
-- [ ] Após redefinir, a marca cai e o consultor segue para `/clients` autenticado
-- [ ] Link expirado ou já usado exibe o motivo e o caminho para pedir outro
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Com `emRecuperacao`, apresenta o formulário de nova senha
+- [x] Sem a marca, exibe a orientação de solicitar um link em `/forgot-password`
+- [x] Senha curta ou divergente da confirmação reporta no campo, sem chamar o Supabase
+- [x] Após redefinir, a marca cai e o consultor segue para `/clients` autenticado
+- [x] Link expirado ou já usado exibe o motivo e o caminho para pedir outro
+- [x] Contagem de testes: 10 da tela mais 8 do leitor de fragmento (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Dois critérios que pareciam um só.** O AC5 pede explicar um link expirado; o AC7, orientar quem chegou sem link. Os dois casos chegam à tela **sem sessão de recuperação** — e sem mais informação seriam indistinguíveis. O Supabase resolve isso devolvendo o erro no fragmento da URL, na forma `#error=access_denied&error_code=otp_expired`. `lerErroDoFragmento` extrai esse código, e um teste assere que as duas situações produzem mensagens **diferentes** — não apenas que cada uma produz a sua.
+>
+> **A navegação após redefinir é explícita, mesmo sendo redundante.** O provedor derruba a marca ao receber `USER_UPDATED`, o que faria a guarda pública redirecionar sozinha. Navegar aqui torna o destino visível no código da tela em vez de efeito colateral de outra camada — e o teste de T4 continua garantindo que a marca cai.
+>
+> **Quatro mutações, quatro detecções**: formulário exibido sem sessão de recuperação, motivo do link não lido, mensagem específica do link expirado removida, e redefinição que não navega.
 **Commit**: `feat(auth): adiciona tela de redefinição de senha`
 
 ---
