@@ -9,7 +9,7 @@ Implement these tasks with the `tlc-spec-driven` skill: **activate it by name an
 ---
 
 **Design**: `.specs/features/auth/design.md`
-**Status**: Draft
+**Status**: Approved
 
 ---
 
@@ -93,15 +93,24 @@ T17 → T18
 **Pendência herdada de `foundation` T6**, deixada lá por disciplina de escopo.
 
 **Done when**:
-- [ ] `site_url` aponta para `http://localhost:5173`
-- [ ] A lista de redirecionamentos permitidos inclui o endereço local de desenvolvimento
-- [ ] `minimum_password_length` é 8, conforme a premissa do spec
-- [ ] Teste verifica o comportamento: cadastro com senha de 7 caracteres é recusado, com 8 é aceito
-- [ ] Contagem de testes: 2 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test`
+- [x] `site_url` aponta para `http://localhost:5173`
+- [x] A lista de redirecionamentos permitidos inclui o endereço local de desenvolvimento
+- [x] `minimum_password_length` é 8, conforme a premissa do spec
+- [x] Teste verifica o comportamento: cadastro com senha de 7 caracteres é recusado, com 8 é aceito
+- [x] Contagem de testes: 3 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test`
 
 **Tests**: integration
 **Gate**: full
+**Status**: ✅ Done
+
+> **Terceiro teste acrescentado**: que o cadastro devolve sessão imediatamente, sem confirmação de e-mail. É a verificação comportamental do AD-007, que até agora só existia como linha no `config.toml`. Se alguém ligar a confirmação, este teste é o alarme.
+>
+> **A mudança só vale após reiniciar a pilha.** `supabase stop` seguido de `start` é obrigatório; alterar o arquivo e rodar o teste sem reiniciar dá falso verde. Isso reforça por que o teste verifica comportamento e não o conteúdo do arquivo — a diferença entre os dois é exatamente esta janela.
+>
+> **`site_url` verificado pelo servidor de e-mail local**: solicitei uma recuperação e li a mensagem no Mailpit. O link aponta para `localhost:5173` e não contém a porta 3000 antiga. A verificação foi manual aqui; T18 a transforma em teste de regressão permanente.
+>
+> **Mutação detectada**: devolver `minimum_password_length` a 6 derruba o teste da senha curta.
 **Commit**: `fix(auth): corrige site_url e mínimo de senha`
 
 ---
