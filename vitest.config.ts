@@ -26,6 +26,13 @@ export default defineConfig({
           name: 'rls',
           environment: 'node',
           include: ['tests/rls/**/*.test.ts'],
+          // Os testes deste projeto importam módulos de src/, e env.ts valida
+          // na carga. Sem estes valores, o import falharia antes da asserção.
+          env: {
+            VITE_SUPABASE_URL: 'http://127.0.0.1:54321',
+            VITE_SUPABASE_ANON_KEY:
+              'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0',
+          },
           // A suíte de isolamento pelo cliente Supabase nasce em T15. Até lá a
           // permissividade fica no script test:rls, como --passWithNoTests:
           // dentro do bloco do projeto a opção é inerte, porque a checagem de

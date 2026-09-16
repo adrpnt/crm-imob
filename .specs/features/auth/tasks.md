@@ -170,16 +170,23 @@ T17 → T18
 - Skill: `supabase`
 
 **Done when**:
-- [ ] `entrar`, `cadastrar`, `sair`, `pedirRecuperacao` e `redefinirSenha` envolvem as chamadas correspondentes
-- [ ] `cadastrar` envia `full_name` em `user_metadata`, que é de onde o trigger o lê (AD-005)
-- [ ] `traduzirErro` devolve a mesma frase para credencial inválida e e-mail inexistente
-- [ ] Falha de rede e limite de requisições têm frases distintas de credencial inválida
-- [ ] O erro original é registrado no console antes de a frase genérica ser devolvida
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] `entrar`, `cadastrar`, `sair`, `pedirRecuperacao` e `redefinirSenha` envolvem as chamadas correspondentes
+- [x] `cadastrar` envia `full_name` em `user_metadata`, que é de onde o trigger o lê (AD-005)
+- [x] `traduzirErro` devolve a mesma frase para credencial inválida e e-mail inexistente
+- [x] Falha de rede e limite de requisições têm frases distintas de credencial inválida
+- [x] O erro original é registrado no console antes de a frase genérica ser devolvida
+- [x] Contagem de testes: 21 unitários mais 3 contra a pilha real (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test` (elevado — ver nota)
 
-**Tests**: unit
-**Gate**: quick
+**Tests**: unit + integration (elevado — ver nota)
+**Gate**: full
+**Status**: ✅ Done
+
+> **Formatos de erro obtidos por provocação, não por suposição.** Provoquei cada falha contra a pilha local antes de escrever o mapeamento: credencial inválida e e-mail inexistente devolvem ambos `invalid_credentials` com status 400; e-mail repetido, `user_already_exists` 422; senha curta, `weak_password` 422. A discrição que o spec exige já vem do provedor, e o trabalho desta camada é não desfazê-la.
+>
+> **Camada de teste elevada de `unit` para `unit + integration`, com demonstração.** Os 21 testes unitários substituem o cliente por mock, o que os torna cegos à forma da API. Provei: troquei a chave dos metadados de `full_name` para `fullName` **no serviço e no teste unitário ao mesmo tempo**, mantendo-os consistentes entre si. Os 86 testes unitários passaram; só o teste contra a pilha real caiu, porque só ele conhece o outro lado do contrato — o trigger que lê `full_name`. É a mesma classe de lacuna que o Verifier apontou na `foundation` sobre o truncamento de `error_logs`, e aqui ela foi fechada na origem em vez de esperar a verificação.
+>
+> **Cinco mutações unitárias, cinco detecções**: revelar senha incorreta, remover a detecção de rede, remover o registro em console, revelar a recusa da recuperação, e remover o nome dos metadados.
 **Commit**: `feat(auth): adiciona serviço de autenticação`
 
 ---
