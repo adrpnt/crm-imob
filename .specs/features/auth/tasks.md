@@ -206,18 +206,27 @@ T17 → T18
 - Skill: `supabase`
 
 **Done when**:
-- [ ] O estado é a união discriminada do design, e o compilador recusa ler a sessão em `carregando`
-- [ ] O estado sai de `carregando` em `INITIAL_SESSION`, com e sem sessão
-- [ ] `PASSWORD_RECOVERY` marca `emRecuperacao`; a marca cai ao redefinir a senha ou ao sair
-- [ ] `SIGNED_OUT` limpa o cache do TanStack Query
-- [ ] O callback de `onAuthStateChange` é síncrono — teste falha se virar assíncrono
-- [ ] A assinatura é cancelada ao desmontar
-- [ ] Limite de tempo resolve para `anonimo` se `INITIAL_SESSION` não chegar
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] O estado é a união discriminada do design, e o compilador recusa ler a sessão em `carregando`
+- [x] O estado sai de `carregando` em `INITIAL_SESSION`, com e sem sessão
+- [x] `PASSWORD_RECOVERY` marca `emRecuperacao`; a marca cai ao redefinir a senha ou ao sair
+- [x] `SIGNED_OUT` limpa o cache do TanStack Query
+- [x] O callback de `onAuthStateChange` é síncrono — teste falha se virar assíncrono
+- [x] A assinatura é cancelada ao desmontar
+- [x] Limite de tempo resolve para `anonimo` se `INITIAL_SESSION` não chegar
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Uma redundância encontrada pela sonda e removida.** O limite de tempo tinha duas defesas contra sobrescrever um estado já resolvido: `clearTimeout` no topo do callback, e uma guarda sobre o estado atual dentro do próprio limite. Remover a guarda não quebrou teste algum — porque, com o cancelamento presente, ela nunca é alcançada. Era código morto que dava a impressão de proteção. Removida; agora o único mecanismo é testado e remover *ele* derruba a suíte.
+>
+> **A marca de recuperação sobrevive à renovação de token, de propósito.** Durante a redefinição o token pode ser renovado; perder a marca ali expulsaria o consultor da própria tela de redefinir senha. `USER_UPDATED` é o que a derruba, e é o evento que o Supabase emite quando `updateUser` conclui — a queda é automática, sem a tela precisar avisar o provedor.
+>
+> **Seis mutações, seis detecções** após a simplificação: callback assíncrono, remoção do cancelamento do limite, `PASSWORD_RECOVERY` ignorado, marca perdida na renovação, cache não limpo, e assinatura não cancelada.
+>
+> **Três arquivos em vez de um**: o contexto e o tipo de estado saíram do módulo do componente porque o Fast Refresh do Vite exige que um módulo de componente exporte apenas componentes.
 **Commit**: `feat(auth): adiciona provedor de sessão`
 
 ---
