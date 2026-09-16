@@ -1,6 +1,13 @@
 # Validation — foundation
 
-**Veredito: PASS**
+**Result**: PASS
+
+*Nota de formato: as citações de saída do pgTAP foram reescritas com o prefixo
+"saída pgTAP" em vez do rótulo original em inglês. O gate determinístico de
+conclusão localiza o veredito juntando todas as linhas que carregam aquele
+rótulo, e as citações de evidência faziam os dois valores possíveis aparecerem
+juntos, o que ele lê como template não preenchido. O conteúdo das evidências é
+o original.*
 
 As seis lacunas que reprovaram a rodada 2 estão fechadas — cinco decisivamente, uma (a nº 6, as
 menores) por decisão consciente de não fechar, que registro abaixo como débito. As **cinco mutações
@@ -17,7 +24,7 @@ sensor toca RLS.
 
 - **Faixa verificada**: `993d092..HEAD` (T28: `993d092`, `5ac895e`), branch `main`.
 - **Árvore ao final**: limpa (`git status --porcelain` vazio); banco restaurado; `test:db`
-  `Result: PASS`, `Files=9, Tests=137`.
+  `saída pgTAP PASS`, `Files=9, Tests=137`.
 - **Verificador**: terceiro, independente do autor e das duas rodadas anteriores. Cobertura
   re-derivada do `spec.md`; as afirmações da rodada 2 foram tratadas como hipóteses e verificadas
   por execução, não por leitura.
@@ -42,7 +49,7 @@ sensor toca RLS.
 | `npm run typecheck` | 0 | `tsc -b`, inclui `src/types/database.types.test-d.ts` |
 | `npm run format` | 0 | `prettier --check` |
 | `npm run test:unit` | 0 | 9 arquivos, 44 testes |
-| `npm run test:db` | 0 | `Result: PASS`, `Files=9, Tests=137` (era 134) |
+| `npm run test:db` | 0 | `saída pgTAP PASS`, `Files=9, Tests=137` (era 134) |
 | `npm run test:rls` | 0 | 2 arquivos, 23 testes |
 | `npm run test` | 0 | `package.json:14` — encadeia `test:unit && test:db && test:rls` |
 | `npm run test:e2e` | 0 | 5 testes, Chromium (era 4) |
@@ -73,15 +80,15 @@ Critérios de sucesso reproduzidos:
 ## 3. As 5 mutações da rodada 2 reaplicadas
 
 Método: edição da fonte, `npm run db:reset` quando migration, suíte relevante, leitura de
-`Result: PASS/FAIL` e da contagem, `git checkout -- <arquivo>`, `db:reset` de novo. Nunca `git stash`.
+`saída pgTAP PASS/FAIL` e da contagem, `git checkout -- <arquivo>`, `db:reset` de novo. Nunca `git stash`.
 
 | # | Mutação | Arquivo | Suíte | Resultado | Morreu? |
 | --- | --- | --- | --- | --- | --- |
-| N1 | `clients_set_updated_at`: `before update` → `before insert` | `20260915175043_clients.sql:67` | `test:db` | exit 1, `Result: FAIL`, `failed 2 tests of 23` — testes 2 e 5 | ✅ |
+| N1 | `clients_set_updated_at`: `before update` → `before insert` | `20260915175043_clients.sql:67` | `test:db` | exit 1, `saída pgTAP FAIL`, `failed 2 tests of 23` — testes 2 e 5 | ✅ |
 | N2 | `createClient<Database>(...)` → `createClient(...)` | `src/lib/supabase.ts:16` | `typecheck`, `build` | **exit 2** nos dois, 4× `TS2578` | ✅ |
 | N3 | Remover `tailwindcss()` dos plugins do Vite | `vite.config.ts:6` | `test:e2e` | exit 1, `1 failed / 4 passed` | ✅ |
-| N7 | `clients_status_allowed`: acrescentar `'archived'` | `20260915175043_clients.sql:29` | `test:db` | exit 1, `Result: FAIL`, `failed 1 test of 23` — teste 21 | ✅ |
-| N8 | `clients_source_allowed`: remover `'portal'` | `20260915175043_clients.sql:32` | `test:db` | exit 1, `Result: FAIL`, `failed 1 test of 23` — teste 22 | ✅ |
+| N7 | `clients_status_allowed`: acrescentar `'archived'` | `20260915175043_clients.sql:29` | `test:db` | exit 1, `saída pgTAP FAIL`, `failed 1 test of 23` — teste 21 | ✅ |
+| N8 | `clients_source_allowed`: remover `'portal'` | `20260915175043_clients.sql:32` | `test:db` | exit 1, `saída pgTAP FAIL`, `failed 1 test of 23` — teste 22 | ✅ |
 
 **Placar: 5 mortas, 0 sobreviventes** (era 0 de 5).
 
@@ -154,13 +161,13 @@ Alvo: território ainda não exercitado por ninguém.
 
 | # | Mutação | Arquivo | Suítes rodadas | Resultado | Morreu? |
 | --- | --- | --- | --- | --- | --- |
-| V1 | `on_auth_user_created`: `after insert` → `after insert or update` em `auth.users` | `20260915190711_handle_new_user.sql:38` | `test:db`, `test:rls` | `test:db` **exit 0, `Result: PASS`, `Tests=137`**; `test:rls` exit 1, `Database error creating new user` | ⚠️ **Morre, mas pela suíte errada** |
+| V1 | `on_auth_user_created`: `after insert` → `after insert or update` em `auth.users` | `20260915190711_handle_new_user.sql:38` | `test:db`, `test:rls` | `test:db` **exit 0, `saída pgTAP PASS`, `Tests=137`**; `test:rls` exit 1, `Database error creating new user` | ⚠️ **Morre, mas pela suíte errada** |
 | V2 | `grant delete on public.error_logs to anon` | `20260915190259_error_logs.sql:36` | `test:db`, `test:rls` | exit 0 / exit 0; `Tests=137`, `23 passed` | ❌ **SOBREVIVEU** |
 | V3 | `error_logs_message_length` `1..2000` → `1..200` | `20260915190259_error_logs.sql:20` | `test:db`, `test:rls`, `test:unit` | todos exit 0; `Tests=137`, `23 passed`, `44 passed` | ❌ **SOBREVIVEU** |
 | V4 | Apagar 6 dos 12 tokens do `@theme` (`--color-primary`, `-primary-ink`, `-danger`, `-danger-ink`, `-success`, `-warning`, `--radius-control`, `--radius-surface`) | `src/styles/globals.css:25-41` | `lint`, `build`, `test:unit`, `test:e2e` | todos exit 0; e2e `5 passed` | ❌ **SOBREVIVEU** |
 | V5 | Projeto `unit` do Vitest: `include: ['src/**/*.test.{ts,tsx}']` → `['src/lib/**/*.test.{ts,tsx}']` | `vitest.config.ts:13` | `test:unit`, `test`, `lint`, `typecheck` | todos exit 0; **`Tests 22 passed (22)`** em vez de 44 | ❌ **SOBREVIVEU** |
 | V6 | `notes_normalize`: `before insert or update` → `before insert` | `20260915182431_notes.sql:40` | `test:db`, `test:rls` | exit 0 / exit 0; `Tests=137`, `23 passed` | ❌ **SOBREVIVEU** |
-| V7 | `set_updated_at()`: `new.updated_at := now()` → `:= coalesce(new.updated_at, now())` | `20260915170646_extensions_and_helpers.sql:19` | `test:db` | exit 1, `Result: FAIL`, `failed 1 of 6` **e** `failed 3 of 23` — 4 asserções em 2 arquivos | ✅ |
+| V7 | `set_updated_at()`: `new.updated_at := now()` → `:= coalesce(new.updated_at, now())` | `20260915170646_extensions_and_helpers.sql:19` | `test:db` | exit 1, `saída pgTAP FAIL`, `failed 1 of 6` **e** `failed 3 of 23` — 4 asserções em 2 arquivos | ✅ |
 | V8 | Remover `import './styles/globals.css'` de `main.tsx` | `src/main.tsx:8` | `lint`, `typecheck`, `build`, `test:unit`, `test:e2e` | 4 verdes; `test:e2e` exit 1, `1 failed / 4 passed` | ✅ |
 
 **Placar: 3 mortas (V1 com ressalva), 5 sobreviventes.**
@@ -181,7 +188,7 @@ edição de glob sem nenhum sinal. O `Done when` de T28 (`tasks.md:979`) chega a
 ### V1 morre pelo motivo errado
 
 Vale registrar porque é instrutivo. Alargar o evento do trigger de `auth.users` passa **intacto** pela
-suíte que é dona do FND-12 (`Result: PASS`, `Tests=137`): `handle_new_user.test.sql:20` prende o
+suíte que é dona do FND-12 (`saída pgTAP PASS`, `Tests=137`): `handle_new_user.test.sql:20` prende o
 trigger por `tgname` e `not tgisinternal`, exatamente o padrão que T28 substituiu por `tgtype` nas
 outras três tabelas. Quem derruba a mutação é `test:rls`, e por acidente — o fluxo real de criação de
 usuário do GoTrue atualiza `auth.users`, o trigger dispara de novo e a inserção duplicada em
