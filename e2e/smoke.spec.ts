@@ -1,15 +1,23 @@
 import { expect, test } from '@playwright/test'
 
+// A raiz passou a exigir sessão quando a feature de autenticação entrou. O
+// teste de fumaça usa a tela de login, que é a primeira coisa que qualquer
+// visitante vê, e portanto o que precisa carregar sem erro.
 test('a aplicação carrega e renderiza a tela inicial', async ({ page }) => {
   const errosDeConsole: string[] = []
   page.on('console', (msg) => {
     if (msg.type() === 'error') errosDeConsole.push(msg.text())
   })
 
-  await page.goto('/')
+  await page.goto('/login')
 
-  await expect(page.getByRole('heading', { name: 'CRM Imobiliário' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar no CRM' })).toBeVisible()
   expect(errosDeConsole).toEqual([])
+})
+
+test('a raiz leva quem não tem sessão para o login', async ({ page }) => {
+  await page.goto('/')
+  await expect(page).toHaveURL(/\/login/)
 })
 
 test('uma rota inexistente mostra a página de não encontrado com volta ao CRM', async ({
@@ -19,7 +27,8 @@ test('uma rota inexistente mostra a página de não encontrado com volta ao CRM'
 
   await expect(page.getByRole('heading', { name: 'Página não encontrada' })).toBeVisible()
   await page.getByRole('link', { name: 'Voltar ao CRM' }).click()
-  await expect(page.getByRole('heading', { name: 'CRM Imobiliário' })).toBeVisible()
+  // Sem sessão, o caminho de volta passa pela guarda e termina no login.
+  await expect(page).toHaveURL(/\/login/)
 })
 
 /**
@@ -31,7 +40,7 @@ test('uma rota inexistente mostra a página de não encontrado com volta ao CRM'
  */
 test('o layout cabe em 320px sem rolagem horizontal', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 640 })
-  await page.goto('/')
+  await page.goto('/login')
 
   const { larguraDoDocumento, larguraDaJanela } = await page.evaluate(() => ({
     larguraDoDocumento: document.documentElement.scrollWidth,
@@ -39,12 +48,12 @@ test('o layout cabe em 320px sem rolagem horizontal', async ({ page }) => {
   }))
 
   expect(larguraDoDocumento).toBeLessThanOrEqual(larguraDaJanela)
-  await expect(page.getByRole('heading', { name: 'CRM Imobiliário' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Entrar no CRM' })).toBeVisible()
 })
 
 test('o layout também cabe em uma janela larga', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
-  await page.goto('/')
+  await page.goto('/login')
 
   const { larguraDoDocumento, larguraDaJanela } = await page.evaluate(() => ({
     larguraDoDocumento: document.documentElement.scrollWidth,
@@ -66,19 +75,15 @@ test('o layout também cabe em uma janela larga', async ({ page }) => {
  * qualquer jeito; o que some é o CSS por trás dela.
  */
 test('os tokens do Tailwind chegam como estilo computado', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/login')
 
-  const cabecalho = page.getByRole('banner')
-  await expect(cabecalho).toHaveCSS('border-bottom-width', '1px')
-  await expect(cabecalho).toHaveCSS('border-bottom-color', 'rgb(223, 227, 232)')
+  // O botão primário consome --color-primary e --color-primary-ink; sem o
+  // pipeline do Tailwind a classe existe no HTML e o estilo não.
+  const entrar = page.getByRole('button', { name: 'Entrar' })
+  await expect(entrar).toHaveCSS('background-color', 'rgb(29, 78, 216)')
+  await expect(entrar).toHaveCSS('color', 'rgb(255, 255, 255)')
 
-  // Exatamente uma marca principal: o layout fornece o <main>, e a tela
-  // renderiza uma <section> dentro dele. Dois <main> aninhados são HTML
-  // inválido, e foi o que esta asserção encontrou ao ser escrita.
-  await expect(page.getByRole('main')).toHaveCount(1)
-  await expect(page.getByRole('main')).toHaveCSS('padding-left', '16px')
-
-  const titulo = page.getByRole('heading', { name: 'CRM Imobiliário' })
+  const titulo = page.getByRole('heading', { name: 'Entrar no CRM' })
   await expect(titulo).toHaveCSS('font-weight', '600')
 })
 

@@ -52,23 +52,62 @@ describe('RotaPublica', () => {
     expect(screen.queryByText('formulário de login')).not.toBeInTheDocument()
   })
 
+  // Sem isto, a guarda venceria a corrida contra a navegação da tela de login e
+  // descartaria a rota que o consultor tentou abrir antes de entrar.
+  it('respeita a rota pretendida ao redirecionar quem acabou de entrar', () => {
+    const router = createMemoryRouter(
+      [
+        { element: <RotaPublica />, children: [{ path: '/login', element: <p>login</p> }] },
+        { path: '/profile', element: <p>tela de perfil</p> },
+        { path: '/clients', element: <p>listagem de clientes</p> },
+      ],
+      { initialEntries: ['/login?redirect=%2Fprofile'] },
+    )
+    render(
+      <ContextoDeAutenticacao.Provider value={autenticado(SESSAO)}>
+        <RouterProvider router={router} />
+      </ContextoDeAutenticacao.Provider>,
+    )
+    expect(screen.getByText('tela de perfil')).toBeInTheDocument()
+  })
+
+  it('ignora destino externo no parâmetro ao redirecionar', () => {
+    const router = createMemoryRouter(
+      [
+        { element: <RotaPublica />, children: [{ path: '/login', element: <p>login</p> }] },
+        { path: '/clients', element: <p>listagem de clientes</p> },
+      ],
+      { initialEntries: ['/login?redirect=https%3A%2F%2Fsite-falso.example'] },
+    )
+    render(
+      <ContextoDeAutenticacao.Provider value={autenticado(SESSAO)}>
+        <RouterProvider router={router} />
+      </ContextoDeAutenticacao.Provider>,
+    )
+    expect(screen.getByText('listagem de clientes')).toBeInTheDocument()
+  })
+
   it('leva ao CRM quem já está autenticado e tenta o cadastro', () => {
     renderizar(autenticado(SESSAO), '/signup')
     expect(screen.getByText('listagem de clientes')).toBeInTheDocument()
   })
 
-  // O link de recuperação autentica o usuário. Sem esta exceção, a regra acima
-  // o expulsaria da tela de redefinir senha um instante após ele clicar.
-  it('libera a redefinição para uma sessão de recuperação', () => {
-    renderizar(autenticado(SESSAO, true), '/reset-password')
-    expect(screen.getByText('formulário de nova senha')).toBeInTheDocument()
-  })
+  // A guarda deixa passar qualquer estado nesta rota. Quem recusa o formulário a
+  // uma sessão comum é a própria tela, que distingue os três casos — e é o que o
+  // AUTH-08 AC7 pede, ao mandar orientar quem chega "sem sessão de recuperação".
+  //
+  // Redirecionar aqui também quebraria o fluxo real: o supabase-js emite
+  // INITIAL_SESSION com a sessão do link antes de PASSWORD_RECOVERY, e neste
+  // intervalo a guarda veria "autenticado sem marca".
+  it('nunca redireciona a rota de redefinição, qualquer que seja a sessão', () => {
+    const casos = [autenticado(SESSAO, false), autenticado(SESSAO, true), ANONIMO] as const
 
-  // Quem já entrou não chegou ali por um link de e-mail.
-  it('não libera a redefinição para uma sessão comum', () => {
-    renderizar(autenticado(SESSAO, false), '/reset-password')
-    expect(screen.getByText('listagem de clientes')).toBeInTheDocument()
-    expect(screen.queryByText('formulário de nova senha')).not.toBeInTheDocument()
+    for (const estado of casos) {
+      const { unmount } = renderizar(estado, '/reset-password')
+      expect(screen.getByText('formulário de nova senha')).toBeInTheDocument()
+      expect(screen.queryByText('listagem de clientes')).not.toBeInTheDocument()
+      unmount()
+    }
   })
 
   // A exceção é de uma rota só: a marca não devolve acesso ao resto.
@@ -81,10 +120,5 @@ describe('RotaPublica', () => {
   it('a marca de recuperação não devolve acesso ao cadastro', () => {
     renderizar(autenticado(SESSAO, true), '/signup')
     expect(screen.getByText('listagem de clientes')).toBeInTheDocument()
-  })
-
-  it('quem não tem sessão alcança a redefinição, para ver a orientação de pedir link', () => {
-    renderizar(ANONIMO, '/reset-password')
-    expect(screen.getByText('formulário de nova senha')).toBeInTheDocument()
   })
 })

@@ -692,17 +692,30 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Criar conta leva ao CRM sem passo intermediário
-- [ ] Sair e entrar de novo funciona com as mesmas credenciais
-- [ ] Recarregar uma rota privada autenticado nunca exibe a tela de login, nem por um instante
-- [ ] Visitante sem sessão que abre rota privada é levado ao login e, após entrar, chega à rota pretendida
-- [ ] O fluxo de recuperação usa o link real capturado no servidor de e-mail local, e a nova senha passa a valer
-- [ ] O link do e-mail aponta para o domínio de desenvolvimento, e não para a porta padrão do `config.toml`
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
+- [x] Criar conta leva ao CRM sem passo intermediário
+- [x] Sair e entrar de novo funciona com as mesmas credenciais
+- [x] Recarregar uma rota privada autenticado nunca exibe a tela de login, nem por um instante
+- [x] Visitante sem sessão que abre rota privada é levado ao login e, após entrar, chega à rota pretendida
+- [x] O fluxo de recuperação usa o link real capturado no servidor de e-mail local, e a nova senha passa a valer
+- [x] O link do e-mail aponta para o domínio de desenvolvimento, e não para a porta padrão do `config.toml`
+- [x] Contagem de testes: 8 de autenticação mais 7 de fumaça, 15 E2E no total
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e && npm run build`
 
 **Tests**: e2e
 **Gate**: full
+**Status**: ✅ Done — encerra a feature `auth`
+
+> **Dois defeitos reais que 232 testes unitários não pegaram.** Ambos são corridas entre o evento de sessão e a renderização, invisíveis fora de um navegador.
+>
+> O primeiro: ao entrar vindo de `/login?redirect=%2Fprofile`, o consultor caía em `/clients`. Quando a autenticação conclui, o evento chega e a guarda pública redireciona **antes** de a tela navegar — e ela não lia o destino pretendido. Corrigido na guarda, que é quem de fato redireciona.
+>
+> O segundo: o formulário de nova senha aparecia e sumia. O supabase-js emite `INITIAL_SESSION` com a sessão do link **antes** de `PASSWORD_RECOVERY`, e nesse intervalo a guarda via "autenticado sem marca" e expulsava o consultor. Ao investigar, descobri que eu havia lido o spec errado: o AUTH-08 AC7 manda orientar quem chega "sem sessão de recuperação", o que **inclui uma sessão comum**. A rota nunca deve ser redirecionada; quem decide é a tela. A correção simplificou a guarda e eliminou a corrida.
+>
+> **Um teste unitário codificava a leitura errada** e foi corrigido junto: ele afirmava que a guarda redireciona uma sessão comum na rota de redefinição. Agora assere que a guarda **nunca** redireciona ali, nos três estados.
+>
+> **Asserção do piscar, sem estado final.** "Recarregar nunca exibe o login, nem por um instante" não se verifica olhando o resultado. O teste observa os eventos de navegação durante o recarregamento e assere que nenhum foi para `/login` — um piscar seria justamente uma dessas navegações.
+>
+> **Os testes de fumaça precisaram mudar** porque a raiz deixou de ser pública. Passaram a usar `/login`, e ganharam um teste novo: a raiz leva quem não tem sessão ao login.
 **Commit**: `test(e2e): cobre o fluxo de autenticação ponta a ponta`
 
 ---
