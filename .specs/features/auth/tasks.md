@@ -77,7 +77,7 @@ T17 → T18
 Fase inserida após o Verifier independente reprovar a feature.
 
 ```
-T19 → T20 → T21
+T19 → T20 → T21 → T22
 ```
 
 ---
@@ -829,6 +829,38 @@ T19 → T20 → T21
 
 ---
 
+#### T22: Fechar os achados da segunda verificação
+
+**What**: Corrigir a numeração duplicada que a emenda de T21 introduziu e amarrar as opções de sessão ao cliente construído.
+**Where**: `src/lib/supabase.test.ts`
+**Depends on**: T21
+**Reuses**: correções de T20 e T21
+**Requirement**: AUTH-04, AUTH-12
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Done when**:
+- [x] O AUTH-04 volta a ter critérios numerados de 1 a 8, sem repetição
+- [x] O critério da rota de redefinição deixa de misturar inglês e português
+- [x] O teste assere as opções **no cliente construído**, e não apenas na constante
+- [x] Passar opções inline, ignorando a constante, derruba a suíte
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run build`
+
+**Tests**: unit
+**Gate**: full
+**Status**: ✅ Done
+**Commit**: `fix(auth): corrige numeração do spec e amarra as opções ao cliente`
+
+> **Um defeito que minha própria correção introduziu.** A emenda de T21 inseriu um critério novo sem renumerar os seguintes, deixando **dois critérios `7.`** no AUTH-04. O `validate_spec.py` não pega numeração duplicada — ele verifica forma EARS e presença de `SHALL`, não sequência. Achado pela segunda verificação.
+>
+> **A correção de T20 estava a meio caminho, e o verificador provou.** Prender a constante deixava passar um cliente construído com opções inline: a constante certa, o cliente errado, e nenhum teste reclamando. O teste passou a mockar `createClient` e assertar o que ele de fato recebeu. Agora há dois níveis — o valor das opções e o fato de serem estas as entregues.
+>
+> **É a mesma forma de defeito que venho caçando desde a `foundation`**: asserção que prova o resultado sem provar o mecanismo. Provar que a constante tem os valores certos não prova que o cliente os usa.
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -838,7 +870,7 @@ Phase 1:  T1 → T2 → T3 → T4 → T5
 Phase 2:  T6 → T7 → T8 → T9 → T10
 Phase 3:  T11 → T12 → T13 → T14 → T15 → T16
 Phase 4:  T17 → T18
-Phase 5:  T19 → T20 → T21
+Phase 5:  T19 → T20 → T21 → T22 → T22
 ```
 
 A execução é estritamente sequencial dentro de cada fase.

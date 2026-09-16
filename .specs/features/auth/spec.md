@@ -87,8 +87,8 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 4. WHEN o consultor aciona sair THEN o sistema SHALL encerrar a sessão, SHALL descartar todo o cache de dados em memória e SHALL redirecionar para `/login`.
 5. WHILE a autenticação estiver em andamento, o sistema SHALL desabilitar o botão de envio e SHALL exibir indicação de carregamento.
 6. WHEN um usuário autenticado acessa `/login`, `/signup` ou `/forgot-password` THEN o sistema SHALL redirecioná-lo para `/clients`, ou para a rota pretendida quando houver uma em `?redirect=`.
-7. The system SHALL never redirecionar `/reset-password`, qualquer que seja o estado da sessão; é a tela que decide entre o formulário e a orientação de pedir um novo link.
 7. IF a chamada de autenticação falhar por rede THEN o sistema SHALL exibir mensagem de falha temporária, distinta da mensagem de credencial inválida.
+8. The system SHALL manter `/reset-password` sempre acessível, qualquer que seja o estado da sessão; é a tela que decide entre o formulário e a orientação de pedir um novo link.
 
 **Independent Test**: Entrar, recarregar a página e continuar em `/clients`; sair e confirmar que voltar pelo histórico do navegador não devolve o conteúdo.
 
