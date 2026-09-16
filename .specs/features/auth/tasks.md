@@ -72,6 +72,14 @@ T11 → T12 → T13 → T14 → T15 → T16
 T17 → T18
 ```
 
+### Phase 5: Correções pós-verificação
+
+Fase inserida após o Verifier independente reprovar a feature.
+
+```
+T19 → T20 → T21
+```
+
 ---
 
 ## Task Breakdown
@@ -720,15 +728,100 @@ T17 → T18
 
 ---
 
+
+### Phase 5: Correções pós-verificação
+
+#### T19: Testar o serviço de perfil
+
+**What**: Testes unitários e contra a pilha real para `profile-service`, hoje sem teste algum.
+**Where**: `src/features/auth/services/profile-service.test.ts`
+**Depends on**: T18
+**Reuses**: harness de `tests/rls/helpers.ts`
+**Requirement**: AUTH-13, AUTH-14
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Lacuna L1, a única classificada como bloqueante.** Três mutações sobrevivem aos cinco gates: parar de gravar o telefone, passar a gravar o e-mail, e fabricar um perfil vazio em vez de falhar.
+
+**Done when**:
+- [x] `atualizarPerfil` tem teste que assere o payload exato enviado, incluindo o telefone
+- [x] Um teste contra a pilha real salva nome e telefone e relê, provando a persistência
+- [x] Um teste contra a pilha real prova que escrever `email` é recusado pelo grant
+- [x] `buscarPerfil` tem teste do caminho de erro, que não pode devolver perfil fabricado
+- [x] As três mutações do relatório passam a ser detectadas
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test`
+
+**Tests**: unit + integration
+**Gate**: full
+**Status**: ✅ Done
+
+> **A mesma lição, cometida duas vezes na mesma feature.** Em T3 acrescentei um teste contra a pilha real para `auth-service` justamente porque mock esconde desvio de contrato — e provei isso trocando a chave dos metadados nos dois lugares ao mesmo tempo. Criei `profile-service` depois e não fiz o mesmo. A lição L-001 do `LESSONS.md` descreve exatamente este caso: quando o grant cobre a operação, o teste comportamental desaparece.
+>
+> **M2 morre nas duas camadas, e por razões diferentes.** O teste unitário assere que o payload não contém `email`; o teste contra a pilha real prova que o banco recusa a escrita com `42501`. Um verifica a intenção do serviço, o outro o contrato do grant. Se só o unitário existisse, alterar o grant da migration passaria despercebido.
+>
+> **A releitura é o que prova a persistência.** Conferir o retorno do update provaria apenas que a chamada devolveu algo; o teste relê da tabela.
+>
+> **Um teste a mais que o pedido**: atualizar o perfil de outro consultor é recusado. A RLS filtra a linha, o `.single()` não encontra alvo, e o serviço devolve recusa em vez de sucesso silencioso.
+**Commit**: `test(auth): cobre o serviço de perfil`
+
+---
+
+#### T20: Fixar a configuração de sessão do cliente
+
+**What**: Tornar explícitas e asseridas as opções de sessão do cliente Supabase.
+**Where**: `src/lib/supabase.ts`
+**Depends on**: T19
+**Reuses**: cliente da `foundation`
+**Requirement**: AUTH-05, AUTH-12
+
+**Lacuna L2.** Desligar a renovação automática de token não derruba teste algum, e é o AUTH-12 AC5.
+
+**Done when**:
+- [ ] `persistSession` e `autoRefreshToken` ficam explícitos no código, em vez de implícitos por padrão
+- [ ] Teste assere as duas opções, de modo que desligar qualquer uma derrube a suíte
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test`
+
+**Tests**: unit
+**Gate**: quick
+**Commit**: `fix(auth): fixa a configuração de sessão do cliente`
+
+---
+
+#### T21: Emendar o spec sobre a rota de redefinição
+
+**What**: Alinhar `spec.md` ao comportamento que T18 provou necessário.
+**Where**: `.specs/features/auth/spec.md`
+**Depends on**: T20
+**Reuses**: medição de T18
+**Requirement**: AUTH-08, AUTH-11
+
+**Lacuna L3.** O spec exige redirecionar `/reset-password` para sessão autenticada; a implementação a isenta incondicionalmente, e um teste fixa a divergência em vez de denunciá-la.
+
+**Done when**:
+- [ ] O AC6 do AUTH-11 deixa de listar `/reset-password` entre as rotas redirecionadas
+- [ ] A premissa correspondente registra a razão medida em T18
+- [ ] O checkbox de T10 deixa de afirmar o comportamento antigo
+- [ ] `validate_spec.py` sai limpo
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test`
+
+**Tests**: none
+**Gate**: build
+**Commit**: `docs(auth): emenda o spec sobre a rota de redefinição`
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5
 
 Phase 1:  T1 → T2 → T3 → T4 → T5
 Phase 2:  T6 → T7 → T8 → T9 → T10
 Phase 3:  T11 → T12 → T13 → T14 → T15 → T16
 Phase 4:  T17 → T18
+Phase 5:  T19 → T20 → T21
 ```
 
 A execução é estritamente sequencial dentro de cada fase.
