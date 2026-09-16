@@ -82,7 +82,7 @@ Fase inserida após o Verifier independente reprovar a feature. Fecha as seis
 lacunas que ele encontrou, em ordem de gravidade.
 
 ```
-T24 → T25 → T26 → T27 → T28
+T24 → T25 → T26 → T27 → T28 → T29
 ```
 
 ---
@@ -993,6 +993,42 @@ T24 → T25 → T26 → T27 → T28
 
 ---
 
+#### T29: Proteger a suíte e fechar o débito recomendado
+
+**What**: Guarda de descoberta de testes, asserção dos tokens do tema e `tgtype` no quarto trigger.
+**Where**: `scripts/check-test-discovery.mjs`
+**Depends on**: T28
+**Reuses**: `vitest list --json`
+**Requirement**: FND-02, FND-12, FND-14
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Tarefa inserida após a terceira verificação**, que aprovou a feature e registrou dez itens de débito. O usuário decidiu fechar o V5 e os três recomendados antes de seguir para `auth`.
+
+**Done when**:
+- [x] `npm run test` falha se um arquivo de teste no disco deixar de ser executado
+- [x] Estreitar o glob do projeto `unit` derruba o gate, nomeando os arquivos ignorados
+- [x] Os quatorze tokens do `@theme` têm asserção individual em navegador real
+- [x] Apagar metade dos tokens derruba o gate, nomeando os ausentes
+- [x] O trigger `on_auth_user_created` é verificado por `tgtype`, e não apenas por existência
+- [x] Contagem de testes: 137 pgTAP, 44 unitários, 23 de RLS, 6 E2E
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e && npm run build`
+
+**Tests**: e2e
+**Gate**: full
+**Status**: ✅ Done
+**Commit**: `test: protege a suíte contra remoção silenciosa`
+
+> **O V5 era defeito do aparato de verificação, não do produto.** Estreitar uma linha em `vitest.config.ts` apagava 22 dos 44 testes e o gate continuava verde. As contagens viviam neste arquivo como checklist manual, relido a cada verificação, mas nada as impunha — ou seja, toda garantia desta feature podia ser desligada por uma linha de configuração. O script compara o que existe no disco com o que o Vitest descobre, e nomeia os arquivos ignorados.
+>
+> **O `tgtype` faltando no quarto trigger** é a correção de T28 aplicada incompleta: cobri os três triggers de `updated_at` e esqueci o de criação de perfil. A terceira verificação mostrou que alargar o evento dele passava intacto pelo pgTAP dono do FND-12, e só quebrava em `test:rls` por acidente.
+>
+> **Quatro mutações, quatro detecções**, cada uma com mensagem que nomeia o que quebrou em vez de só falhar.
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -1002,7 +1038,7 @@ Phase 1:  T1 → T2 → T3 → T4 → T5
 Phase 2:  T6 → T7 → T8 → T9 → T10 → T11 → T23 → T12 → T13
 Phase 3:  T14 → T15 → T16
 Phase 4:  T17 → T18 → T19 → T20 → T21 → T22
-Phase 5:  T24 → T25 → T26 → T27 → T28
+Phase 5:  T24 → T25 → T26 → T27 → T28 → T29
 ```
 
 A execução é estritamente sequencial — não há paralelismo dentro de uma fase.

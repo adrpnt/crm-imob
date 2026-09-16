@@ -81,3 +81,43 @@ test('os tokens do Tailwind chegam como estilo computado', async ({ page }) => {
   const titulo = page.getByRole('heading', { name: 'CRM Imobiliário' })
   await expect(titulo).toHaveCSS('font-weight', '600')
 })
+
+/**
+ * Todos os tokens declarados em `@theme` chegam ao navegador (FND-02).
+ *
+ * A asserção anterior cobria o pipeline do Tailwind, mas não os tokens um a
+ * um: apagar metade do bloco `@theme` passava intacto. Cada token aqui tem um
+ * consumidor previsto no design — superfícies, texto, borda, ação primária,
+ * ação destrutiva, feedback e foco.
+ */
+test('os tokens do tema estão definidos como variáveis CSS', async ({ page }) => {
+  await page.goto('/')
+
+  const tokens = await page.evaluate(() => {
+    const estilo = getComputedStyle(document.documentElement)
+    const nomes = [
+      '--color-surface',
+      '--color-surface-muted',
+      '--color-ink',
+      '--color-ink-muted',
+      '--color-border',
+      '--color-primary',
+      '--color-primary-ink',
+      '--color-danger',
+      '--color-danger-ink',
+      '--color-success',
+      '--color-warning',
+      '--color-focus',
+      '--radius-control',
+      '--radius-surface',
+    ]
+    return Object.fromEntries(nomes.map((n) => [n, estilo.getPropertyValue(n).trim()]))
+  })
+
+  const vazios = Object.entries(tokens)
+    .filter(([, valor]) => valor === '')
+    .map(([nome]) => nome)
+
+  expect(vazios, `tokens ausentes no @theme: ${vazios.join(', ')}`).toEqual([])
+  expect(tokens['--color-danger']).not.toBe(tokens['--color-primary'])
+})

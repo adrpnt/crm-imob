@@ -17,12 +17,14 @@ select is(
   'handle_new_user fixa search_path vazio, impedindo sequestro de caminho'
 );
 
-select ok(
-  exists (select 1 from pg_trigger
-           where tgname = 'on_auth_user_created'
-             and tgrelid = 'auth.users'::regclass
-             and not tgisinternal),
-  'o trigger on_auth_user_created existe em auth.users'
+-- tgtype = 5 é ROW | AFTER | INSERT. Verificar só a existência deixaria passar
+-- o trigger ligado ao evento errado — a mesma lacuna que a segunda verificação
+-- encontrou nos triggers de updated_at, e que ficou de fora daquela correção.
+select is(
+  (select tgtype::int from pg_trigger
+    where tgname = 'on_auth_user_created' and tgrelid = 'auth.users'::regclass),
+  5,
+  'on_auth_user_created dispara em AFTER INSERT por linha em auth.users'
 );
 
 -- ---------- caminho 1: metadados completos ----------
