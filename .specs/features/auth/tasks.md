@@ -128,16 +128,31 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] `schemaDeLogin`, `schemaDeCadastro`, `schemaDeRecuperacao`, `schemaDeNovaSenha` e `schemaDePerfil` existem, com tipos inferidos exportados
-- [ ] Senha exige 8 caracteres; confirmação divergente reporta no campo de confirmação, não no de senha
-- [ ] E-mail é aparado e convertido para minúsculas antes de validar
-- [ ] Nome completo é obrigatório e limitado a 120 caracteres, casando com a constraint de `profiles`
-- [ ] Cada regra tem um caso que passa e um que falha, com a mensagem asserida
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] `schemaDeLogin`, `schemaDeCadastro`, `schemaDeRecuperacao`, `schemaDeNovaSenha` e `schemaDePerfil` existem, com tipos inferidos exportados
+- [x] Senha exige 8 caracteres; confirmação divergente reporta no campo de confirmação, não no de senha
+- [x] E-mail é aparado e convertido para minúsculas antes de validar
+- [x] Nome completo é obrigatório e limitado a 120 caracteres, casando com a constraint de `profiles`
+- [x] Cada regra tem um caso que passa e um que falha, com a mensagem asserida
+- [x] Contagem de testes: 21 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Uma justificativa minha foi refutada por medição, dentro da própria tarefa.** Escrevi que o parâmetro `when` do refinamento existia porque, sem ele, um erro em campo não relacionado impediria a checagem de senhas de rodar — que é o que a documentação do Zod descreve. A sonda de mutação mostrou que remover o `when` não quebrava teste algum, então medi os três cenários diretamente:
+>
+> | Cenário | sem `when` | com `when` |
+> | --- | --- | --- |
+> | erro de validação em outro campo | `nome, confirmacao` | idêntico |
+> | erro de **tipo** em outro campo | só `nome` | `nome, confirmacao` |
+> | senha curta **e** divergente | `senha, confirmacao` | só `senha` |
+>
+> A documentação fala do segundo caso, que **não ocorre neste app**: o React Hook Form sempre entrega strings. O efeito real aqui é o terceiro — suprimir o ruído de "confirmação não confere" enquanto a própria senha é inválida. Comentário corrigido para o efeito medido, e o teste que não discriminava foi substituído por um que mede exatamente esse caso.
+>
+> **Cinco mutações, cinco detecções** após a correção: remover o `when`, mover o `path` para o campo de senha, remover a normalização do e-mail, baixar o mínimo para 6 e remover a redução do telefone a dígitos.
+>
+> **Senha no login não tem mínimo**, de propósito: exigi-lo rejeitaria senha legítima anterior à regra e informaria a política de senha a quem ainda não tem conta.
 **Commit**: `feat(auth): adiciona schemas de validação`
 
 ---
