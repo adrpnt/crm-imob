@@ -118,10 +118,10 @@
 ## Handoff
 
 - **Feature**: `.specs/features/foundation` (fase Specify concluída para as 5 features)
-- **Phase / Task**: `foundation` concluída e verificada — veredito PASS na terceira rodada
+- **Phase / Task**: `auth` — Specify e Design aprovados, Tasks redigido e aguardando aprovação
 - **Completed**: Specify das 5 features (aprovado); `foundation` inteira — 29 tarefas, 32 commits, 3 rodadas de verificação independente
 - **In-progress** (file:line): nenhum
-- **Next step**: Iniciar a feature `auth` pela fase Design. O spec já está aprovado. Dois itens do `config.toml` ficaram pendentes de T6 e pertencem a ela: `site_url` aponta para a porta 3000 em vez da 5173, e `minimum_password_length` está em 6 enquanto a premissa do spec fixa 8.
+- **Next step**: Obter aprovação do `tasks.md` de `auth` e executar T1, que fecha a pendência do `config.toml` herdada de `foundation` T6.
 - **Blockers**: nenhum
 - **Uncommitted files**: nenhum
 - **Débito registrado**: sete itens em `.specs/features/foundation/validation.md` §6, classificados como não bloqueantes. Os quatro recomendados foram fechados em T29.
