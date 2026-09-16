@@ -187,6 +187,8 @@ T17 → T18
 > **Camada de teste elevada de `unit` para `unit + integration`, com demonstração.** Os 21 testes unitários substituem o cliente por mock, o que os torna cegos à forma da API. Provei: troquei a chave dos metadados de `full_name` para `fullName` **no serviço e no teste unitário ao mesmo tempo**, mantendo-os consistentes entre si. Os 86 testes unitários passaram; só o teste contra a pilha real caiu, porque só ele conhece o outro lado do contrato — o trigger que lê `full_name`. É a mesma classe de lacuna que o Verifier apontou na `foundation` sobre o truncamento de `error_logs`, e aqui ela foi fechada na origem em vez de esperar a verificação.
 >
 > **Cinco mutações unitárias, cinco detecções**: revelar senha incorreta, remover a detecção de rede, remover o registro em console, revelar a recusa da recuperação, e remover o nome dos metadados.
+>
+> **Falha de processo registrada.** Commitei esta tarefa com o `typecheck` reprovando. Rodei os gates em laço, li a saída, e commitei na mesma invocação sem parar diante do `exit=2` — que é exatamente o que a regra do fluxo proíbe. É a segunda vez; a primeira foi em T28 da `foundation`. A causa raiz do erro de tipo: `tests/**/*.ts` estava no projeto **node** do TypeScript, que usa resolução `nodenext`, e o novo teste importa de `src/`, onde os imports relativos não têm extensão. Corrigido com um `tsconfig.tests.json` próprio, de resolução `bundler` — forçar extensões no código de produção por causa da configuração de teste seria a cauda balançando o cachorro. O gate inteiro foi reexecutado e passa.
 **Commit**: `feat(auth): adiciona serviço de autenticação`
 
 ---
