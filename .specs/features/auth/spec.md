@@ -43,6 +43,9 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 | Comportamento ao acessar `/login` já autenticado | Redirecionar para `/clients` | Evita que o consultor com sessão ativa reveja a tela de login ao usar um atalho antigo | n |
 | Tela de perfil, ausente no PLAN §7 embora `/profile` seja rota privada no PLAN §6 | Exibe nome, e-mail e telefone; permite editar nome e telefone; e-mail somente leitura | Fecha a inconsistência entre §6 e §7 pelo escopo mínimo que torna a rota útil, respeitando AD-008 | y |
 
+| Distinguir sessão expirada de permissão negada, indistintos na redação original do AUTH-12 AC3 | 401 e 403 encerram a sessão; `42501` é erro de permissão e a mantém | `42501` é o que a RLS devolve para "esta linha não é sua", com sessão perfeitamente válida. Inserir um cliente com `owner_id` alheio produz esse código e é comportamento esperado, já coberto por teste na `foundation`. Tratá-lo como expiração derrubaria o consultor para o login por um erro legítimo | y |
+| O link de recuperação de senha autentica o usuário, colidindo com o AUTH-11 | O provedor marca a sessão como de recuperação ao receber `PASSWORD_RECOVERY`; enquanto a marca vale, `/reset-password` é acessível e a regra de redirecionamento não se aplica | É o único caminho que distingue "autenticado por link de recuperação" de "autenticado normalmente", e portanto o único que cumpre o AUTH-08 AC7 como escrito | y |
+
 **Open questions:** none — todas resolvidas ou registradas acima.
 
 ---
@@ -138,8 +141,9 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 
 1. WHEN o sistema detectar que a sessão foi encerrada ou não pôde ser renovada THEN o sistema SHALL limpar todo o cache de dados, SHALL exibir a mensagem "Sua sessão expirou" e SHALL redirecionar para `/login` preservando a rota corrente.
 2. WHEN o consultor autentica após essa expiração THEN o sistema SHALL devolvê-lo à rota preservada.
-3. IF uma requisição ao Supabase falhar por falta de autorização THEN o sistema SHALL tratá-la como sessão expirada, e não como erro genérico.
-4. The system SHALL renovar a sessão automaticamente enquanto o token de atualização for válido, sem interromper o consultor.
+3. IF uma requisição ao Supabase falhar com status HTTP 401 ou 403 THEN o sistema SHALL tratá-la como sessão expirada.
+4. IF uma requisição falhar com o código `42501` do PostgREST THEN o sistema SHALL tratá-la como erro de permissão na tela que a originou, e SHALL não encerrar a sessão.
+5. The system SHALL renovar a sessão automaticamente enquanto o token de atualização for válido, sem interromper o consultor.
 
 **Independent Test**: Com o app aberto, invalidar a sessão pelo dashboard do Supabase, disparar uma ação e observar mensagem, redirecionamento e retorno à rota após novo login.
 
