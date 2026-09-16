@@ -654,16 +654,27 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] `/login`, `/signup`, `/forgot-password` e `/reset-password` ficam sob `RotaPublica` e `PublicLayout`
-- [ ] `/profile` fica sob `RotaProtegida` e `AppLayout`, com `MenuDoUsuario` no cabeçalho
-- [ ] `AuthProvider` envolve a árvore por dentro do `QueryClientProvider`
-- [ ] Um teste percorre a árvore real e assere que cada rota está sob a guarda correta
-- [ ] A asserção de que nenhuma rota tem `loader` continua valendo (AD-013)
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
+- [x] `/login`, `/signup`, `/forgot-password` e `/reset-password` ficam sob `RotaPublica` e `PublicLayout`
+- [x] `/profile` fica sob `RotaProtegida` e `AppLayout`, com `MenuDoUsuario` no cabeçalho
+- [x] `AuthProvider` envolve a árvore por dentro do `QueryClientProvider`
+- [x] Um teste percorre a árvore real e assere que cada rota está sob a guarda correta
+- [x] A asserção de que nenhuma rota tem `loader` continua valendo (AD-013)
+- [x] Contagem de testes: 8 testes de rota (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run build`
 
 **Tests**: unit
 **Gate**: full
+**Status**: ✅ Done
+
+> **Cada rota é verificada duas vezes, positiva e negativamente.** Um teste assere que as rotas de CRM estão sob `RotaProtegida`; outro, que **não** estão sob `RotaPublica`. Cadastrar uma rota no lugar errado derruba os dois. Só a asserção positiva deixaria passar uma rota aninhada sob ambas as guardas, que compila e roda.
+>
+> **A verificação sobe a árvore real, e não uma montada no teste.** `ancestraisDe` percorre `rotas` a partir da raiz até o caminho pedido. É o que faz esta suíte detectar uma rota nova cadastrada no lugar errado — exatamente a lição que a `foundation` registrou sobre asserções estruturais.
+>
+> **A estrutura é guarda → layout → telas**, e a ordem importa. A guarda por fora decide antes de qualquer moldura ser desenhada; inverter faria o cabeçalho aparecer e só então descobrir que não há sessão, produzindo o piscar que o PLAN §6 proíbe.
+>
+> **`/clients` é lugar-tenente.** A rota pertence à feature `clients`, mas as guardas e o login apontam para ela. Sem um destino real, o fluxo de autenticação não fecharia de ponta a ponta e T18 não teria o que testar. Renderiza o conteúdo de espera atual e será substituída.
+>
+> **Quatro mutações, quatro detecções.**
 **Commit**: `feat(auth): liga as rotas de autenticação à árvore`
 
 ---
