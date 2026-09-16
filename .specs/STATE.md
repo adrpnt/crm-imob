@@ -118,10 +118,12 @@
 ## Handoff
 
 - **Feature**: `.specs/features/foundation` (fase Specify concluída para as 5 features)
-- **Phase / Task**: Tasks de `foundation` — 22 tarefas em 4 fases, validador limpo, aguardando aprovação
-- **Completed**: Specify das 5 features (aprovado); Design de `foundation` (aprovado); Tasks de `foundation` (rascunho)
+- **Phase / Task**: `foundation` concluída e verificada — veredito PASS na terceira rodada
+- **Completed**: Specify das 5 features (aprovado); `foundation` inteira — 29 tarefas, 32 commits, 3 rodadas de verificação independente
 - **In-progress** (file:line): nenhum
-- **Next step**: Obter aprovação do `tasks.md` e confirmar a delegação em lotes, então executar T1.
+- **Next step**: Iniciar a feature `auth` pela fase Design. O spec já está aprovado. Dois itens do `config.toml` ficaram pendentes de T6 e pertencem a ela: `site_url` aponta para a porta 3000 em vez da 5173, e `minimum_password_length` está em 6 enquanto a premissa do spec fixa 8.
 - **Blockers**: nenhum
-- **Uncommitted files**: `.specs/features/foundation/{design.md,tasks.md}`, `.specs/STATE.md`
+- **Uncommitted files**: nenhum
+- **Débito registrado**: sete itens em `.specs/features/foundation/validation.md` §6, classificados como não bloqueantes. Os quatro recomendados foram fechados em T29.
+- **Lições destiladas**: oito, em `.specs/LESSONS.md`. Carregar as confirmadas ao iniciar Specify e Design de `auth`.
 - **Branch**: main

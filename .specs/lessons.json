@@ -1,0 +1,153 @@
+{
+  "schema": 1,
+  "promote_threshold": 2,
+  "window_days": 45,
+  "quarantine_threshold": 2,
+  "next_id": 9,
+  "lessons": [
+    {
+      "id": "L-001",
+      "key": "surviving_mutant::quando politica de rls e grant por coluna cobrem o mesmo caso um teste comportamental passa pelo motivo errado verifique a camada de grant no catalogo has column privilege pg policies sempre com controle positivo",
+      "text": "Quando política de RLS e grant por coluna cobrem o mesmo caso, um teste comportamental passa pelo motivo errado: verifique a camada de grant no catálogo (has_column_privilege, pg_policies), sempre com controle positivo.",
+      "signal": "surviving_mutant",
+      "scope": "db/rls",
+      "status": "candidate",
+      "features": [
+        "foundation"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "M6,M7 rodada 1 (db/rls)"
+      ],
+      "created": "2026-09-16T13:42:19Z",
+      "last_seen": "2026-09-16T13:42:19Z"
+    },
+    {
+      "id": "L-002",
+      "key": "surviving_mutant::assercao de trigger por nome nao detecta o evento errado assere tgtype 19 row before update 5 row after insert alem do nome",
+      "text": "Asserção de trigger por nome não detecta o evento errado: assere tgtype (19 = ROW|BEFORE|UPDATE, 5 = ROW|AFTER|INSERT) além do nome.",
+      "signal": "surviving_mutant",
+      "scope": "db/triggers",
+      "status": "candidate",
+      "features": [
+        "foundation"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N1 rodada 2 (db/triggers)"
+      ],
+      "created": "2026-09-16T13:42:19Z",
+      "last_seen": "2026-09-16T13:42:19Z"
+    },
+    {
+      "id": "L-003",
+      "key": "surviving_mutant::para provar que um trigger de updated at faz efeito semeie o valor antigo com o trigger desligado now nao avanca dentro da transacao e comparar contra data fixa passa mesmo com o trigger no evento errado",
+      "text": "Para provar que um trigger de updated_at faz efeito, semeie o valor antigo com o trigger desligado: now() não avança dentro da transação, e comparar contra data fixa passa mesmo com o trigger no evento errado.",
+      "signal": "surviving_mutant",
+      "scope": "db/triggers",
+      "status": "candidate",
+      "features": [
+        "foundation"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N1 rodada 2 (db/triggers)"
+      ],
+      "created": "2026-09-16T13:42:19Z",
+      "last_seen": "2026-09-16T13:42:19Z"
+    },
+    {
+      "id": "L-004",
+      "key": "surviving_mutant::amostrar um valor invalido nao detecta um conjunto de dominio alargado nem encurtado assere pg get constraintdef exato",
+      "text": "Amostrar um valor inválido não detecta um conjunto de domínio alargado nem encurtado: assere pg_get_constraintdef exato.",
+      "signal": "surviving_mutant",
+      "scope": "db/constraints",
+      "status": "candidate",
+      "features": [
+        "foundation"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N7,N8 rodada 2 (db/constraints)"
+      ],
+      "created": "2026-09-16T13:42:19Z",
+      "last_seen": "2026-09-16T13:42:19Z"
+    },
+    {
+      "id": "L-005",
+      "key": "surviving_mutant::teste de layout que verifica classe css nao detecta o pipeline do tailwind removido assere estilo computado em navegador real",
+      "text": "Teste de layout que verifica classe CSS não detecta o pipeline do Tailwind removido: assere estilo computado em navegador real.",
+      "signal": "surviving_mutant",
+      "scope": "ui/estilo",
+      "status": "candidate",
+      "features": [
+        "foundation"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "N3 rodada 2 (ui/estilo)"
+      ],
+      "created": "2026-09-16T13:42:19Z",
+      "last_seen": "2026-09-16T13:42:19Z"
+    },
+    {
+      "id": "L-006",
+      "key": "surviving_mutant::contagem de testes em documento e checklist nao gate compare os arquivos de teste no disco com os que o runner descobre senao estreitar um glob apaga metade da suite em silencio",
+      "text": "Contagem de testes em documento é checklist, não gate: compare os arquivos de teste no disco com os que o runner descobre, senão estreitar um glob apaga metade da suíte em silêncio.",
+      "signal": "surviving_mutant",
+      "scope": "ferramental",
+      "status": "candidate",
+      "features": [
+        "foundation"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "V5 rodada 3 (ferramental)"
+      ],
+      "created": "2026-09-16T13:42:19Z",
+      "last_seen": "2026-09-16T13:42:19Z"
+    },
+    {
+      "id": "L-007",
+      "key": "ac_gap::em react router data mode um error boundary de classe na raiz nao captura erro lancado dentro de rota a fronteira padrao do router pega antes e preciso registrar errorboundary nas rotas de topo",
+      "text": "Em React Router data mode, um error boundary de classe na raiz não captura erro lançado dentro de rota: a fronteira padrão do router pega antes. É preciso registrar ErrorBoundary nas rotas de topo.",
+      "signal": "ac_gap",
+      "scope": "ui/erros",
+      "status": "candidate",
+      "features": [
+        "foundation"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "FND-16 / T20 (ui/erros)"
+      ],
+      "created": "2026-09-16T13:42:19Z",
+      "last_seen": "2026-09-16T13:42:19Z"
+    },
+    {
+      "id": "L-008",
+      "key": "spec_deviation::ao remover algo que o spec exige emende o spec na mesma tarefa o indice removido por medicao ficou tres rodadas contradizendo o ac10",
+      "text": "Ao remover algo que o spec exige, emende o spec na mesma tarefa: o índice removido por medição ficou três rodadas contradizendo o AC10.",
+      "signal": "spec_deviation",
+      "scope": "processo",
+      "status": "candidate",
+      "features": [
+        "foundation"
+      ],
+      "recurrence": 1,
+      "harmful": 0,
+      "evidence": [
+        "T24 / AD-004 (processo)"
+      ],
+      "created": "2026-09-16T13:42:19Z",
+      "last_seen": "2026-09-16T13:42:19Z"
+    }
+  ]
+}
