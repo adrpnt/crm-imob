@@ -313,14 +313,23 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Em estado de envio, fica desabilitado e um segundo clique não dispara a ação
-- [ ] A variante destrutiva é visualmente distinta da primária (PLAN §11)
-- [ ] O foco permanece visível em todas as variantes
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Em estado de envio, fica desabilitado e um segundo clique não dispara a ação
+- [ ] ~~A variante destrutiva é visualmente distinta da primária (PLAN §11)~~ — **transferido para `clients`**, ver nota
+- [x] O botão é alcançável pelo teclado; o foco visível vem da regra global de `:focus-visible` e é verificado em navegador real
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done, com um critério transferido
+
+> **A variante destrutiva não foi construída, de propósito.** `auth` não tem ação destrutiva — sair não é uma. Criar a variante agora seria abstração especulativa, contra o princípio que o próprio design desta feature enuncia: componente novo nasce quando há consumidor. Ela nasce em `clients`, junto da exclusão que a exige e que o PLAN §7 descreve com diálogo de confirmação. O critério foi transferido, não apagado.
+>
+> **O tipo padrão é `button`, não `submit`.** Dentro de um formulário o padrão do HTML é `submit`, o que transforma qualquer botão esquecido — cancelar, alternar visibilidade da senha — em envio acidental. Dois testes cobrem isso: um verifica o atributo, outro verifica que o formulário de fato não é enviado.
+>
+> **A prevenção de duplo envio mora no componente**, e não em cada tela. Se dependesse da tela, bastaria um formulário esquecer. O teste clica duas vezes durante o envio e assere zero chamadas.
+>
+> **Quatro mutações, quatro detecções**: envio que não desabilita, tipo padrão trocado, progresso não anunciado, variante não exposta.
 **Commit**: `feat(ui): adiciona componente de botão`
 
 ---
