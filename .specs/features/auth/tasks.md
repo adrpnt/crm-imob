@@ -279,14 +279,23 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Rótulo visível sempre; texto de exemplo nunca faz as vezes de rótulo (PLAN §11)
-- [ ] A mensagem de erro é associada ao controle por `aria-describedby`, e o controle recebe `aria-invalid`
-- [ ] O controle é alcançável pelo rótulo: clicar no rótulo foca o campo
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Rótulo visível sempre; texto de exemplo nunca faz as vezes de rótulo (PLAN §11)
+- [x] A mensagem de erro é associada ao controle por `aria-describedby`, e o controle recebe `aria-invalid`
+- [x] O controle é alcançável pelo rótulo: clicar no rótulo foca o campo
+- [x] Contagem de testes: 9 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **O rótulo é prop obrigatória, não opcional.** Deixá-lo opcional permitiria um campo só com texto de exemplo, que é exatamente o que o PLAN §11 proíbe — ele some quando o consultor começa a digitar e nunca existiu para quem usa leitor de tela. O teste confirma que o rótulo permanece mesmo com texto de exemplo presente.
+>
+> **A amarração é provada por comportamento, não por atributo.** O teste clica no rótulo e verifica que o controle recebeu foco. Assertar `htmlFor` seria verificar a implementação; clicar verifica o que o consultor obtém.
+>
+> **Um teste meu estava errado.** Eu esperava que `e.target.value` devolvesse a tecla digitada; ele devolve o valor acumulado do controle. Corrigi a expectativa, que ficou mais precisa, e anotei o porquê no teste.
+>
+> **Cinco mutações, cinco detecções**: rótulo sem amarração, erro não associado, controle não marcado como inválido, apoio fora da descrição, e props não encaminhadas.
 **Commit**: `feat(ui): adiciona componente de campo de formulário`
 
 ---
