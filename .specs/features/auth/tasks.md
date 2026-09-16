@@ -244,15 +244,22 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] `ehSessaoExpirada` reconhece 401 e 403, e **não** reconhece `42501`
-- [ ] `ehErroDeAutorizacao` segue reconhecendo os três, porque repetir a tentativa e encerrar a sessão são decisões diferentes
-- [ ] `QueryCache.onError` dispara a expiração apenas para os status HTTP
-- [ ] Um erro `42501` não encerra a sessão — teste explícito
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] `ehSessaoExpirada` reconhece 401 e 403, e **não** reconhece `42501`
+- [x] `ehErroDeAutorizacao` segue reconhecendo os três, porque repetir a tentativa e encerrar a sessão são decisões diferentes
+- [x] `QueryCache.onError` dispara a expiração apenas para os status HTTP
+- [x] Um erro `42501` não encerra a sessão — teste explícito
+- [x] Contagem de testes: 12 acrescentados, 110 unitários no total (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done — encerra a Fase 1
+
+> **Um sinalizador de expiração, não um sistema de notificações.** A guarda de rota não distingue um visitante que nunca entrou de um consultor desconectado no meio do trabalho: os dois chegam ao login sem sessão. `marcarSessaoExpirada` e `consumirSessaoExpirada` resolvem isso com leitura destrutiva, para que a mensagem apareça uma vez e não reapareça ao recarregar. A tela de login consome o sinal em T11.
+>
+> **Terceiro artefato de sonda desta sessão, e o mais instrutivo.** A mutação principal — fazer `ehSessaoExpirada` aceitar `42501` — apareceu como sobrevivente. Não era: `ehErroDeAutorizacao` contém uma linha idêntica e vem antes no arquivo, então a substituição por texto atingiu a função errada, onde a checagem de `42501` já existe e portanto nada mudava. Refeita mirando o bloco inteiro da função, a mutação derruba três testes. A lição operacional é que substituição por linha isolada não serve para sondar arquivo com funções parecidas; o alvo precisa ser o bloco.
+>
+> **Cinco mutações, cinco detecções** após a correção da sonda.
 **Commit**: `feat(auth): distingue sessão expirada de permissão negada`
 
 ---

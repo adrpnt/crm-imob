@@ -1,6 +1,16 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { deveTentarDeNovo, ehErroDeAutorizacao, queryClient } from './query-client'
+import {
+  aoFalharConsulta,
+  deveTentarDeNovo,
+  ehErroDeAutorizacao,
+  ehSessaoExpirada,
+  queryClient,
+} from './query-client'
+import { consumirSessaoExpirada, marcarSessaoExpirada } from './sessao-expirada'
+import { supabase } from './supabase'
+
+vi.mock('./supabase', () => ({ supabase: { auth: { signOut: vi.fn() } } }))
 
 describe('ehErroDeAutorizacao', () => {
   it('reconhece a recusa do PostgREST por política ou privilégio', () => {
@@ -48,5 +58,86 @@ describe('queryClient', () => {
 
   it('não repete mutações: reenviar uma escrita pode duplicar efeito', () => {
     expect(queryClient.getDefaultOptions().mutations?.retry).toBe(false)
+  })
+})
+
+describe('ehSessaoExpirada', () => {
+  it('reconhece o status 401', () => {
+    expect(ehSessaoExpirada({ status: 401 })).toBe(true)
+  })
+
+  it('reconhece o status 403', () => {
+    expect(ehSessaoExpirada({ status: 403 })).toBe(true)
+  })
+
+  // Esta é a distinção que a emenda ao spec introduziu. O 42501 significa
+  // "linha alheia" com sessão válida: inserir um cliente com owner_id de outro
+  // produz esse código, e é comportamento esperado.
+  it('NÃO reconhece o 42501 da RLS, que é permissão negada com sessão válida', () => {
+    expect(ehSessaoExpirada({ code: '42501' })).toBe(false)
+  })
+
+  it('não quebra com valores que não são objeto', () => {
+    expect(ehSessaoExpirada(null)).toBe(false)
+    expect(ehSessaoExpirada('erro')).toBe(false)
+  })
+})
+
+describe('as duas classificações decidem coisas diferentes sobre o mesmo erro', () => {
+  it('o 42501 não é repetido, mas também não encerra a sessão', () => {
+    const erro = { code: '42501' }
+    expect(ehErroDeAutorizacao(erro)).toBe(true)
+    expect(ehSessaoExpirada(erro)).toBe(false)
+  })
+
+  it('o 401 não é repetido e encerra a sessão', () => {
+    const erro = { status: 401 }
+    expect(ehErroDeAutorizacao(erro)).toBe(true)
+    expect(ehSessaoExpirada(erro)).toBe(true)
+  })
+})
+
+describe('aoFalharConsulta', () => {
+  beforeEach(() => {
+    consumirSessaoExpirada()
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+    consumirSessaoExpirada()
+  })
+
+  it('encerra a sessão e sinaliza a expiração em um 401', () => {
+    aoFalharConsulta({ status: 401 })
+    expect(supabase.auth.signOut).toHaveBeenCalledOnce()
+    expect(consumirSessaoExpirada()).toBe(true)
+  })
+
+  it('não encerra a sessão em um 42501', () => {
+    aoFalharConsulta({ code: '42501' })
+    expect(supabase.auth.signOut).not.toHaveBeenCalled()
+    expect(consumirSessaoExpirada()).toBe(false)
+  })
+
+  it('ignora erro comum de rede', () => {
+    aoFalharConsulta(new Error('network'))
+    expect(supabase.auth.signOut).not.toHaveBeenCalled()
+  })
+
+  it('está ligado ao cache de consultas do cliente', () => {
+    expect(queryClient.getQueryCache().config.onError).toBe(aoFalharConsulta)
+  })
+})
+
+describe('consumirSessaoExpirada', () => {
+  it('devolve falso quando nada marcou', () => {
+    consumirSessaoExpirada()
+    expect(consumirSessaoExpirada()).toBe(false)
+  })
+
+  it('é destrutivo: a segunda leitura já devolve falso', () => {
+    marcarSessaoExpirada()
+    expect(consumirSessaoExpirada()).toBe(true)
+    expect(consumirSessaoExpirada()).toBe(false)
   })
 })
