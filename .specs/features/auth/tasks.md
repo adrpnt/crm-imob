@@ -378,15 +378,24 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Em `carregando`, não renderiza nem o conteúdo privado nem a tela de login
-- [ ] Em `anonimo`, redireciona para `/login` gravando a rota pretendida em `?redirect=`
-- [ ] Em `autenticado`, renderiza o `Outlet`
-- [ ] A rota pretendida preserva caminho, parâmetros de consulta e fragmento
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Em `carregando`, não renderiza nem o conteúdo privado nem a tela de login
+- [x] Em `anonimo`, redireciona para `/login` gravando a rota pretendida em `?redirect=`
+- [x] Em `autenticado`, renderiza o `Outlet`
+- [x] A rota pretendida preserva caminho, parâmetros de consulta e fragmento
+- [x] Contagem de testes: 8 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **O estado do meio tem dois testes, não um.** Um verifica que nem o conteúdo privado nem o login aparecem; outro, que há indicação de progresso. Separados de propósito: renderizar `null` passaria no primeiro e daria tela em branco, que é o outro defeito que o PLAN §10 proíbe.
+>
+> **Outra expectativa minha estava errada, e a correção revelou a garantia certa.** Eu esperava que `Zona+Sul` chegasse ao destino como `Zona Sul`. Não chega: a URL é codificada inteira, então o `+` vira `%2B` e volta como `+`. Isso está correto — o destino precisa ser **idêntico** ao pedido. Reinterpretar a query devolveria o consultor a um filtro diferente daquele que ele tentou abrir. O teste passou a assertar a igualdade com a URL original em vez de um valor que eu tinha suposto.
+>
+> **`Carregando` nasceu compartilhado**, e não extraído depois: T10 é o segundo consumidor, o que já é razão suficiente.
+>
+> **Quatro mutações, quatro detecções**: carregamento ignorado, rota pretendida sem query e fragmento, destino não enviado ao login, e conteúdo privado nunca renderizado.
 **Commit**: `feat(auth): adiciona guarda das rotas privadas`
 
 ---
