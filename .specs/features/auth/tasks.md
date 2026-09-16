@@ -347,13 +347,20 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Usa região assistiva, de modo que a mensagem seja anunciada e não apenas exibida
-- [ ] Distingue erro de informação por cor e por texto, nunca só por cor
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Usa região assistiva, de modo que a mensagem seja anunciada e não apenas exibida
+- [x] Distingue erro de informação por cor e por texto, nunca só por cor
+- [x] Contagem de testes: 7 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Dois papéis, não um.** Erro usa `role="alert"`, que interrompe o leitor de tela — quem acabou de enviar um formulário precisa saber agora que falhou, não quando chegar ali lendo. Sucesso, aviso e informação usam `role="status"`, que aguarda uma pausa: anunciar "pronto, salvo" por cima do que está sendo lido atrapalha mais do que ajuda.
+>
+> **O marcador textual é o que cumpre o critério.** A cor sozinha deixa de fora quem não separa vermelho de verde, que é a deficiência de visão de cores mais comum. Um teste assere que os quatro tons produzem marcadores distintos — remover o marcador ou repetir um entre tons derruba a suíte.
+>
+> **Quatro mutações, quatro detecções**: erro sem anúncio assertivo, marcador removido, marcador repetido entre tons, e tom padrão trocado.
 **Commit**: `feat(ui): adiciona componente de alerta`
 
 ---
