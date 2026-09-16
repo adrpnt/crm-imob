@@ -413,15 +413,22 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Em `carregando`, não renderiza nada de decisivo
-- [ ] Em `autenticado`, redireciona para `/clients`
-- [ ] WHILE `emRecuperacao`, `/reset-password` é acessível mesmo autenticado
-- [ ] Autenticado normalmente, sem a marca, `/reset-password` também redireciona
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Em `carregando`, não renderiza nada de decisivo
+- [x] Em `autenticado`, redireciona para `/clients`
+- [x] WHILE `emRecuperacao`, `/reset-password` é acessível mesmo autenticado
+- [x] Autenticado normalmente, sem a marca, `/reset-password` também redireciona
+- [x] Contagem de testes: 9 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run build`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done — encerra a Fase 2
+
+> **A exceção tem duas metades, e cada uma é guardada por um teste diferente.** A condição é `emRecuperacao && pathname === '/reset-password'`. Remover a segunda metade faz a marca abrir cadastro e login; remover a primeira faz a redefinição abrir para qualquer sessão. As duas mutações derrubam testes distintos, o que prova que nenhuma das metades é decorativa.
+>
+> **Quem não tem sessão alcança `/reset-password`**, de propósito: é ali que a orientação de pedir um link novo precisa aparecer, conforme o AUTH-08 AC7. A guarda não bloqueia anônimos nessa rota; quem decide o que exibir é a própria tela, em T14.
+>
+> **Quatro mutações, quatro detecções.**
 **Commit**: `feat(auth): adiciona guarda das rotas públicas`
 
 ---
