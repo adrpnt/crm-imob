@@ -448,16 +448,24 @@ T17 → T18
 - Skill: NONE
 
 **Done when**:
-- [ ] Credencial inválida exibe a frase genérica, sem distinguir e-mail inexistente de senha errada
-- [ ] Falha de rede exibe frase distinta
-- [ ] Durante o envio o botão desabilita e um segundo envio não acontece
-- [ ] Após entrar, navega para a rota de `?redirect=` quando houver, e para `/clients` quando não
-- [ ] Links para cadastro e recuperação estão presentes
-- [ ] Contagem de testes: a definir na implementação
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Credencial inválida exibe a frase genérica, sem distinguir e-mail inexistente de senha errada
+- [x] Falha de rede exibe frase distinta — garantida em `traduzirErro` e coberta em T3
+- [x] Durante o envio o botão desabilita e um segundo envio não acontece
+- [x] Após entrar, navega para a rota de `?redirect=` quando houver, e para `/clients` quando não
+- [x] **Acrescentado**: destino externo em `?redirect=` é ignorado (redirecionamento aberto)
+- [x] Links para cadastro e recuperação estão presentes
+- [x] Contagem de testes: 12 da tela mais 6 do destino seguro (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
+
+> **Uma vulnerabilidade que o design não previu.** `?redirect=` é vetor clássico de redirecionamento aberto: bastaria enviar `/login?redirect=https://site-falso.com` para que o consultor, após digitar a senha corretamente, caísse numa cópia da tela. Como o endereço de origem é legítimo, o golpe é difícil de perceber. `destinoSeguro` aceita apenas caminhos internos e recusa também `//host`, que o navegador trata como absoluto herdando o protocolo, e `/\host`, que alguns normalizam.
+>
+> **Um teste meu não discriminava, e a correção revelou o comportamento certo.** O teste "limpa o erro anterior ao reenviar" na verdade verificava navegação: como a tela desmonta ao navegar, o alerta some de qualquer forma. A diferença real aparece **durante** o segundo envio — manter o erro antigo em tela enquanto a nova tentativa está em voo faz parecer que ela já falhou. O teste passou a interceptar o envio em voo e assertar que o alerta já saiu.
+>
+> **Cinco mutações, cinco detecções** após a correção: validação do destino removida por completo, só a barra dupla liberada, a tela confiando no parâmetro sem validar, aviso de expiração lido a cada renderização, e erro anterior não limpo.
 **Commit**: `feat(auth): adiciona tela de login`
 
 ---
