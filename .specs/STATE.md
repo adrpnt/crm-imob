@@ -117,13 +117,45 @@
 
 ## Handoff
 
-- **Feature**: `.specs/features/foundation` (fase Specify concluída para as 5 features)
-- **Phase / Task**: `auth` — Specify e Design aprovados, Tasks redigido e aguardando aprovação
-- **Completed**: Specify das 5 features (aprovado); `foundation` inteira — 29 tarefas, 32 commits, 3 rodadas de verificação independente
+- **Feature**: `.specs/features/auth` — concluída e verificada
+- **Phase / Task**: `auth` — Execute concluído (T1 a T22); verificação independente encerrada na rodada 2 com **PASS**
+- **Completed**: Specify das 5 features (aprovado); `foundation` inteira (29 tarefas, 32 commits, 3 rodadas de verificação); `auth` inteira (22 tarefas, 27 commits, 2 rodadas — rodada 1 FAIL por lacuna bloqueante, rodada 2 PASS)
 - **In-progress** (file:line): nenhum
-- **Next step**: Obter aprovação do `tasks.md` de `auth` e executar T1, que fecha a pendência do `config.toml` herdada de `foundation` T6.
+- **Next step**: Iniciar a fase Design de `clients`, a única feature com Specify pronto e nada adiante (`context.md` marca `Ready for design`). Antes de desenhar, resolver dois pontos de entrada registrados abaixo.
 - **Blockers**: nenhum
 - **Uncommitted files**: nenhum
-- **Débito registrado**: sete itens em `.specs/features/foundation/validation.md` §6, classificados como não bloqueantes. Os quatro recomendados foram fechados em T29.
-- **Lições destiladas**: oito, em `.specs/LESSONS.md`. Carregar as confirmadas ao iniciar Specify e Design de `auth`.
 - **Branch**: main
+
+### Estado das cinco features
+
+| Feature | Specify | Design | Tasks | Execute | Verificação |
+| ------- | ------- | ------ | ----- | ------- | ----------- |
+| `foundation` | ✅ | ✅ | ✅ | ✅ | ✅ PASS (3 rodadas) |
+| `auth` | ✅ | ✅ | ✅ | ✅ | ✅ PASS (rodada 2) |
+| `clients` | ✅ | — | — | — | — |
+| `notes` | ✅ | — | — | — | — |
+| `deploy` | ✅ | — | — | — | — |
+
+### Gates na última medição (rodada 2 de `auth`, códigos de saída diretos)
+
+`npm run lint` · `typecheck` · `test` (242 unitários em 27 arquivos; pgTAP 9 arquivos e 137 asserções; 34 RLS em 5 arquivos) · `test:e2e` (15) · `build` — todos `0`. Pilha local no ar: API 54321, DB 54322, Mailpit 54324.
+
+### Dois pontos a resolver na entrada do Design de `clients`
+
+1. **Nove premissas do `spec.md` de `clients` seguem com `Confirmed? n`** — ordenação padrão, obrigatoriedade de campos, retorno à primeira página ao filtrar, comportamento da busca e do telefone, mudança de status só pelo formulário, confirmação de saída com alterações pendentes e ausência de suporte offline. Três delas mudam a forma dos componentes; confirmar em bloco antes de desenhar.
+2. **Onde o 401 de mutação é tratado** — ver D3 abaixo.
+
+### Débito de `auth` que atravessa para `clients`
+
+- **D3** (`validation.md` §7): `src/lib/query-client.ts:68-69` liga a detecção de sessão expirada só ao `QueryCache`; não existe `MutationCache`. Em `auth` era P2, com uma escrita única que captura o próprio erro. `clients` traz criar, editar e excluir — o Design precisa decidir a camada.
+- **AUTH-12 AC4** só se torna testável aqui: `validation.md` §6.3 registra que não existia, em `auth`, tela capaz de originar `42501`. O formulário de cliente é essa tela.
+
+### Débito remanescente de `auth` (nenhum bloqueante)
+
+D1 e D2 foram fechadas em T22, após o relatório — ver o adendo do autor em `validation.md`. Seguem abertas **D3 a D9**, entre elas: AUTH-12 AC1/AC2 sem cadeia percorrida de ponta a ponta (D4), os dois edge cases deixados como dívida por decisão do usuário (D5 perfil ilegível após cadastro, D6 sair numa aba refletindo na outra), duas indistinguibilidades benignas medidas (D7, D8) e, cosmético, a tabela de rastreabilidade mais os Success Criteria de `.specs/features/auth/spec.md:184-211` ainda marcados como `Pending` depois de Tasks e Execute (D9). Débito de `foundation`: sete itens em `validation.md` §6, os quatro recomendados fechados em T29.
+
+### Lições
+
+Doze candidatas em `.specs/lessons.json` — oito de `foundation` (L-001 a L-008), quatro de `auth` (L-009 a L-012). **Nenhuma promovida a confirmada**, então o Design de `clients` não carrega nenhuma como guia obrigatório, embora valha ler L-001 (grant versus política) e L-009 (serviço novo sem teste próprio) pelo escopo que `clients` vai tocar.
+
+Dois pontos para o mantenedor revisar com `lessons.py`, não à mão: L-012 lista evidência em `foundation` **e** `auth` mas registra `recurrence: 1` com apenas `auth` em `features`; e a mensagem de `a3cebbf` admite reincidência de L-001 em `auth`, que segue marcada só com `foundation`. Sob `promote_threshold=2`, qualquer uma das duas viraria confirmada.
