@@ -41,8 +41,8 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 | Como filtros e busca convivem | Combinados por E lógico, todos refletidos na URL junto com página e ordenação | PLAN §7 pede filtros na URL. E lógico é o que corresponde à leitura natural de "leads da Zona Sul" | y |
 | Página inicial ao mudar filtro ou busca | Volta para a primeira página | Manter a página 3 ao filtrar costuma render uma lista vazia sem explicação aparente | n |
 | Origem das opções do filtro de região | Regiões distintas já cadastradas pelo próprio consultor, ordenadas alfabeticamente | Decorre de AD-009: não há lista fixa nem tabela de domínio | y |
-| Mudança de status | Feita pelo formulário de edição, sem atalho na listagem | Mantém o MVP com um único caminho de escrita; atalho inline exigiria tratamento próprio de erro e desfazer | n |
-| Confirmação ao sair com alterações não salvas | Incluída — bloqueia navegação interna com alterações pendentes | PLAN §7 pede "se viável"; com React Hook Form o estado de sujeira já existe, então o custo é baixo | n |
+| Mudança de status | Feita pelo formulário de edição, sem atalho na listagem | Mantém o MVP com um único caminho de escrita; atalho inline exigiria tratamento próprio de erro e desfazer | y |
+| Confirmação ao sair com alterações não salvas | Incluída — bloqueia navegação interna com alterações pendentes. **Não** cobre recarregar nem fechar a aba: medido na fase Design, `useBlocker` do React Router não intercepta esses gestos | PLAN §7 pede "se viável"; com React Hook Form o estado de sujeira já existe, então o custo é baixo | y |
 | Moeda e formatação de renda | Exibida como BRL com separador de milhar e duas casas; entrada aceita dígitos com ou sem máscara | Decorre do tipo `numeric(12,2)` definido em `foundation` | y |
 | Comportamento sem conexão | Erro de rede exibe estado de erro com ação de tentar de novo; não há fila offline | Suporte offline é um produto à parte e não consta do PLAN | n |
 
@@ -172,6 +172,7 @@ Toda ambiguidade está resolvida ou registrada aqui — nada fica silenciosament
 - IF o consultor abrir a edição de um cliente excluído em outra aba THEN o sistema SHALL exibir o estado de não encontrado ao salvar, em vez de falhar silenciosamente.
 - WHEN o termo de busca contiver apenas espaços THEN o sistema SHALL tratá-lo como busca vazia.
 - WHEN o termo de busca contiver `%` ou `_` THEN o sistema SHALL tratá-los como caracteres literais, e não como curingas.
+- WHEN o termo de busca contiver `*` THEN o sistema SHALL tratá-lo como curinga equivalente a `%`, e não como caractere literal. Medido na fase Design: o PostgREST traduz `*` para `%` antes do SQL, de modo que `\*` significa "porcentagem literal" e um asterisco literal é inexpressável por `ilike`. Documentado como limite conhecido em vez de afirmado ao contrário.
 - WHEN um nome muito longo for exibido na listagem THEN o sistema SHALL truncá-lo visualmente sem quebrar o layout, mantendo o valor completo acessível.
 - IF a página solicitada na URL exceder o total de páginas THEN o sistema SHALL exibir a última página existente.
 - WHEN a região for digitada com caixa diferente de uma já existente THEN o sistema SHALL agrupá-las como a mesma opção no filtro.

@@ -115,6 +115,22 @@
 - **Date**: 2026-09-15
 - **Status**: active
 
+### AD-015
+- **Decision**: O estado de uma listagem — busca, filtros, ordenação e página — vive na query string da URL como fonte única. Um módulo puro traduz `URLSearchParams` em um objeto tipado nas duas direções, a chave do TanStack Query deriva desse objeto, e mudar um filtro é navegar. Não existe `useState` espelhando filtro em efeito.
+- **Reason**: O spec de `clients` exige que a URL reflita o estado (CLNT-10) e que abrir uma URL com filtros restaure exatamente aquela lista (AC7). Com a URL como fonte única isso é a estrutura, não um par de sincronizações que precisa ser mantido em acordo. De graça vêm o compartilhamento por link e os botões de voltar e avançar do navegador operando sobre as páginas em cache.
+- **Trade-off**: Todo filtro novo precisa de serialização e de um valor padrão, e um filtro de forma complexa fica desconfortável numa query string. Em troca, a dessincronia entre tela e URL deixa de ser possível.
+- **Scope**: `clients`, `notes` e toda tela de listagem futura.
+- **Date**: 2026-09-17
+- **Status**: active
+
+### AD-016
+- **Decision**: A falha de autorização em **escrita** é tratada por `mutationCache.onError` no `queryClient`, simétrico ao `queryCache.onError` que já existia. Nenhuma mutação trata 401 ou 403 por conta própria.
+- **Reason**: Fecha a dívida D3 da verificação de `auth`, onde `query-client.ts` ligava a detecção apenas às leituras e a única escrita da feature engolia o 401 numa mensagem genérica. A documentação do TanStack Query garante que os callbacks do `MutationCache` disparam para toda mutação e não podem ser sobrescritos por uma individual — é o que impede que uma mutação nova nasça esquecida, que é a forma de falha silenciosa que o AD-014 evita no banco.
+- **Trade-off**: O tratamento fica longe de onde a mutação é escrita, então quem lê o hook não vê que existe. Mitigado por teste que assere a ligação no cliente construído, e não apenas a existência da função.
+- **Scope**: Todas as features que escrevem no banco.
+- **Date**: 2026-09-17
+- **Status**: active
+
 ## Handoff
 
 - **Feature**: `.specs/features/auth` — concluída e verificada
