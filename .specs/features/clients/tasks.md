@@ -698,16 +698,17 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Cabeçalhos de coluna permitem ordenar por nome e por data, alternando crescente e decrescente
-- [ ] A ordenação corrente é anunciada por `aria-sort`, e não apenas por ícone
-- [ ] Nome muito longo é truncado visualmente sem quebrar o layout, com o valor completo acessível (edge case do spec)
-- [ ] Dois clientes de mesmo nome são distinguíveis por e-mail ou telefone (edge case do spec)
-- [ ] Renda aparece formatada em BRL
-- [ ] Contagem de testes: 12 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Cabeçalhos de coluna permitem ordenar por nome e por data, alternando crescente e decrescente
+- [x] A ordenação corrente é anunciada por `aria-sort`, e não apenas por ícone
+- [x] Nome muito longo é truncado visualmente sem quebrar o layout, com o valor completo acessível (edge case do spec)
+- [x] Dois clientes de mesmo nome são distinguíveis por e-mail ou telefone (edge case do spec)
+- [x] Renda aparece formatada em BRL
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona a tabela de clientes`
 
 ---
