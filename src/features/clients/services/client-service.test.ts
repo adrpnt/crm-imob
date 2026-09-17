@@ -1,12 +1,24 @@
-import { afterEach, describe, expect, it, vi, type Mock } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
 
 import { supabase } from '../../../lib/supabase'
 import { PADROES, type FiltrosDeClientes } from '../filtros'
-import { buscarCliente, listarClientes, listarRegioes, type Cliente } from './client-service'
+import type { DadosDeCliente } from '../schemas'
+import {
+  atualizarCliente,
+  buscarCliente,
+  criarCliente,
+  excluirCliente,
+  listarClientes,
+  listarRegioes,
+  type Cliente,
+} from './client-service'
 
-vi.mock('../../../lib/supabase', () => ({ supabase: { from: vi.fn() } }))
+vi.mock('../../../lib/supabase', () => ({
+  supabase: { from: vi.fn(), auth: { getSession: vi.fn() } },
+}))
 
 const from = vi.mocked(supabase.from)
+const getSession = vi.mocked(supabase.auth.getSession)
 
 type RespostaDoPostgrest = { data: unknown; error: unknown; count?: number | null }
 
@@ -19,7 +31,17 @@ type RespostaDoPostgrest = { data: unknown; error: unknown; count?: number | nul
  */
 function consultaQueDevolve(resposta: RespostaDoPostgrest) {
   const construtor: Record<string, unknown> = {}
-  for (const metodo of ['select', 'ilike', 'or', 'eq', 'order', 'range']) {
+  for (const metodo of [
+    'select',
+    'ilike',
+    'or',
+    'eq',
+    'order',
+    'range',
+    'insert',
+    'update',
+    'delete',
+  ]) {
     construtor[metodo] = vi.fn(() => construtor)
   }
   construtor.single = vi.fn(() => Promise.resolve(resposta))
@@ -50,7 +72,18 @@ const CLIENTE: Cliente = {
   updated_at: '2026-01-01T00:00:00Z',
 }
 
+beforeEach(() => {
+  getSession.mockResolvedValue({
+    data: { session: { user: { id: 'u1' } } },
+    error: null,
+  } as never)
+  // `traduzirErro` registra o erro original antes de traduzir; sem o silêncio,
+  // a saída da suíte fica ilegível.
+  vi.spyOn(console, 'error').mockImplementation(() => {})
+})
+
 afterEach(() => {
+  vi.restoreAllMocks()
   vi.clearAllMocks()
 })
 
@@ -219,5 +252,198 @@ describe('listarRegioes', () => {
     consultaQueDevolve({ data: null, error: { code: '42501', message: 'permission denied' } })
 
     await expect(listarRegioes()).rejects.toMatchObject({ code: '42501' })
+  })
+})
+
+const DADOS: DadosDeCliente = {
+  name: 'Joana Silva',
+  email: 'joana@exemplo.com',
+  phone: '11987654321',
+  status: 'lead',
+  source: 'instagram',
+  region: 'Zona Sul',
+  income: 5000,
+  income_type: 'formal',
+}
+
+/** As oito colunas do grant de update, como o banco as recebe. */
+const OITO_COLUNAS = {
+  name: 'Joana Silva',
+  email: 'joana@exemplo.com',
+  phone: '11987654321',
+  status: 'lead',
+  source: 'instagram',
+  region: 'Zona Sul',
+  income: 5000,
+  income_type: 'formal',
+}
+
+describe('criarCliente', () => {
+  // CLNT-02: a política de insert exige `owner_id = auth.uid()` no with check.
+  // Igualdade profunda, e não objectContaining: uma coluna a mais no payload
+  // faria toda criação falhar com 42501 (L-001).
+  it('envia as oito colunas e o owner_id da sessão', async () => {
+    const consulta = consultaQueDevolve({ data: CLIENTE, error: null })
+
+    await criarCliente(DADOS)
+
+    expect(consulta.insert).toHaveBeenCalledWith({ ...OITO_COLUNAS, owner_id: 'u1' })
+  })
+
+  it('devolve o cliente criado', async () => {
+    consultaQueDevolve({ data: CLIENTE, error: null })
+
+    expect(await criarCliente(DADOS)).toEqual({ ok: true, cliente: CLIENTE })
+  })
+
+  // Campo apagado precisa chegar como nulo: string vazia violaria o formato do
+  // e-mail e os dígitos do telefone.
+  it('envia nulo nos campos opcionais deixados em branco', async () => {
+    const consulta = consultaQueDevolve({ data: CLIENTE, error: null })
+
+    await criarCliente({ name: 'Joana Silva', status: 'lead' })
+
+    expect(consulta.insert).toHaveBeenCalledWith({
+      name: 'Joana Silva',
+      email: null,
+      phone: null,
+      status: 'lead',
+      source: null,
+      region: null,
+      income: null,
+      income_type: null,
+      owner_id: 'u1',
+    })
+  })
+
+  // Sem sessão o banco devolveria o mesmo 42501 de "linha de outro dono", e a
+  // frase resultante confundiria a causa.
+  it('recusa sem tentar o insert quando não há sessão', async () => {
+    getSession.mockResolvedValue({ data: { session: null }, error: null } as never)
+
+    const resultado = await criarCliente(DADOS)
+
+    expect(resultado).toEqual({
+      ok: false,
+      mensagem: 'Sua sessão expirou. Entre de novo para continuar.',
+    })
+    expect(from).not.toHaveBeenCalled()
+  })
+
+  // CLNT-05 AC10: devolver em vez de lançar é o que deixa o formulário exibir o
+  // erro sem perder o que foi digitado.
+  it('traduz a violação de check em mensagem, sem lançar', async () => {
+    consultaQueDevolve({ data: null, error: { code: '23514', message: 'check violation' } })
+
+    expect(await criarCliente(DADOS)).toEqual({
+      ok: false,
+      mensagem: 'Algum valor não é aceito pelo cadastro. Revise os campos.',
+    })
+  })
+})
+
+describe('atualizarCliente', () => {
+  // L-001: política e grant cobrem o mesmo caso, então o payload é asserido por
+  // igualdade profunda. Com `objectContaining`, uma coluna fora do grant
+  // passaria no teste e faria todo salvamento falhar em produção.
+  it('envia exatamente as oito colunas do grant', async () => {
+    const consulta = consultaQueDevolve({ data: CLIENTE, error: null })
+
+    await atualizarCliente('c1', DADOS)
+
+    expect(consulta.update).toHaveBeenCalledWith(OITO_COLUNAS)
+  })
+
+  // As três estão fora do grant de update (AD-014): qualquer uma no payload
+  // faz o PostgREST recusar a operação inteira com 42501.
+  it('não envia owner_id, created_at nem updated_at', async () => {
+    const consulta = consultaQueDevolve({ data: CLIENTE, error: null })
+
+    await atualizarCliente('c1', DADOS)
+
+    const payload = consulta.update.mock.calls[0][0]
+    expect(payload).not.toHaveProperty('owner_id')
+    expect(payload).not.toHaveProperty('created_at')
+    expect(payload).not.toHaveProperty('updated_at')
+  })
+
+  it('filtra pela linha e devolve o cliente atualizado', async () => {
+    const consulta = consultaQueDevolve({ data: CLIENTE, error: null })
+
+    expect(await atualizarCliente('c1', DADOS)).toEqual({ ok: true, cliente: CLIENTE })
+    expect(consulta.eq).toHaveBeenCalledWith('id', 'c1')
+  })
+
+  // O 42501 não é expiração de sessão: `ehSessaoExpirada` é estreita de
+  // propósito, e derrubar o consultor para o login aqui seria um erro.
+  it('traduz o 42501 em erro de permissão', async () => {
+    consultaQueDevolve({ data: null, error: { code: '42501', message: 'permission denied' } })
+
+    expect(await atualizarCliente('c1', DADOS)).toEqual({
+      ok: false,
+      mensagem: 'Você não tem permissão para esta alteração.',
+    })
+  })
+
+  // Edge case do spec: a edição aberta em outra aba de um cliente já excluído
+  // precisa dizer isso ao salvar, em vez de falhar silenciosamente.
+  it('traduz o retorno sem linhas em cliente inexistente', async () => {
+    consultaQueDevolve({ data: null, error: { code: 'PGRST116', message: 'no rows' } })
+
+    expect(await atualizarCliente('c1', DADOS)).toEqual({
+      ok: false,
+      mensagem: 'Este cliente não existe mais. Ele pode ter sido excluído em outra aba.',
+    })
+  })
+})
+
+describe('excluirCliente', () => {
+  it('exclui a linha pedida e devolve o cliente excluído', async () => {
+    const consulta = consultaQueDevolve({ data: CLIENTE, error: null })
+
+    expect(await excluirCliente('c1')).toEqual({ ok: true, cliente: CLIENTE })
+    expect(consulta.delete).toHaveBeenCalled()
+    expect(consulta.eq).toHaveBeenCalledWith('id', 'c1')
+  })
+
+  // CLNT-17 AC6: sem o `.select().single()`, a política filtraria a linha de
+  // outro dono e o delete devolveria sucesso silencioso.
+  it('recusa quando a exclusão não encontra a linha', async () => {
+    consultaQueDevolve({ data: null, error: { code: 'PGRST116', message: 'no rows' } })
+
+    const resultado = await excluirCliente('c1')
+
+    expect(resultado.ok).toBe(false)
+    expect(resultado.ok === false && resultado.mensagem).toMatch(/não existe mais/i)
+  })
+
+  it('devolve a frase genérica para código desconhecido, sem lançar', async () => {
+    consultaQueDevolve({ data: null, error: { code: '08006', message: 'connection failure' } })
+
+    expect(await excluirCliente('c1')).toEqual({
+      ok: false,
+      mensagem: 'Não foi possível salvar agora. Tente de novo em instantes.',
+    })
+  })
+})
+
+describe('tradução em ponto único', () => {
+  // Espalhar a tradução pelas telas é o padrão de falha que o auth-service já
+  // evita: a mesma causa seria dita de dois jeitos, e uma das telas revelaria
+  // detalhe de banco.
+  it('dá a mesma frase ao mesmo código nas três escritas, e registra o erro original', async () => {
+    const erro = { code: '42501', message: 'permission denied' }
+
+    consultaQueDevolve({ data: null, error: erro })
+    const criacao = await criarCliente(DADOS)
+    consultaQueDevolve({ data: null, error: erro })
+    const atualizacao = await atualizarCliente('c1', DADOS)
+    consultaQueDevolve({ data: null, error: erro })
+    const exclusao = await excluirCliente('c1')
+
+    expect(criacao).toEqual({ ok: false, mensagem: 'Você não tem permissão para esta alteração.' })
+    expect(atualizacao).toEqual(criacao)
+    expect(exclusao).toEqual(criacao)
+    expect(console.error).toHaveBeenCalledWith('[falha ao escrever cliente]', erro)
   })
 })

@@ -270,19 +270,20 @@ T27 → T28
 - Skill: `supabase`
 
 **Done when**:
-- [ ] `criarCliente` envia `owner_id` do usuário autenticado, exigido pelo `with check` da política
-- [ ] `atualizarCliente` envia **somente** as oito colunas do grant de update, asserido por igualdade **profunda** do payload (L-001)
-- [ ] Teste assere negativamente que o payload não contém `owner_id`, `created_at` nem `updated_at`
-- [ ] Teste de pilha real: escrever uma coluna fora do grant é recusada com `42501` — controle positivo junto, provando que a coluna de dentro passa (L-001)
-- [ ] Teste de pilha real: criar, reler e confirmar que os triggers normalizaram nome, e-mail, telefone e região
-- [ ] Teste de pilha real: excluir um cliente com notas apaga as notas por cascata
-- [ ] Teste de pilha real: tentar atualizar cliente de outro usuário não altera nada
-- [ ] Erro do banco vira mensagem em português num ponto único, e os dados digitados não são perdidos
-- [ ] Contagem de testes: 14 unitários e 10 de RLS passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test`
+- [x] `criarCliente` envia `owner_id` do usuário autenticado, exigido pelo `with check` da política
+- [x] `atualizarCliente` envia **somente** as oito colunas do grant de update, asserido por igualdade **profunda** do payload (L-001)
+- [x] Teste assere negativamente que o payload não contém `owner_id`, `created_at` nem `updated_at`
+- [x] Teste de pilha real: escrever uma coluna fora do grant é recusada com `42501` — controle positivo junto, provando que a coluna de dentro passa (L-001)
+- [x] Teste de pilha real: criar, reler e confirmar que os triggers normalizaram nome, e-mail, telefone e região
+- [x] Teste de pilha real: excluir um cliente com notas apaga as notas por cascata
+- [x] Teste de pilha real: tentar atualizar cliente de outro usuário não altera nada
+- [x] Erro do banco vira mensagem em português num ponto único, e os dados digitados não são perdidos
+- [x] Contagem de testes: 14 unitários e 10 de RLS passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test`
 
 **Tests**: unit e integration
 **Gate**: full
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona as escritas do serviço de clientes`
 
 ---

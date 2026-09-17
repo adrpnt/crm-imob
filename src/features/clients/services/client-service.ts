@@ -1,7 +1,10 @@
+import type { PostgrestError } from '@supabase/supabase-js'
+
 import { supabase } from '../../../lib/supabase'
 import type { Database } from '../../../types/database.types'
 import { padroesDeBusca } from '../busca'
 import type { FiltrosDeClientes } from '../filtros'
+import type { DadosDeCliente } from '../schemas'
 
 export type Cliente = Database['public']['Tables']['clients']['Row']
 
@@ -147,4 +150,114 @@ export async function listarRegioes(): Promise<string[]> {
   }
 
   return [...porCaixa.values()].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+}
+
+export type ResultadoDeEscrita = { ok: true; cliente: Cliente } | { ok: false; mensagem: string }
+
+const MENSAGEM_GENERICA = 'Não foi possível salvar agora. Tente de novo em instantes.'
+
+/**
+ * Traduz o erro do banco em frase para o consultor, em um ponto único.
+ *
+ * Espalhar a tradução pelas telas é o padrão de falha que o `auth-service` já
+ * evita: uma delas acabaria revelando detalhe de banco, e a mesma causa seria
+ * dita de dois jeitos. As escritas devolvem a frase pronta em vez de lançar,
+ * de modo que o formulário exibe o erro sem perder o que foi digitado
+ * (CLNT-05 AC10).
+ */
+function traduzirErro(erro: PostgrestError): string {
+  console.error('[falha ao escrever cliente]', erro)
+
+  switch (erro.code) {
+    case '42501':
+      // Não é sessão expirada: `ehSessaoExpirada` é estreita de propósito, e
+      // este código significa "esta linha não é sua" com sessão válida.
+      return 'Você não tem permissão para esta alteração.'
+    case '23514':
+      return 'Algum valor não é aceito pelo cadastro. Revise os campos.'
+    case 'PGRST116':
+      // Zero linhas no retorno: ou o cliente foi excluído em outra aba, ou a
+      // política filtrou a linha de outro dono. As duas leituras levam à mesma
+      // frase, que é o que o spec pede ao não revelar se o registro existe.
+      return 'Este cliente não existe mais. Ele pode ter sido excluído em outra aba.'
+    default:
+      return MENSAGEM_GENERICA
+  }
+}
+
+/**
+ * As oito colunas do grant de update (AD-014).
+ *
+ * `owner_id`, `created_at` e `updated_at` ficam fora porque estão fora do
+ * grant: incluir qualquer uma faria TODO salvamento falhar com `42501`, e o
+ * consultor veria "não foi possível salvar" para sempre. Campo apagado vira
+ * nulo, e não string vazia, para a coluna aceitar.
+ */
+function colunasEditaveis(dados: DadosDeCliente) {
+  return {
+    name: dados.name,
+    email: dados.email ?? null,
+    phone: dados.phone ?? null,
+    status: dados.status,
+    source: dados.source ?? null,
+    region: dados.region ?? null,
+    income: dados.income ?? null,
+    income_type: dados.income_type ?? null,
+  }
+}
+
+/**
+ * Cria o cliente com o `owner_id` do consultor autenticado.
+ *
+ * A política de insert exige `owner_id = auth.uid()` no `with check`, então o
+ * valor vai no payload — é a única escrita em que ele aparece. Sem sessão a
+ * operação nem é tentada: o erro do banco seria o mesmo `42501` de "linha de
+ * outro dono", e a frase resultante confundiria a causa.
+ */
+export async function criarCliente(dados: DadosDeCliente): Promise<ResultadoDeEscrita> {
+  const { data: sessao } = await supabase.auth.getSession()
+  const dono = sessao.session?.user.id
+  if (dono === undefined) {
+    return { ok: false, mensagem: 'Sua sessão expirou. Entre de novo para continuar.' }
+  }
+
+  const { data, error } = await supabase
+    .from('clients')
+    .insert({ ...colunasEditaveis(dados), owner_id: dono })
+    .select('*')
+    .single()
+
+  if (error) return { ok: false, mensagem: traduzirErro(error) }
+  return { ok: true, cliente: data }
+}
+
+/** Atualiza somente as colunas do grant; a política restringe a linha. */
+export async function atualizarCliente(
+  id: string,
+  dados: DadosDeCliente,
+): Promise<ResultadoDeEscrita> {
+  const { data, error } = await supabase
+    .from('clients')
+    .update(colunasEditaveis(dados))
+    .eq('id', id)
+    .select('*')
+    .single()
+
+  if (error) return { ok: false, mensagem: traduzirErro(error) }
+  return { ok: true, cliente: data }
+}
+
+/**
+ * Exclui o cliente. As notas vão por cascata, pela chave estrangeira de
+ * `notes` (CLNT-17 AC3) — a aplicação não as apaga uma a uma.
+ *
+ * O `.select().single()` devolve a linha excluída: sem ele, tentar excluir o
+ * cliente de outro consultor devolveria sucesso silencioso, porque a política
+ * filtra a linha e o delete não encontra alvo.
+ */
+export async function excluirCliente(id: string): Promise<ResultadoDeEscrita> {
+  const { data, error } = await supabase.from('clients').delete().eq('id', id).select('*').single()
+
+  if (error) return { ok: false, mensagem: traduzirErro(error) }
+  return { ok: true, cliente: data }
 }
