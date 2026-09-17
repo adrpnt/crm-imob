@@ -415,15 +415,16 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Rótulo é prop obrigatória, como em `Campo` — não existe seleção sem rótulo
-- [ ] Erro é associado por `aria-describedby` e marcado por `aria-invalid`
-- [ ] Aceita opção vazia, para os campos onde deixar em branco é válido
-- [ ] Operável por teclado, com foco visível
-- [ ] Contagem de testes: 8 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Rótulo é prop obrigatória, como em `Campo` — não existe seleção sem rótulo
+- [x] Erro é associado por `aria-describedby` e marcado por `aria-invalid`
+- [x] Aceita opção vazia, para os campos onde deixar em branco é válido
+- [x] Operável por teclado, com foco visível
+- [x] Contagem de testes: 8 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(ui): adiciona campo de seleção`
 
 ---
