@@ -752,15 +752,16 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Exibe o total de clientes que satisfazem os filtros correntes
-- [ ] Páginas de 20; avançar e voltar escrevem a página na URL
-- [ ] Página solicitada acima do total exibe a última existente (edge case do spec)
-- [ ] Nos limites, os controles ficam inativos em vez de produzir página inválida
-- [ ] Contagem de testes: 10 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Exibe o total de clientes que satisfazem os filtros correntes
+- [x] Páginas de 20; avançar e voltar escrevem a página na URL
+- [x] Página solicitada acima do total exibe a última existente (edge case do spec)
+- [x] Nos limites, os controles ficam inativos em vez de produzir página inválida
+- [x] Contagem de testes: 10 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona a paginação`
 
 ---
