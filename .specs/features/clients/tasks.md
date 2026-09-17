@@ -779,16 +779,17 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Carregando exibe esqueleto; nenhum dos cinco estados exibe área em branco
-- [ ] Sem nenhum cliente, exibe o estado inicial que convida ao primeiro cadastro
-- [ ] Com filtros que não retornam nada, exibe busca sem resultado **com ação de limpar**, distinta do estado inicial
-- [ ] Falha na consulta exibe erro com ação de tentar de novo, **sem perder os filtros da URL**
-- [ ] Abrir uma URL com filtros restaura exatamente aquele estado de listagem
-- [ ] Contagem de testes: 16 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Carregando exibe esqueleto; nenhum dos cinco estados exibe área em branco
+- [x] Sem nenhum cliente, exibe o estado inicial que convida ao primeiro cadastro
+- [x] Com filtros que não retornam nada, exibe busca sem resultado **com ação de limpar**, distinta do estado inicial
+- [x] Falha na consulta exibe erro com ação de tentar de novo, **sem perder os filtros da URL**
+- [x] Abrir uma URL com filtros restaura exatamente aquele estado de listagem
+- [x] Contagem de testes: 16 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona a tela de listagem`
 
 ---
