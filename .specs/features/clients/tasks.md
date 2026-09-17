@@ -497,14 +497,15 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Aceita contagem de linhas, para servir à tabela, aos cartões e à ficha
-- [ ] Anuncia carregamento em região assistiva, em vez de só aparecer visualmente (CLNT-18 AC7)
-- [ ] Não anuncia repetidamente a cada nova linha
-- [ ] Contagem de testes: 6 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Aceita contagem de linhas, para servir à tabela, aos cartões e à ficha
+- [x] Anuncia carregamento em região assistiva, em vez de só aparecer visualmente (CLNT-18 AC7)
+- [x] Não anuncia repetidamente a cada nova linha
+- [x] Contagem de testes: 6 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(ui): adiciona esqueleto de conteúdo`
 
 ---
