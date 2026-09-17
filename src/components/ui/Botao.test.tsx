@@ -104,6 +104,48 @@ describe('Botao', () => {
     )
   })
 
+  // CLNT-16 AC2: a ação destrutiva é visualmente distinta da primária. O
+  // `data-variante` é o mesmo contrato das outras duas variantes.
+  it('expõe a variante destrutiva, distinta da primária', () => {
+    render(
+      <>
+        <Botao>Salvar</Botao>
+        <Botao variante="destrutiva">Excluir</Botao>
+      </>,
+    )
+
+    const primaria = screen.getByRole('button', { name: 'Salvar' })
+    const destrutiva = screen.getByRole('button', { name: 'Excluir' })
+
+    expect(destrutiva).toHaveAttribute('data-variante', 'destrutiva')
+    expect(destrutiva.className).not.toBe(primaria.className)
+  })
+
+  // O par foi medido em 5.31:1. Trocar por um tom não declarado no `@theme`
+  // não produziria erro de build: a utilitária simplesmente não pinta nada.
+  it('pinta a variante destrutiva com o par de cor medido', () => {
+    render(<Botao variante="destrutiva">Excluir</Botao>)
+    expect(screen.getByRole('button')).toHaveClass('bg-danger-fill', 'text-danger-ink')
+  })
+
+  // CLNT-16 AC8: durante a exclusão, uma segunda confirmação não pode passar.
+  it('ignora cliques enquanto a exclusão está em andamento', async () => {
+    const aoClicar = vi.fn()
+    render(
+      <Botao variante="destrutiva" enviando onClick={aoClicar}>
+        Excluir
+      </Botao>,
+    )
+
+    const botao = screen.getByRole('button')
+    await userEvent.click(botao)
+    await userEvent.click(botao)
+
+    expect(aoClicar).not.toHaveBeenCalled()
+    expect(botao).toBeDisabled()
+    expect(botao).toHaveAttribute('aria-busy', 'true')
+  })
+
   it('é alcançável pelo teclado', async () => {
     render(<Botao>Entrar</Botao>)
     await userEvent.tab()

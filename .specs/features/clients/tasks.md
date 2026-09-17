@@ -389,14 +389,15 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] A variante usa `bg-danger-fill` com `text-danger-ink`, o par medido em 5.31:1
-- [ ] É visualmente distinta da primária, exigência da §11 do PLAN — asserido pelo `data-variante`, como as outras duas
-- [ ] `enviando` continua valendo, cobrindo o CLNT-16 AC8
-- [ ] Contagem de testes: os testes existentes de `Botao.test.tsx` mais 3 novos passam
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] A variante usa `bg-danger-fill` com `text-danger-ink`, o par medido em 5.31:1
+- [x] É visualmente distinta da primária, exigência da §11 do PLAN — asserido pelo `data-variante`, como as outras duas
+- [x] `enviando` continua valendo, cobrindo o CLNT-16 AC8
+- [x] Contagem de testes: os testes existentes de `Botao.test.tsx` mais 3 novos passam
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(ui): adiciona a variante destrutiva do botão`
 
 ---

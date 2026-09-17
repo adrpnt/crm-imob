@@ -1,6 +1,6 @@
 import type { ComponentPropsWithRef, ReactNode } from 'react'
 
-export type VarianteDeBotao = 'primaria' | 'secundaria'
+export type VarianteDeBotao = 'primaria' | 'secundaria' | 'destrutiva'
 
 type Props = Omit<ComponentPropsWithRef<'button'>, 'disabled'> & {
   variante?: VarianteDeBotao
@@ -16,6 +16,10 @@ const ESTILOS: Record<VarianteDeBotao, string> = {
   // reprovaria o contraste exigido pela §11 do PLAN. Grafite dá 6.86:1.
   primaria: 'bg-rocket-500 text-graphite-950 hover:bg-rocket-600',
   secundaria: 'border border-silver-400 bg-graphite-700 text-cloud-50 hover:bg-graphite-600',
+  // O par medido para ação destrutiva: danger-ink sobre danger-fill dá 5.31:1.
+  // A marca é grafite, laranja e prata, e nenhum desses tons expressa exclusão
+  // sem se confundir com a ação primária (CLNT-16 AC2).
+  destrutiva: 'bg-danger-fill text-danger-ink hover:bg-danger-fill/90',
 }
 
 /**
@@ -30,9 +34,10 @@ const ESTILOS: Record<VarianteDeBotao, string> = {
  * submissão duplicada do AUTH-01: não depende de a tela lembrar de ignorar o
  * segundo clique.
  *
- * A variante destrutiva não existe aqui de propósito: `auth` não tem ação
- * destrutiva, e criá-la sem consumidor seria abstração especulativa. Ela nasce
- * em `clients`, junto da exclusão que a exige.
+ * A variante destrutiva nasceu em `clients`, junto da exclusão que a exige
+ * (CLNT-16). Ela fica visualmente distinta da primária, e não apenas mais
+ * escura: confirmar uma exclusão e salvar um cadastro não podem parecer o
+ * mesmo gesto.
  */
 export function Botao({
   variante = 'primaria',
