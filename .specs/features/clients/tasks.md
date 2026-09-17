@@ -146,18 +146,19 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] `normalizarTermo` apara, colapsa espaços internos, remove acentos por `NFD` e baixa a caixa
-- [ ] Teste com `José Gonçalves ÃÕÜÊ ação` produz exatamente o que `immutable_unaccent` produziu na medição do design, cedilha incluída
-- [ ] `escaparCuringas` escapa `\`, `%` e `_` — **a contrabarra primeiro**, senão ela escapa o escape recém-inserido
-- [ ] Teste prova que `%` e `_` digitados casam literalmente, e não como curinga (edge case do spec)
-- [ ] Teste documenta que `*` **permanece curinga**, conforme o edge case emendado: é o comportamento medido do PostgREST, e se ele mudar este teste é o alarme
-- [ ] `soDigitos` reduz `(11) 98765-4321` a dígitos, para casar contra o telefone armazenado
-- [ ] `padroesDeBusca` devolve o padrão de texto e, quando o termo tem dígitos, também o de telefone
-- [ ] Contagem de testes: 14 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] `normalizarTermo` apara, colapsa espaços internos, remove acentos por `NFD` e baixa a caixa
+- [x] Teste com `José Gonçalves ÃÕÜÊ ação` produz exatamente o que `immutable_unaccent` produziu na medição do design, cedilha incluída
+- [x] `escaparCuringas` escapa `\`, `%` e `_` — **a contrabarra primeiro**, senão ela escapa o escape recém-inserido
+- [x] Teste prova que `%` e `_` digitados casam literalmente, e não como curinga (edge case do spec)
+- [x] Teste documenta que `*` **permanece curinga**, conforme o edge case emendado: é o comportamento medido do PostgREST, e se ele mudar este teste é o alarme
+- [x] `soDigitos` reduz `(11) 98765-4321` a dígitos, para casar contra o telefone armazenado
+- [x] `padroesDeBusca` devolve o padrão de texto e, quando o termo tem dígitos, também o de telefone
+- [x] Contagem de testes: 14 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): normaliza o termo de busca e escapa curingas`
 
 ---
