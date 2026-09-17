@@ -525,7 +525,7 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [x] Nove campos, com só `name` obrigatório e `status` pré-selecionado em lead
+- [x] Oito campos, com só `name` obrigatório e `status` pré-selecionado em lead
 - [x] Validação vem do `schemaDeCliente` por `@hookform/resolvers`, sem regra duplicada na tela
 - [x] Erro aparece no campo correspondente e **a requisição não é enviada**
 - [x] Na falha de validação, o foco vai para o primeiro campo inválido (CLNT-18 AC5)
@@ -535,6 +535,8 @@ T27 → T28
 - [x] Expõe o estado de sujeira, que T16 consome
 - [x] Contagem de testes: 20 testes passam (sem deleções silenciosas)
 - [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+
+> **Correção do orquestrador**: este critério dizia "Nove campos". São oito — as oito colunas do grant de update (AD-014) e os oito campos de `schemaDeCliente`. O erro estava na redação da tarefa, não no código; o spec (CLNT-01) sempre descreveu oito.
 
 **Tests**: unit
 **Gate**: quick
@@ -805,6 +807,7 @@ T27 → T28
 - [ ] Identificador inexistente ou de outro usuário exibe não encontrado, **sem revelar que o registro existe**
 - [ ] Enquanto carrega, exibe esqueleto
 - [ ] Oferece editar, excluir e voltar para a listagem **preservando os filtros de origem**
+- [ ] Lê `location.state.mensagem` e exibe a confirmação vinda do cadastro e da edição — sem isso o CLNT-01 AC1 e o CLNT-15 AC4 ficam sem exibição de fato (decidido no lote 3: alerta na tela de origem sumiria no mesmo quadro da navegação)
 - [ ] Reserva o ponto onde a lista de notas entra, sem implementá-la
 - [ ] Contagem de testes: 12 testes passam (sem deleções silenciosas)
 - [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
