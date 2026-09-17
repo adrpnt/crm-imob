@@ -2,7 +2,7 @@
 
 **Spec**: `.specs/features/clients/spec.md`
 **Context**: `.specs/features/clients/context.md`
-**Status**: Draft
+**Status**: Approved
 
 ---
 
@@ -96,7 +96,7 @@ graph TD
     HK --> TELA
     TELA --> TAB[TabelaDeClientes: md e acima]
     TELA --> CAR[CartoesDeClientes: abaixo de md]
-    TELA --> EST[Esqueleto / Vazio / SemResultado / TelaDeErro]
+    TELA --> EST[Esqueleto / Vazio / SemResultado / Erro com refetch]
 
     FORM[FormularioDeCliente] --> MUT[useCreateClient / useUpdateClient]
     DEL[DialogoDeExclusao] --> MUTD[useDeleteClient]
@@ -126,7 +126,7 @@ o total e a paginação do CLNT-17 AC4 se recalcularem sem cálculo local.
 | `Campo` | `src/components/ui/Campo.tsx` | Importar. Rótulo obrigatório, `aria-describedby` e `aria-invalid` já amarrados — entrega o CLNT-18 AC1 e AC5 de graça |
 | `Botao` | `src/components/ui/Botao.tsx` | **Estender** com a variante `destrutiva`. O comentário do arquivo já declara que ela nasce aqui; `enviando` cobre o CLNT-05 AC9 e o CLNT-17 AC8 |
 | `Alerta` | `src/components/ui/Alerta.tsx` | Importar. `role="alert"` para erro e `role="status"` para sucesso entregam o CLNT-18 AC7 |
-| `TelaDeErro` | `src/components/feedback/TelaDeErro.tsx` | Estado de erro do CLNT-13 AC15 com ação de tentar de novo |
+| `TelaDeErro` | `src/components/feedback/TelaDeErro.tsx` | **Apenas** as fronteiras de erro. Medido em T24: não recebe props, tem `<h1>` próprio e sua única ação é `location.reload()`, que descarta o cache — não serve ao CLNT-13 AC15, que pede repetir a consulta |
 | `Carregando` | `src/components/feedback/Carregando.tsx` | Estado pendente da ficha; os esqueletos do CLNT-13 são novos |
 | `AppLayout` + `MenuDoUsuario` | `src/components/layout/AppLayout.tsx` | Já é a moldura de `/clients`; as telas entram como filhas |
 | `RotaProtegida` | `src/features/auth/components/RotaProtegida.tsx` | Já envolve `/clients`. Nenhuma rota nova precisa de guarda própria |
@@ -295,7 +295,7 @@ export type ResultadoDeEscrita =
 
 | Cenário | Tratamento | O que o consultor vê |
 | ------- | ---------- | -------------------- |
-| Consulta da listagem falha | `TelaDeErro` com ação de tentar de novo; filtros preservados na URL | Estado de erro, e a lista volta ao clicar em tentar de novo |
+| Consulta da listagem falha | `Alerta` com `role="alert"` mais botão que chama `refetch()`; filtros preservados na URL | Estado de erro, e a lista volta ao clicar em tentar de novo, sem recarregar a página |
 | `id` inexistente ou de outro dono | A RLS devolve zero linhas; a tela trata como não encontrado | "Cliente não encontrado", com retorno à listagem, sem revelar se existe |
 | 401 ou 403 em leitura | `aoFalharConsulta` já ligado ao `QueryCache` | Login com "Sua sessão expirou", rota preservada |
 | 401 ou 403 em **escrita** | `mutationCache.onError` novo (D3) | Mesmo caminho da leitura, em vez de mensagem genérica |
@@ -357,7 +357,7 @@ export type ResultadoDeEscrita =
 | CLNT-10 | `filtros.ts` nas duas direções, com `useSearchParams` |
 | CLNT-11 | `sort` e `order` restritos em `lerFiltros`, aplicados por `.order()` |
 | CLNT-12 | `TabelaDeClientes` e `CartoesDeClientes` alternadas por classe |
-| CLNT-13 | `Esqueleto`, estado inicial, sem resultado e `TelaDeErro` |
+| CLNT-13 | `Esqueleto`, estado inicial, sem resultado e erro inline com `refetch` |
 | CLNT-14 | `FichaDoCliente` + `buscarCliente` que propaga erro |
 | CLNT-15 | `FormularioDeCliente` pré-preenchido + `atualizarCliente` nas oito colunas do grant |
 | CLNT-16 | `DialogoDeExclusao` sobre `Dialogo`, com `Botao destrutiva` |
