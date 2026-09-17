@@ -556,16 +556,17 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Bloqueia a navegação interna quando há alterações pendentes, e não bloqueia quando não há
-- [ ] Confirmar descarta e prossegue para o destino que estava bloqueado
-- [ ] Cancelar mantém o consultor onde está, com o formulário intacto
-- [ ] Salvar com sucesso **não** dispara o bloqueio — o teste cobre essa ordem, que é onde o `useBlocker` costuma errar
-- [ ] Um comentário registra o limite medido na fase Design: não intercepta recarregar nem fechar a aba
-- [ ] Contagem de testes: 8 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Bloqueia a navegação interna quando há alterações pendentes, e não bloqueia quando não há
+- [x] Confirmar descarta e prossegue para o destino que estava bloqueado
+- [x] Cancelar mantém o consultor onde está, com o formulário intacto
+- [x] Salvar com sucesso **não** dispara o bloqueio — o teste cobre essa ordem, que é onde o `useBlocker` costuma errar
+- [x] Um comentário registra o limite medido na fase Design: não intercepta recarregar nem fechar a aba
+- [x] Contagem de testes: 8 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): confirma saída com alterações não salvas`
 
 ---
