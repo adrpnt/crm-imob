@@ -8,16 +8,16 @@ export function TelaDeErro() {
   return (
     <div
       role="alert"
-      className="mx-auto max-w-md rounded-surface border border-border bg-surface p-6 text-center"
+      className="mx-auto max-w-md rounded-surface border border-graphite-700 bg-graphite-800 p-6 text-center"
     >
-      <h1 className="text-xl font-semibold">Algo deu errado</h1>
-      <p className="mt-2 text-ink-muted">
+      <h1 className="text-xl">Algo deu errado</h1>
+      <p className="mt-2 text-silver-600">
         A falha foi registrada. Recarregue a página para continuar.
       </p>
       <button
         type="button"
         onClick={() => globalThis.location.reload()}
-        className="mt-4 rounded-control bg-primary px-4 py-2 font-medium text-primary-ink"
+        className="mt-4 rounded-control bg-rocket-500 px-4 py-2 font-medium text-graphite-950"
       >
         Recarregar
       </button>

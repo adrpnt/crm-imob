@@ -12,8 +12,10 @@ type Props = Omit<ComponentPropsWithRef<'button'>, 'disabled'> & {
 }
 
 const ESTILOS: Record<VarianteDeBotao, string> = {
-  primaria: 'bg-primary text-primary-ink',
-  secundaria: 'border border-border bg-surface text-ink',
+  // O texto é grafite, não branco: cloud-50 sobre rocket-500 mede 2.66:1 e
+  // reprovaria o contraste exigido pela §11 do PLAN. Grafite dá 6.86:1.
+  primaria: 'bg-rocket-500 text-graphite-950 hover:bg-rocket-600',
+  secundaria: 'border border-silver-400 bg-graphite-700 text-cloud-50 hover:bg-graphite-600',
 }
 
 /**

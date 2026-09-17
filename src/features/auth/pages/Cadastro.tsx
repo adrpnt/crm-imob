@@ -55,8 +55,8 @@ export function Cadastro() {
   }
 
   return (
-    <section className="rounded-surface border border-border bg-surface p-6">
-      <h1 className="text-xl font-semibold">Criar conta</h1>
+    <section className="rounded-surface border border-graphite-700 bg-graphite-800 p-6">
+      <h1 className="text-xl">Criar conta</h1>
 
       {erroDoEnvio ? (
         <div className="mt-4">
@@ -102,9 +102,9 @@ export function Cadastro() {
         </Botao>
       </form>
 
-      <p className="mt-4 text-sm text-ink-muted">
+      <p className="mt-4 text-sm text-silver-600">
         Já tem conta?{' '}
-        <Link to="/login" className="text-primary">
+        <Link to="/login" className="text-rocket-500">
           Entrar
         </Link>
       </p>

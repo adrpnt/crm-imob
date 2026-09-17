@@ -40,8 +40,8 @@ export function EsqueciSenha() {
   }
 
   return (
-    <section className="rounded-surface border border-border bg-surface p-6">
-      <h1 className="text-xl font-semibold">Recuperar senha</h1>
+    <section className="rounded-surface border border-graphite-700 bg-graphite-800 p-6">
+      <h1 className="text-xl">Recuperar senha</h1>
 
       {pedidoEnviado ? (
         <>
@@ -57,15 +57,15 @@ export function EsqueciSenha() {
               Verifique também a caixa de spam.
             </Alerta>
           </div>
-          <p className="mt-4 text-sm text-ink-muted">
-            <Link to="/login" className="text-primary">
+          <p className="mt-4 text-sm text-silver-600">
+            <Link to="/login" className="text-rocket-500">
               Voltar para entrar
             </Link>
           </p>
         </>
       ) : (
         <>
-          <p className="mt-2 text-sm text-ink-muted">
+          <p className="mt-2 text-sm text-silver-600">
             Informe seu e-mail e enviaremos um link para criar uma nova senha.
           </p>
 
@@ -89,8 +89,8 @@ export function EsqueciSenha() {
             </Botao>
           </form>
 
-          <p className="mt-4 text-sm text-ink-muted">
-            <Link to="/login" className="text-primary">
+          <p className="mt-4 text-sm text-silver-600">
+            <Link to="/login" className="text-rocket-500">
               Voltar para entrar
             </Link>
           </p>

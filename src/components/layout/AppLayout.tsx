@@ -11,8 +11,8 @@ import { Outlet } from 'react-router'
  */
 export function AppLayout({ acoesDoUsuario }: { acoesDoUsuario?: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-surface text-ink">
-      <header className="border-b border-border bg-surface">
+    <div className="flex min-h-dvh flex-col bg-graphite-900 text-cloud-50">
+      <header className="border-b border-graphite-700 bg-graphite-800">
         <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-3">
           <span className="text-base font-semibold">CRM Imobiliário</span>
           <div data-testid="acoes-do-usuario" className="flex items-center gap-2">

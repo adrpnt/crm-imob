@@ -24,7 +24,7 @@ export function MenuDoUsuario() {
   return (
     <div className="flex items-center gap-3">
       {perfil ? (
-        <Link to="/profile" className="text-sm font-medium text-ink">
+        <Link to="/profile" className="text-sm font-medium text-cloud-50">
           {perfil.full_name}
         </Link>
       ) : null}

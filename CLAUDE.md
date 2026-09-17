@@ -315,37 +315,83 @@ andamento e já registrou duas decisões que valem para todas as features:
 
 ## Design system
 
-Defined entirely as Tailwind v4 `@theme` tokens in `src/index.css` — there is **no
-`tailwind.config.js`**, this is CSS-first Tailwind v4. Tokens become utilities automatically
-(`--color-rocket-500` → `bg-rocket-500`, `text-rocket-500`, `border-rocket-500`, …), so a
-utility referencing a shade that isn't declared below silently produces nothing.
+Grafite, laranja Rocket e prata metálico, declarados como tokens `@theme` em
+`src/styles/globals.css` — **não** existe `tailwind.config.js` (AD-010). Cada
+token vira utilitária automaticamente (`--color-rocket-500` → `bg-rocket-500`,
+`text-rocket-500`, `border-rocket-500`, …), e o corolário é a armadilha: uma
+utilitária que referencia um tom **não declarado** não produz nada, em silêncio,
+sem erro de build.
 
-### Typography
+### Tipografia
 
-| Token            | Family                                 | Use                       |
+| Token            | Família                                | Uso                       |
 | ---------------- | -------------------------------------- | ------------------------- |
-| `--font-display` | `"Raleway", "Segoe UI", sans-serif`    | headings (`font-display`) |
-| `--font-body`    | `"Montserrat", "Segoe UI", sans-serif` | body text, set on `body`  |
+| `--font-display` | `"Raleway", "Segoe UI", sans-serif`    | títulos (`font-display`)  |
+| `--font-body`    | `"Montserrat", "Segoe UI", sans-serif` | corpo, aplicado no `body` |
 
-Loaded from Google Fonts in `index.html` (with `preconnect` + `display=swap`): Montserrat
-400/500/600/700 + italic 400, Raleway 700/800/900. `h1`–`h4` get `font-display`, `font-weight:
-800` and `letter-spacing: -0.01em` from the base layer, so headings usually need no font classes.
+Carregadas do Google Fonts no `index.html`, com `preconnect` e `display=swap`:
+Montserrat 400/500/600/700 mais itálico 400, Raleway 700/800/900. A camada base
+dá a `h1`–`h4` a família de display, `font-weight: 800` e
+`letter-spacing: -0.01em` — **títulos não declaram classe de fonte**, apenas
+tamanho. Uma classe `font-semibold` na tela venceria a camada base e desfaria o
+peso pretendido.
 
-### Colors
+### Cores da marca
 
-| Token                  | Hex       | Role                                                                   |
-| ---------------------- | --------- | ---------------------------------------------------------------------- |
-| `--color-graphite-950` | `#0a0b0c` | deepest background, section contrast                                   |
-| `--color-graphite-900` | `#111315` | **official Grafite** — page background (`body`, `App`)                 |
-| `--color-graphite-800` | `#1a1d20` | cards, raised surfaces                                                 |
-| `--color-graphite-700` | `#262a2e` | default borders                                                        |
-| `--color-graphite-600` | `#383d42` | lighter borders                                                        |
-| `--color-graphite-400` | `#6b7176` | muted UI                                                               |
-| `--color-rocket-500`   | `#ff6a00` | **official Laranja Rocket** — CTAs, accents, focus ring, `::selection` |
-| `--color-rocket-600`   | `#e05e00` | hover/pressed orange                                                   |
-| `--color-rocket-700`   | `#b84c00` | darkest orange                                                         |
-| `--color-rocket-300`   | `#ff9548` | light orange, gradient start                                           |
-| `--color-silver-400`   | `#c0c7d1` | **official Prata Metálico**                                            |
-| `--color-silver-300`   | `#dde1e6` | primary body text on dark                                              |
-| `--color-silver-600`   | `#8b939c` | secondary/muted text                                                   |
-| `--color-cloud-50`     | `#f7f6f4` | default text color on `body`, headings                                 |
+| Token                  | Hex       | Papel                                                          |
+| ---------------------- | --------- | -------------------------------------------------------------- |
+| `--color-graphite-950` | `#0a0b0c` | fundo mais profundo: página pública, preenchimento de campo    |
+| `--color-graphite-900` | `#111315` | **Grafite oficial** — fundo de página (`body`, `AppLayout`)    |
+| `--color-graphite-800` | `#1a1d20` | cartões, cabeçalho, superfícies elevadas                       |
+| `--color-graphite-700` | `#262a2e` | divisórias decorativas, preenchimento do botão secundário      |
+| `--color-graphite-600` | `#383d42` | hover do botão secundário                                      |
+| `--color-graphite-400` | `#6b7176` | borda de campo de formulário                                   |
+| `--color-rocket-500`   | `#ff6a00` | **Laranja Rocket oficial** — ação, link, anel de foco, seleção |
+| `--color-rocket-600`   | `#e05e00` | hover e pressionado                                            |
+| `--color-rocket-700`   | `#b84c00` | laranja mais escuro — sem consumidor ainda                     |
+| `--color-rocket-300`   | `#ff9548` | laranja claro, início de gradiente — sem consumidor ainda      |
+| `--color-silver-400`   | `#c0c7d1` | **Prata Metálico oficial** — borda do botão secundário         |
+| `--color-silver-300`   | `#dde1e6` | texto primário alternativo — sem consumidor ainda              |
+| `--color-silver-600`   | `#8b939c` | texto secundário e de apoio                                    |
+| `--color-cloud-50`     | `#f7f6f4` | cor de texto padrão do `body` e dos títulos                    |
+
+### Cores de feedback
+
+A paleta de marca é de grafite, laranja e prata, e não tem como expressar erro,
+sucesso e aviso. Estes cinco tokens existem fora dela porque o `Alerta` tem
+quatro tons e a exclusão de `clients` precisa de ação destrutiva distinta
+(CLNT-16 AC2):
+
+| Token                 | Hex       | Papel                            |
+| --------------------- | --------- | -------------------------------- |
+| `--color-danger`      | `#ff8a8a` | texto e borda de erro            |
+| `--color-danger-fill` | `#c81e1e` | preenchimento da ação destrutiva |
+| `--color-danger-ink`  | `#f7f6f4` | texto sobre `danger-fill`        |
+| `--color-success`     | `#4ade80` | confirmação                      |
+| `--color-warning`     | `#fcd34d` | atenção                          |
+
+Todos ficam a 25 graus ou menos do laranja da marca no matiz — inevitável, já
+que a marca **é** laranja. Por isso a distinção entre tons nunca depende de cor:
+o `Alerta` prefixa cada um com marcador textual ("Erro:", "Atenção:", "Pronto:",
+"Aviso:").
+
+### Duas regras de contraste que vieram de medição
+
+Contam como regra porque contrariam a intuição e porque o PLAN §11 e o CLNT-18
+AC6 exigem 4.5:1. Os 26 pares em uso foram medidos; o pior caso é 3.43:1, numa
+borda de campo, onde o mínimo é 3:1.
+
+1. **Texto sobre preenchimento laranja é grafite, nunca claro.** `cloud-50`
+   sobre `rocket-500` dá **2.66:1** e reprova; `graphite-950` dá 6.86:1. Vale
+   para todo botão, badge ou etiqueta preenchida com o laranja.
+2. **`graphite-700` não serve como borda de controle.** Sobre `graphite-900` dá
+   **1.29:1**, e a WCAG 1.4.11 exige 3:1 para componente não textual — borda de
+   campo identifica o controle. Para isso use `graphite-400` (3.99:1 contra o
+   preenchimento do campo) ou `silver-400`. O `graphite-700` fica para divisória
+   decorativa.
+
+O guarda disso é `e2e/smoke.spec.ts`: um teste exige que os 24 tokens do
+`@theme` cheguem ao navegador como variável CSS, outro assere que o botão
+primário computa `rgb(255, 106, 0)` com texto `rgb(10, 11, 12)` e que o título
+computa peso 800 em Raleway. Apagar metade do `@theme`, trocar o texto do botão
+por branco ou remover a camada base derruba a suíte.

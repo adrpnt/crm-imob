@@ -45,8 +45,8 @@ export function RedefinirSenha() {
     const motivo = traduzirErroDoFragmento(lerErroDoFragmento(local.hash))
 
     return (
-      <section className="rounded-surface border border-border bg-surface p-6">
-        <h1 className="text-xl font-semibold">Redefinir senha</h1>
+      <section className="rounded-surface border border-graphite-700 bg-graphite-800 p-6">
+        <h1 className="text-xl">Redefinir senha</h1>
 
         <div className="mt-4">
           <Alerta tom="aviso">
@@ -54,8 +54,8 @@ export function RedefinirSenha() {
           </Alerta>
         </div>
 
-        <p className="mt-4 text-sm text-ink-muted">
-          <Link to="/forgot-password" className="text-primary">
+        <p className="mt-4 text-sm text-silver-600">
+          <Link to="/forgot-password" className="text-rocket-500">
             Solicitar um novo link
           </Link>
         </p>
@@ -64,8 +64,8 @@ export function RedefinirSenha() {
   }
 
   return (
-    <section className="rounded-surface border border-border bg-surface p-6">
-      <h1 className="text-xl font-semibold">Criar nova senha</h1>
+    <section className="rounded-surface border border-graphite-700 bg-graphite-800 p-6">
+      <h1 className="text-xl">Criar nova senha</h1>
 
       {erroDoEnvio ? (
         <div className="mt-4">

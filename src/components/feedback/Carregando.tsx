@@ -8,7 +8,7 @@
 export function Carregando({ rotulo = 'Carregando' }: { rotulo?: string }) {
   return (
     <div role="status" aria-live="polite" className="flex min-h-40 items-center justify-center">
-      <span className="text-ink-muted">{rotulo}…</span>
+      <span className="text-silver-600">{rotulo}…</span>
     </div>
   )
 }

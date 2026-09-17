@@ -8,7 +8,7 @@ import { Outlet } from 'react-router'
  */
 export function PublicLayout() {
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-surface-muted px-4 py-10 text-ink">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-graphite-950 px-4 py-10 text-cloud-50">
       <div className="w-full max-w-md">
         <Outlet />
       </div>

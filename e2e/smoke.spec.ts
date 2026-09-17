@@ -77,14 +77,20 @@ test('o layout também cabe em uma janela larga', async ({ page }) => {
 test('os tokens do Tailwind chegam como estilo computado', async ({ page }) => {
   await page.goto('/login')
 
-  // O botão primário consome --color-primary e --color-primary-ink; sem o
+  // O botão primário consome --color-rocket-500 e --color-graphite-950; sem o
   // pipeline do Tailwind a classe existe no HTML e o estilo não.
+  //
+  // O texto é grafite, e não branco, por medição: cloud-50 sobre rocket-500 dá
+  // 2.66:1 e reprovaria o PLAN §11. Trocar por branco aqui derruba este teste.
   const entrar = page.getByRole('button', { name: 'Entrar' })
-  await expect(entrar).toHaveCSS('background-color', 'rgb(29, 78, 216)')
-  await expect(entrar).toHaveCSS('color', 'rgb(255, 255, 255)')
+  await expect(entrar).toHaveCSS('background-color', 'rgb(255, 106, 0)')
+  await expect(entrar).toHaveCSS('color', 'rgb(10, 11, 12)')
 
+  // Peso e família vêm da camada base, não de classe na tela: os títulos não
+  // declaram font-*. Se a camada base sumir, o peso cai para 400 e isto falha.
   const titulo = page.getByRole('heading', { name: 'Entrar no CRM' })
-  await expect(titulo).toHaveCSS('font-weight', '600')
+  await expect(titulo).toHaveCSS('font-weight', '800')
+  await expect(titulo).toHaveCSS('font-family', /Raleway/)
 })
 
 /**
@@ -101,14 +107,24 @@ test('os tokens do tema estão definidos como variáveis CSS', async ({ page }) 
   const tokens = await page.evaluate(() => {
     const estilo = getComputedStyle(document.documentElement)
     const nomes = [
-      '--color-surface',
-      '--color-surface-muted',
-      '--color-ink',
-      '--color-ink-muted',
-      '--color-border',
-      '--color-primary',
-      '--color-primary-ink',
+      '--font-display',
+      '--font-body',
+      '--color-graphite-950',
+      '--color-graphite-900',
+      '--color-graphite-800',
+      '--color-graphite-700',
+      '--color-graphite-600',
+      '--color-graphite-400',
+      '--color-rocket-300',
+      '--color-rocket-500',
+      '--color-rocket-600',
+      '--color-rocket-700',
+      '--color-silver-300',
+      '--color-silver-400',
+      '--color-silver-600',
+      '--color-cloud-50',
       '--color-danger',
+      '--color-danger-fill',
       '--color-danger-ink',
       '--color-success',
       '--color-warning',
@@ -124,5 +140,9 @@ test('os tokens do tema estão definidos como variáveis CSS', async ({ page }) 
     .map(([nome]) => nome)
 
   expect(vazios, `tokens ausentes no @theme: ${vazios.join(', ')}`).toEqual([])
-  expect(tokens['--color-danger']).not.toBe(tokens['--color-primary'])
+
+  // A ação destrutiva não pode colidir com a ação primária (PLAN §11), e o
+  // foco é o laranja da marca por decisão do design system.
+  expect(tokens['--color-danger-fill']).not.toBe(tokens['--color-rocket-500'])
+  expect(tokens['--color-focus']).toBe(tokens['--color-rocket-500'])
 })

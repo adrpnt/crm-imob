@@ -26,7 +26,7 @@ const ESTILO: Record<TomDeAlerta, string> = {
   erro: 'border-danger text-danger',
   aviso: 'border-warning text-warning',
   sucesso: 'border-success text-success',
-  informacao: 'border-border text-ink',
+  informacao: 'border-graphite-400 text-cloud-50',
 }
 
 /**

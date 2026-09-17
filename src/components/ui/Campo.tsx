@@ -31,7 +31,7 @@ export function Campo({ rotulo, erro, dica, className, ...props }: Props) {
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={idDoControle} className="text-sm font-medium text-ink">
+      <label htmlFor={idDoControle} className="text-sm font-medium text-cloud-50">
         {rotulo}
       </label>
 
@@ -40,8 +40,8 @@ export function Campo({ rotulo, erro, dica, className, ...props }: Props) {
         aria-invalid={erro ? true : undefined}
         aria-describedby={descricoes || undefined}
         className={[
-          'rounded-control border bg-surface px-3 py-2 text-ink',
-          erro ? 'border-danger' : 'border-border',
+          'rounded-control border bg-graphite-950 px-3 py-2 text-cloud-50',
+          erro ? 'border-danger' : 'border-graphite-400',
           className,
         ]
           .filter(Boolean)
@@ -50,7 +50,7 @@ export function Campo({ rotulo, erro, dica, className, ...props }: Props) {
       />
 
       {dica ? (
-        <p id={idDaDica} className="text-sm text-ink-muted">
+        <p id={idDaDica} className="text-sm text-silver-600">
           {dica}
         </p>
       ) : null}

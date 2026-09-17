@@ -66,7 +66,7 @@ export function Perfil() {
 
   return (
     <section className="mx-auto max-w-md">
-      <h1 className="text-xl font-semibold">Meu perfil</h1>
+      <h1 className="text-xl">Meu perfil</h1>
 
       {salvo ? (
         <div className="mt-4">
@@ -100,7 +100,7 @@ export function Perfil() {
           readOnly
           value={consulta.data.email}
           dica="O e-mail não pode ser alterado por aqui."
-          className="bg-surface-muted"
+          className="bg-graphite-800"
         />
 
         <Campo

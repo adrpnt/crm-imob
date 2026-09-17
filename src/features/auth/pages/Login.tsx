@@ -39,8 +39,8 @@ export function Login() {
   }
 
   return (
-    <section className="rounded-surface border border-border bg-surface p-6">
-      <h1 className="text-xl font-semibold">Entrar no CRM</h1>
+    <section className="rounded-surface border border-graphite-700 bg-graphite-800 p-6">
+      <h1 className="text-xl">Entrar no CRM</h1>
 
       {sessaoExpirou ? (
         <div className="mt-4">
@@ -76,14 +76,14 @@ export function Login() {
         </Botao>
       </form>
 
-      <p className="mt-4 text-sm text-ink-muted">
-        <Link to="/forgot-password" className="text-primary">
+      <p className="mt-4 text-sm text-silver-600">
+        <Link to="/forgot-password" className="text-rocket-500">
           Esqueci minha senha
         </Link>
       </p>
-      <p className="mt-1 text-sm text-ink-muted">
+      <p className="mt-1 text-sm text-silver-600">
         Não tem conta?{' '}
-        <Link to="/signup" className="text-primary">
+        <Link to="/signup" className="text-rocket-500">
           Criar conta
         </Link>
       </p>
