@@ -303,18 +303,19 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] `mutationCache: new MutationCache({ onError: aoFalharConsulta })` no cliente construído
-- [ ] Teste assere `queryClient.getMutationCache().config.onError === aoFalharConsulta`, no cliente construído e não na função isolada
-- [ ] Teste prova que 401 em mutação encerra a sessão, e que `42501` **não** encerra
-- [ ] O teste equivalente do `queryCache` continua passando, sem deleção
-- [ ] Contagem de testes: os testes existentes de `query-client.test.ts` mais 4 novos passam
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] `mutationCache: new MutationCache({ onError: aoFalharConsulta })` no cliente construído
+- [x] Teste assere `queryClient.getMutationCache().config.onError === aoFalharConsulta`, no cliente construído e não na função isolada
+- [x] Teste prova que 401 em mutação encerra a sessão, e que `42501` **não** encerra
+- [x] O teste equivalente do `queryCache` continua passando, sem deleção
+- [x] Contagem de testes: os testes existentes de `query-client.test.ts` mais 4 novos passam
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
 
 > **Dívida D3 de `auth`.** O relatório da rodada 2 registrou que a detecção estava ligada só às leituras e que a única escrita de `auth` engolia o 401 numa mensagem genérica. Esta tarefa fecha isso para as três mutações de `clients` e, de passagem, para a edição de perfil.
 
+**Status**: ✅ Done
 **Commit**: `fix(lib): trata falha de autorização nas mutações`
 
 ---

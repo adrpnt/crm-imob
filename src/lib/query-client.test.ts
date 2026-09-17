@@ -129,6 +129,67 @@ describe('aoFalharConsulta', () => {
   })
 })
 
+/**
+ * Executa uma mutação de verdade pelo cache do cliente construído.
+ *
+ * Provocar a mutação em vez de chamar `aoFalharConsulta` na mão é o que prova
+ * a ligação: uma função correta e desligada do `MutationCache` passaria em
+ * qualquer teste que a invocasse diretamente — foi exatamente a dívida D3.
+ */
+async function mutacaoQueFalha(
+  erro: unknown,
+  opcoes: { onError?: (erro: unknown) => void } = {},
+): Promise<void> {
+  const mutacao = queryClient
+    .getMutationCache()
+    .build<unknown, unknown, void, unknown>(queryClient, {
+      mutationFn: () => Promise.reject(erro),
+      ...opcoes,
+    })
+  await expect(mutacao.execute(undefined)).rejects.toBe(erro)
+}
+
+describe('falha de autorização em mutação (AD-016)', () => {
+  beforeEach(() => {
+    consumirSessaoExpirada()
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+    consumirSessaoExpirada()
+    queryClient.getMutationCache().clear()
+  })
+
+  it('está ligado ao cache de mutações do cliente', () => {
+    expect(queryClient.getMutationCache().config.onError).toBe(aoFalharConsulta)
+  })
+
+  it('um 401 em mutação encerra a sessão e sinaliza a expiração', async () => {
+    await mutacaoQueFalha({ status: 401 })
+    expect(supabase.auth.signOut).toHaveBeenCalledOnce()
+    expect(consumirSessaoExpirada()).toBe(true)
+  })
+
+  // O 42501 é "esta linha não é sua" com sessão válida. Derrubar o consultor
+  // para o login por isso é o erro que `ehSessaoExpirada` existe para evitar.
+  it('um 42501 em mutação NÃO encerra a sessão', async () => {
+    await mutacaoQueFalha({ code: '42501' })
+    expect(supabase.auth.signOut).not.toHaveBeenCalled()
+    expect(consumirSessaoExpirada()).toBe(false)
+  })
+
+  // A garantia que o AD-016 compra: o callback do cache não pode ser
+  // sobrescrito por uma mutação individual, então uma mutação nova não nasce
+  // esquecida por tratar o próprio erro.
+  it('dispara mesmo quando a mutação trata o próprio erro', async () => {
+    const proprio = vi.fn()
+    await mutacaoQueFalha({ status: 401 }, { onError: proprio })
+    expect(proprio).toHaveBeenCalledOnce()
+    expect(supabase.auth.signOut).toHaveBeenCalledOnce()
+    expect(consumirSessaoExpirada()).toBe(true)
+  })
+})
+
 describe('consumirSessaoExpirada', () => {
   it('devolve falso quando nada marcou', () => {
     consumirSessaoExpirada()

@@ -1,4 +1,4 @@
-import { QueryCache, QueryClient } from '@tanstack/react-query'
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
 
 import { marcarSessaoExpirada } from './sessao-expirada'
 import { supabase } from './supabase'
@@ -40,7 +40,11 @@ export function ehSessaoExpirada(erro: unknown): boolean {
 }
 
 /**
- * Reage à falha de uma consulta.
+ * Reage à falha de uma consulta ou de uma mutação.
+ *
+ * Ligada aos dois caches do cliente (AD-016): a detecção presa apenas às
+ * leituras foi a dívida D3 da verificação de `auth`, onde a única escrita da
+ * feature engolia o 401 numa mensagem genérica.
  *
  * Exportada para ser testável diretamente, sem precisar provocar uma consulta
  * real só para observar o efeito.
@@ -67,6 +71,11 @@ export function deveTentarDeNovo(tentativasFalhas: number, erro: unknown): boole
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: aoFalharConsulta }),
+  // Simétrico ao cache de consultas (AD-016). Os callbacks do `MutationCache`
+  // disparam para toda mutação e não podem ser sobrescritos por uma
+  // individual, o que impede que uma mutação nova nasça esquecida — a forma de
+  // falha silenciosa que o AD-014 evita no banco (CLNT-05).
+  mutationCache: new MutationCache({ onError: aoFalharConsulta }),
   defaultOptions: {
     queries: {
       retry: deveTentarDeNovo,
