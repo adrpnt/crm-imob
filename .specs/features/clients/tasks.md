@@ -643,15 +643,16 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Digitar não dispara consulta por tecla: a URL só muda após 300ms sem nova digitação
-- [ ] O teste usa temporizador falso e prova que cinco teclas em sequência produzem **uma** escrita na URL
-- [ ] Ao aplicar a busca, a página volta para a primeira (CLNT-13 AC8)
-- [ ] O campo reflete o termo que veio da URL ao abrir a tela
-- [ ] Contagem de testes: 9 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Digitar não dispara consulta por tecla: a URL só muda após 300ms sem nova digitação
+- [x] O teste usa temporizador falso e prova que cinco teclas em sequência produzem **uma** escrita na URL
+- [x] Ao aplicar a busca, a página volta para a primeira (CLNT-13 AC8)
+- [x] O campo reflete o termo que veio da URL ao abrir a tela
+- [x] Contagem de testes: 9 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona a barra de busca com atraso`
 
 ---
