@@ -333,15 +333,16 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] A chave de `useClients` inclui todos os filtros, de modo que mudar qualquer um refaz a consulta
-- [ ] `useClients` mantém a página anterior visível durante a troca, em vez de piscar esqueleto a cada paginada
-- [ ] `useRegioes` tem `staleTime` longo e chave própria, por ser lista que muda pouco
-- [ ] Cada hook expõe os estados de carregamento e de erro que as telas consomem
-- [ ] Contagem de testes: 10 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] A chave de `useClients` inclui todos os filtros, de modo que mudar qualquer um refaz a consulta
+- [x] `useClients` mantém a página anterior visível durante a troca, em vez de piscar esqueleto a cada paginada
+- [x] `useRegioes` tem `staleTime` longo e chave própria, por ser lista que muda pouco
+- [x] Cada hook expõe os estados de carregamento e de erro que as telas consomem
+- [x] Contagem de testes: 10 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona os hooks de leitura`
 
 ---
