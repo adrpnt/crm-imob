@@ -468,17 +468,18 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Ao abrir, o foco vai para dentro do diálogo
-- [ ] A tabulação fica confinada: do último elemento volta ao primeiro, e do primeiro para trás vai ao último
-- [ ] Escape fecha **sem executar a ação**
-- [ ] Ao fechar, o foco volta ao elemento que o abriu — asserido, e não suposto
-- [ ] A opção de cancelar é a focada por padrão (CLNT-16 AC2)
-- [ ] Tem `role="dialog"`, `aria-modal` e rótulo acessível ligado ao título
-- [ ] Contagem de testes: 12 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Ao abrir, o foco vai para dentro do diálogo
+- [x] A tabulação fica confinada: do último elemento volta ao primeiro, e do primeiro para trás vai ao último
+- [x] Escape fecha **sem executar a ação**
+- [x] Ao fechar, o foco volta ao elemento que o abriu — asserido, e não suposto
+- [x] A opção de cancelar é a focada por padrão (CLNT-16 AC2)
+- [x] Tem `role="dialog"`, `aria-modal` e rótulo acessível ligado ao título
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(ui): adiciona diálogo modal acessível`
 
 ---
