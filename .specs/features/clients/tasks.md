@@ -611,16 +611,17 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Formulário chega pré-preenchido com os valores atuais
-- [ ] Enquanto carrega, exibe esqueleto em vez de área em branco
-- [ ] Salvar altera, confirma e navega de volta para a ficha
-- [ ] Editar um cliente excluído em outra aba exibe o estado de não encontrado ao salvar, em vez de falhar em silêncio (edge case do spec)
-- [ ] Sair com alterações pendentes pede confirmação
-- [ ] Contagem de testes: 12 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Formulário chega pré-preenchido com os valores atuais
+- [x] Enquanto carrega, exibe esqueleto em vez de área em branco
+- [x] Salvar altera, confirma e navega de volta para a ficha
+- [x] Editar um cliente excluído em outra aba exibe o estado de não encontrado ao salvar, em vez de falhar em silêncio (edge case do spec)
+- [x] Sair com alterações pendentes pede confirmação
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona a tela de edição`
 
 ---
