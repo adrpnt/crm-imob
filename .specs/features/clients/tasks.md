@@ -207,16 +207,17 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Renda é exibida como BRL com separador de milhar e duas casas, conforme a premissa do spec
-- [ ] Renda nula é exibida como ausência, e não como `R$ 0,00` — os dois significam coisas diferentes
-- [ ] Entrada de renda aceita dígitos com e sem máscara e chega ao schema como número
-- [ ] Telefone de 10 e de 11 dígitos recebe a máscara correspondente; comprimento inesperado é exibido como está, sem quebrar
-- [ ] Datas de criação e atualização são exibidas em formato brasileiro
-- [ ] Contagem de testes: 12 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Renda é exibida como BRL com separador de milhar e duas casas, conforme a premissa do spec
+- [x] Renda nula é exibida como ausência, e não como `R$ 0,00` — os dois significam coisas diferentes
+- [x] Entrada de renda aceita dígitos com e sem máscara e chega ao schema como número
+- [x] Telefone de 10 e de 11 dígitos recebe a máscara correspondente; comprimento inesperado é exibido como está, sem quebrar
+- [x] Datas de criação e atualização são exibidas em formato brasileiro
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 
 > **Módulo não nomeado no `design.md`.** A necessidade está no spec — a premissa de moeda e o CLNT-14 AC1 — mas o desenho listou a formatação dentro das telas sem lhe dar arquivo. Extraído aqui porque três telas o consomem: listagem, ficha e formulário.
 
