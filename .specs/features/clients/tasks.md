@@ -360,15 +360,16 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] As três mutações invalidam a chave de listagem, asserido pela chave exata
-- [ ] Atualizar e excluir invalidam também a chave do cliente individual
-- [ ] Nenhuma mutação escreve no cache à mão: o total e a paginação se recalculam pela consulta refeita (CLNT-17 AC4)
-- [ ] Nenhuma mutação trata 401 por conta própria — isso é do `MutationCache` de T7 (AD-016)
-- [ ] Contagem de testes: 12 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] As três mutações invalidam a chave de listagem, asserido pela chave exata
+- [x] Atualizar e excluir invalidam também a chave do cliente individual
+- [x] Nenhuma mutação escreve no cache à mão: o total e a paginação se recalculam pela consulta refeita (CLNT-17 AC4)
+- [x] Nenhuma mutação trata 401 por conta própria — isso é do `MutationCache` de T7 (AD-016)
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona os hooks de escrita`
 
 ---
