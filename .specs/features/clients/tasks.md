@@ -176,19 +176,20 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] `name` exige de 2 a 120 caracteres, como `clients_name_length`
-- [ ] `email` vazio é aceito; preenchido com formato inválido é recusado, como `clients_email_format`
-- [ ] `phone` aceita de 8 a 20 dígitos depois de retirada a máscara, como `clients_phone_digits`
-- [ ] `income` recusa negativo e acima de 99.999.999,99, como `clients_income_range`
-- [ ] `region` até 80 caracteres, como `clients_region_length`
-- [ ] `status`, `source` e `income_type` aceitam só os valores dos respectivos checks; `status` tem `lead` por padrão
-- [ ] Renda vazia com tipo de renda preenchido é aceita (edge case do spec)
-- [ ] Cada limite tem um caso que passa e um que falha, com a mensagem em português asserida
-- [ ] Contagem de testes: 20 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] `name` exige de 2 a 120 caracteres, como `clients_name_length`
+- [x] `email` vazio é aceito; preenchido com formato inválido é recusado, como `clients_email_format`
+- [x] `phone` aceita de 8 a 20 dígitos depois de retirada a máscara, como `clients_phone_digits`
+- [x] `income` recusa negativo e acima de 99.999.999,99, como `clients_income_range`
+- [x] `region` até 80 caracteres, como `clients_region_length`
+- [x] `status`, `source` e `income_type` aceitam só os valores dos respectivos checks; `status` tem `lead` por padrão
+- [x] Renda vazia com tipo de renda preenchido é aceita (edge case do spec)
+- [x] Cada limite tem um caso que passa e um que falha, com a mensagem em português asserida
+- [x] Contagem de testes: 20 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona schema de validação do cliente`
 
 ---
