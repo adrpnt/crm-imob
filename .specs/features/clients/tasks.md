@@ -584,15 +584,16 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Cadastro com só o nome preenchido cria o cliente
-- [ ] Após criar, exibe confirmação e navega para a ficha do cliente criado
-- [ ] Recusa do serviço mantém os dados digitados na tela
-- [ ] Sair com alterações pendentes pede confirmação
-- [ ] Contagem de testes: 10 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Cadastro com só o nome preenchido cria o cliente
+- [x] Após criar, exibe confirmação e navega para a ficha do cliente criado
+- [x] Recusa do serviço mantém os dados digitados na tela
+- [x] Sair com alterações pendentes pede confirmação
+- [x] Contagem de testes: 10 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona a tela de cadastro`
 
 ---
