@@ -525,19 +525,20 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Nove campos, com só `name` obrigatório e `status` pré-selecionado em lead
-- [ ] Validação vem do `schemaDeCliente` por `@hookform/resolvers`, sem regra duplicada na tela
-- [ ] Erro aparece no campo correspondente e **a requisição não é enviada**
-- [ ] Na falha de validação, o foco vai para o primeiro campo inválido (CLNT-18 AC5)
-- [ ] Durante o envio, o botão fica desabilitado e um segundo envio é impedido
-- [ ] Recusa do serviço exibe a causa em `Alerta` e **preserva tudo que foi digitado**
-- [ ] Pré-preenche a partir de valores existentes, para servir à edição
-- [ ] Expõe o estado de sujeira, que T16 consome
-- [ ] Contagem de testes: 20 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Nove campos, com só `name` obrigatório e `status` pré-selecionado em lead
+- [x] Validação vem do `schemaDeCliente` por `@hookform/resolvers`, sem regra duplicada na tela
+- [x] Erro aparece no campo correspondente e **a requisição não é enviada**
+- [x] Na falha de validação, o foco vai para o primeiro campo inválido (CLNT-18 AC5)
+- [x] Durante o envio, o botão fica desabilitado e um segundo envio é impedido
+- [x] Recusa do serviço exibe a causa em `Alerta` e **preserva tudo que foi digitado**
+- [x] Pré-preenche a partir de valores existentes, para servir à edição
+- [x] Expõe o estado de sujeira, que T16 consome
+- [x] Contagem de testes: 20 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona o formulário de cliente`
 
 ---
