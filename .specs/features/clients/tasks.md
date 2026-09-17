@@ -670,16 +670,17 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] As opções de região vêm do `useRegioes`, em ordem alfabética
-- [ ] Mudar qualquer filtro escreve na URL e volta para a primeira página
-- [ ] Os filtros chegam preenchidos a partir da URL ao abrir a tela
-- [ ] Existe ação de limpar os filtros, consumida pelo estado de busca sem resultado
-- [ ] Abaixo de 768px os filtros continuam acessíveis
-- [ ] Contagem de testes: 11 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] As opções de região vêm do `useRegioes`, em ordem alfabética
+- [x] Mudar qualquer filtro escreve na URL e volta para a primeira página
+- [x] Os filtros chegam preenchidos a partir da URL ao abrir a tela
+- [x] Existe ação de limpar os filtros, consumida pelo estado de busca sem resultado
+- [x] Abaixo de 768px os filtros continuam acessíveis
+- [x] Contagem de testes: 11 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona o painel de filtros`
 
 ---
