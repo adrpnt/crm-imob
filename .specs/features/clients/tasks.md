@@ -442,14 +442,15 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Oferece as sugestões recebidas e **aceita um valor novo**, pois o AD-009 não fecha a lista
-- [ ] Rótulo, dica e erro se comportam como em `Campo`
-- [ ] Lista vazia de sugestões não quebra o campo nem esconde o controle
-- [ ] Contagem de testes: 7 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Oferece as sugestões recebidas e **aceita um valor novo**, pois o AD-009 não fecha a lista
+- [x] Rótulo, dica e erro se comportam como em `Campo`
+- [x] Lista vazia de sugestões não quebra o campo nem esconde o controle
+- [x] Contagem de testes: 7 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(ui): adiciona campo com sugestões`
 
 ---
