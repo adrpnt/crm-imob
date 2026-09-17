@@ -726,14 +726,15 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Cada cartão leva ao cliente e mostra nome, contato, status e região
-- [ ] A alternância com a tabela é por classe utilitária, não por `matchMedia` — funciona no primeiro quadro, sem salto de layout
-- [ ] Teste prova que as duas árvores recebem a mesma lista, de modo que não exista dado só no desktop
-- [ ] Contagem de testes: 8 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Cada cartão leva ao cliente e mostra nome, contato, status e região
+- [x] A alternância com a tabela é por classe utilitária, não por `matchMedia` — funciona no primeiro quadro, sem salto de layout
+- [x] Teste prova que as duas árvores recebem a mesma lista, de modo que não exista dado só no desktop
+- [x] Contagem de testes: 8 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona os cartões de clientes`
 
 ---
