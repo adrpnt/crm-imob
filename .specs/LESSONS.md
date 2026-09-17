@@ -8,17 +8,21 @@
 
 Corroborated across multiple features. Safe to apply as guidance.
 
-_none_
+### L-001 - Quando política de RLS e grant por coluna cobrem o mesmo caso, um teste comportamental passa pelo motivo errado: verifique a camada de grant no catálogo (has_column_privilege, pg_policies), sempre com controle positivo.
+- signal: `surviving_mutant` · recurrence: 2 feature(s) · scope: `db/rls` · harmful: 0
+- features: foundation, auth
+- evidence: M6,M7 rodada 1 (db/rls) (+1 more)
+- last seen: 2026-09-17T14:09:19Z
+
+### L-012 - Encadear verificação e commit no mesmo comando elimina o ponto de decisão entre eles: rode o gate, leia a saída, e só então commite numa invocação separada.
+- signal: `gate_fail` · recurrence: 2 feature(s) · scope: `processo` · harmful: 0
+- features: auth, foundation
+- evidence: T28 foundation, T3 auth, T22 auth (processo) (+1 more)
+- last seen: 2026-09-17T14:09:25Z
 
 ## Candidates (under observation - do NOT load as guidance yet)
 
 Seen once or not yet corroborated. Tracked, not trusted.
-
-### L-001 - Quando política de RLS e grant por coluna cobrem o mesmo caso, um teste comportamental passa pelo motivo errado: verifique a camada de grant no catálogo (has_column_privilege, pg_policies), sempre com controle positivo.
-- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `db/rls` · harmful: 0
-- features: foundation
-- evidence: M6,M7 rodada 1 (db/rls)
-- last seen: 2026-09-16T13:42:19Z
 
 ### L-002 - Asserção de trigger por nome não detecta o evento errado: assere tgtype (19 = ROW|BEFORE|UPDATE, 5 = ROW|AFTER|INSERT) além do nome.
 - signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `db/triggers` · harmful: 0
@@ -79,12 +83,6 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - features: auth
 - evidence: M8 rodada 1 / L3 (processo)
 - last seen: 2026-09-16T18:54:42Z
-
-### L-012 - Encadear verificação e commit no mesmo comando elimina o ponto de decisão entre eles: rode o gate, leia a saída, e só então commite numa invocação separada.
-- signal: `gate_fail` · recurrence: 1 feature(s) · scope: `processo` · harmful: 0
-- features: auth
-- evidence: T28 foundation, T3 auth, T22 auth (processo)
-- last seen: 2026-09-16T19:21:27Z
 
 ## Quarantined (failed when applied - ignore)
 

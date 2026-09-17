@@ -11,17 +11,19 @@
       "text": "Quando política de RLS e grant por coluna cobrem o mesmo caso, um teste comportamental passa pelo motivo errado: verifique a camada de grant no catálogo (has_column_privilege, pg_policies), sempre com controle positivo.",
       "signal": "surviving_mutant",
       "scope": "db/rls",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "foundation"
+        "foundation",
+        "auth"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "M6,M7 rodada 1 (db/rls)"
+        "M6,M7 rodada 1 (db/rls)",
+        "M2 rodada 1 (profile-service grava email, coluna fora do grant; reincidencia declarada em a3cebbf) (servicos)"
       ],
       "created": "2026-09-16T13:42:19Z",
-      "last_seen": "2026-09-16T13:42:19Z"
+      "last_seen": "2026-09-17T14:09:19Z"
     },
     {
       "id": "L-002",
@@ -209,17 +211,19 @@
       "text": "Encadear verificação e commit no mesmo comando elimina o ponto de decisão entre eles: rode o gate, leia a saída, e só então commite numa invocação separada.",
       "signal": "gate_fail",
       "scope": "processo",
-      "status": "candidate",
+      "status": "confirmed",
       "features": [
-        "auth"
+        "auth",
+        "foundation"
       ],
-      "recurrence": 1,
+      "recurrence": 2,
       "harmful": 0,
       "evidence": [
-        "T28 foundation, T3 auth, T22 auth (processo)"
+        "T28 foundation, T3 auth, T22 auth (processo)",
+        "T28 foundation (993d092, 5ac895e): validador acusado e commit na mesma invocacao (processo)"
       ],
       "created": "2026-09-16T19:21:27Z",
-      "last_seen": "2026-09-16T19:21:27Z"
+      "last_seen": "2026-09-17T14:09:25Z"
     }
   ]
 }
