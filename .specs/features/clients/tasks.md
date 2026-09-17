@@ -238,20 +238,21 @@ T27 → T28
 - Skill: `supabase`
 
 **Done when**:
-- [ ] `listarClientes` faz **um** request com `count: 'exact'` e `.range()`, devolvendo clientes e total
-- [ ] A busca é **um** `ilike` sobre `search_text`, nunca um `.or()` de três colunas
-- [ ] Filtros de status, origem e região são combinados por E lógico com a busca
-- [ ] `buscarCliente` propaga o erro e **não** fabrica cliente vazio — o caminho de erro tem teste próprio
-- [ ] `listarRegioes` agrupa por `lower()` e ordena alfabeticamente, agrupando variações de caixa (edge case do spec)
-- [ ] `owner_id` não aparece em nenhum filtro: a política já restringe, e filtrar aqui daria a impressão falsa de que é o filtro que protege
-- [ ] Teste de pilha real: dois usuários, e cada um lista somente os seus
-- [ ] Teste de pilha real: busca por trecho de nome com acento e por telefone com máscara encontram o cliente
-- [ ] Teste de pilha real: página além do total devolve lista vazia, sem erro
-- [ ] Contagem de testes: 16 unitários e 8 de RLS passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test`
+- [x] `listarClientes` faz **um** request com `count: 'exact'` e `.range()`, devolvendo clientes e total
+- [x] A busca é **um** `ilike` sobre `search_text`, nunca um `.or()` de três colunas
+- [x] Filtros de status, origem e região são combinados por E lógico com a busca
+- [x] `buscarCliente` propaga o erro e **não** fabrica cliente vazio — o caminho de erro tem teste próprio
+- [x] `listarRegioes` agrupa por `lower()` e ordena alfabeticamente, agrupando variações de caixa (edge case do spec)
+- [x] `owner_id` não aparece em nenhum filtro: a política já restringe, e filtrar aqui daria a impressão falsa de que é o filtro que protege
+- [x] Teste de pilha real: dois usuários, e cada um lista somente os seus
+- [x] Teste de pilha real: busca por trecho de nome com acento e por telefone com máscara encontram o cliente
+- [x] Teste de pilha real: página além do total devolve lista vazia, sem erro
+- [x] Contagem de testes: 16 unitários e 8 de RLS passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test`
 
 **Tests**: unit e integration
 **Gate**: full
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona as leituras do serviço de clientes`
 
 ---
