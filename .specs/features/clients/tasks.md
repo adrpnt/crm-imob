@@ -103,7 +103,7 @@ T27 → T28
 Fase inserida pelo orquestrador após auditar a evidência do verificador da rodada 1.
 
 ```
-T29 → T30
+T29 → T30 → T31
 ```
 
 ---
@@ -982,6 +982,35 @@ T29 → T30
 
 ---
 
+#### T31: Preservar a confirmação quando a paginação recua
+
+**What**: O recuo de página da `Paginacao` repassa o estado da navegação, como o recuo do vazio já faz.
+**Where**: `src/features/clients/components/Paginacao.tsx`
+**Depends on**: T30
+**Reuses**: o padrão de `useRecuoNoVazio` em `ListaDeClientes.tsx:44-55`, que já repassa `state`
+**Requirement**: CLNT-17
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Terceira lacuna, reportada pelo worker de T29/T30 e confirmada pelo orquestrador.** `Paginacao.tsx:33` troca a página com `replace` sem repassar `location.state`. No caminho em que a exclusão deixa a página corrente acima do novo total mas o total segue positivo, o recuo descarta a mensagem e a confirmação "Cliente excluído." nunca aparece. O CLNT-17 AC3 exige exibir confirmação **e** voltar com os filtros preservados; neste caminho só a segunda metade acontece. É a mesma classe de defeito que T30 fechou no caminho do total zero.
+
+**Done when**:
+- [x] O recuo da `Paginacao` repassa o estado da navegação
+- [x] Teste prova que a mensagem sobrevive ao recuo com total ainda positivo
+- [x] Remover o repasse derruba o teste (discriminação provada, não suposta)
+- [x] O teste existente `Paginacao.test.tsx:83` continua passando, sem alteração
+- [x] Contagem de testes: os existentes mais 2 novos passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+
+**Tests**: unit
+**Gate**: quick
+**Status**: ✅ Done
+**Commit**: `fix(clients): preserva a confirmação quando a paginação recua`
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -994,7 +1023,7 @@ Phase 4:  T15 → T16 → T17 → T18
 Phase 5:  T19 → T20 → T21 → T22 → T23 → T24
 Phase 6:  T25 → T26
 Phase 7:  T27 → T28
-Phase 8:  T29 → T30
+Phase 8:  T29 → T30 → T31
 ```
 
 A execução é estritamente sequencial: não há paralelismo dentro de uma fase.

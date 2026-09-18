@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useSearchParams } from 'react-router'
+import { useLocation, useSearchParams } from 'react-router'
 
 import { Botao } from '../../../components/ui/Botao'
 import { escreverFiltros, lerFiltros } from '../filtros'
@@ -23,6 +23,7 @@ type Props = {
  */
 export function Paginacao({ total }: Props) {
   const [parametros, definirParametros] = useSearchParams()
+  const estado = useLocation().state
   const pagina = lerFiltros(parametros).page
   const paginas = Math.ceil(total / POR_PAGINA)
 
@@ -33,10 +34,14 @@ export function Paginacao({ total }: Props) {
     if (total > 0 && pagina > paginas) {
       definirParametros(
         (anteriores) => escreverFiltros({ ...lerFiltros(anteriores), page: paginas }),
-        { replace: true },
+        // O estado segue junto: a exclusão manda a confirmação por aqui, e sem
+        // repassá-la o recuo cumpre a segunda metade do CLNT-17 AC3 e come a
+        // primeira (a mensagem). Mesma razão do recuo do vazio em
+        // `ListaDeClientes`.
+        { replace: true, state: estado },
       )
     }
-  }, [definirParametros, pagina, paginas, total])
+  }, [definirParametros, estado, pagina, paginas, total])
 
   function irPara(destino: number) {
     definirParametros((anteriores) => escreverFiltros({ ...lerFiltros(anteriores), page: destino }))

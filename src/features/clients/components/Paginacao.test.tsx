@@ -6,9 +6,10 @@ import { describe, expect, it } from 'vitest'
 
 import { Paginacao } from './Paginacao'
 
-function renderizar(total: number, entrada = '/clients') {
+function renderizar(total: number, entrada = '/clients', estado?: unknown) {
+  const [pathname, busca] = entrada.split('?')
   const router = createMemoryRouter([{ path: '/clients', element: <Paginacao total={total} /> }], {
-    initialEntries: [entrada],
+    initialEntries: [{ pathname, search: busca ? `?${busca}` : '', state: estado ?? null }],
   })
   render(<RouterProvider router={router} />)
   return router
@@ -82,6 +83,23 @@ describe('Paginacao', () => {
 
     await waitFor(() => expect(router.state.location.search).toBe('?page=3'))
     expect(resumo()).toContain('página 3 de 3')
+  })
+
+  // CLNT-17 AC3: a exclusão exibe confirmação E volta com os filtros. Quando a
+  // página corrente deixa de existir, o recuo não pode engolir a mensagem —
+  // senão só a segunda metade do critério acontece.
+  it('preserva a confirmação da exclusão ao recuar de página', async () => {
+    const router = renderizar(45, '/clients?page=9', { mensagem: 'Cliente excluído.' })
+
+    await waitFor(() => expect(router.state.location.search).toBe('?page=3'))
+    expect(router.state.location.state).toEqual({ mensagem: 'Cliente excluído.' })
+  })
+
+  it('não inventa estado ao recuar quando não havia nenhum', async () => {
+    const router = renderizar(45, '/clients?page=9')
+
+    await waitFor(() => expect(router.state.location.search).toBe('?page=3'))
+    expect(router.state.location.state).toBeNull()
   })
 
   it('não redireciona quando a página cabe no total', async () => {
