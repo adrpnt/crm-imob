@@ -969,14 +969,15 @@ T29 → T30
 **Canto descoberto na auditoria.** `ListaDeClientes.tsx:124` retorna no estado vazio antes de renderizar `Paginacao`, onde o recuo vive. Com `page=2` e total zero — excluir o último cliente de uma lista filtrada — a tela mostra o vazio na página 2 e o consultor não tem como voltar. O CLNT-17 AC5 manda navegar para a página anterior quando a corrente fica vazia e existe anterior; a página 1 existe.
 
 **Done when**:
-- [ ] Com total zero e página acima de 1, a listagem volta para a primeira página
-- [ ] O estado vazio e o de busca sem resultado continuam distintos (CLNT-13 AC13 e AC14)
-- [ ] Teste cobre excluir o último cliente de uma página filtrada
-- [ ] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Com total zero e página acima de 1, a listagem volta para a primeira página
+- [x] O estado vazio e o de busca sem resultado continuam distintos (CLNT-13 AC13 e AC14)
+- [x] Teste cobre excluir o último cliente de uma página filtrada
+- [x] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas) — 546 → 549 unitários
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `fix(clients): recua de página quando o total zera`
 
 ---

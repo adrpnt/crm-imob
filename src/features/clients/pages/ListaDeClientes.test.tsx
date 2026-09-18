@@ -307,4 +307,50 @@ describe('ListaDeClientes', () => {
     await screen.findByRole('table')
     await waitFor(() => expect(router.state.location.search).toBe(''))
   })
+
+  // CLNT-17 AC5 com total zero: excluir o último cliente de uma lista filtrada
+  // na página 2. A `Paginacao` não é montada no vazio, então o recuo teria de
+  // vir daqui — sem ele o consultor fica parado numa página sem saída.
+  it('volta para a primeira página quando a exclusão esvazia a lista filtrada', async () => {
+    lista.mockResolvedValue({ clientes: [], total: 0 })
+    const router = renderizar({
+      pathname: '/clients',
+      search: '?status=lead&page=2',
+      state: { mensagem: 'Cliente excluído.' },
+    })
+
+    await waitFor(() => expect(router.state.location.search).toBe('?status=lead'))
+    // O filtro sobrevive ao recuo, e a confirmação da exclusão também
+    // (CLNT-16 AC3): ela viaja no estado da navegação.
+    expect(await screen.findByText('Nenhum cliente encontrado')).toBeInTheDocument()
+    expect(
+      within(bloco('Nenhum cliente encontrado')).getByRole('button', { name: 'Limpar filtros' }),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('Cliente excluído.')
+  })
+
+  // CLNT-13 AC13: o recuo não pode confundir os dois estados vazios — sem
+  // filtro, o que aparece continua sendo o convite ao primeiro cadastro.
+  it('mantém o estado inicial distinto ao recuar sem filtro algum', async () => {
+    lista.mockResolvedValue({ clientes: [], total: 0 })
+    const router = renderizar('/clients?page=3')
+
+    await waitFor(() => expect(router.state.location.search).toBe(''))
+    expect(await screen.findByText('Sua carteira está vazia')).toBeInTheDocument()
+    expect(screen.queryByText('Nenhum cliente encontrado')).not.toBeInTheDocument()
+  })
+
+  // AC5 só manda recuar quando existe página anterior: na primeira não há para
+  // onde ir, e navegar aqui só trocaria a URL por ela mesma.
+  it('não navega quando o vazio já está na primeira página', async () => {
+    lista.mockResolvedValue({ clientes: [], total: 0 })
+    const router = renderizar('/clients?search=zzz')
+
+    await screen.findByText('Nenhum cliente encontrado')
+    expect(router.state.location.search).toBe('?search=zzz')
+    // A URL igual não prova nada sozinha: uma navegação para ela mesma a
+    // deixaria idêntica. A chave da localização é o que denuncia o gesto que
+    // não deveria ter acontecido.
+    expect(router.state.location.key).toBe('default')
+  })
 })

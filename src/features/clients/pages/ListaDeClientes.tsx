@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, useLocation, useSearchParams } from 'react-router'
 
 import { Esqueleto } from '../../../components/feedback/Esqueleto'
@@ -8,7 +9,7 @@ import { CartoesDeClientes } from '../components/CartoesDeClientes'
 import { Paginacao } from '../components/Paginacao'
 import { BotaoDeLimparFiltros, PainelDeFiltros } from '../components/PainelDeFiltros'
 import { TabelaDeClientes } from '../components/TabelaDeClientes'
-import { lerFiltros, type FiltrosDeClientes } from '../filtros'
+import { escreverFiltros, lerFiltros, PADROES, type FiltrosDeClientes } from '../filtros'
 import { useClients } from '../hooks/leitura'
 
 /**
@@ -25,6 +26,32 @@ function temFiltros(filtros: FiltrosDeClientes): boolean {
     filtros.origem !== null ||
     filtros.regiao !== null
   )
+}
+
+/**
+ * Recuo para a primeira página quando os filtros correntes não devolvem nada
+ * (CLNT-17 AC5).
+ *
+ * A `Paginacao` já recua quando a página pedida passa do total, mas ela só é
+ * montada quando há resultado. Excluir o último cliente de uma lista filtrada
+ * na página 2 deixa o consultor parado no vazio dessa página, sem controle
+ * nenhum para sair dela — e a página 1 existe.
+ *
+ * A troca é `replace`, para que a página vazia não fique no histórico, e leva
+ * o estado da navegação junto: é por ele que viaja a confirmação da exclusão
+ * (CLNT-16 AC3), que sumiria no recuo.
+ */
+function useRecuoNoVazio(vazio: boolean, pagina: number, estado: unknown) {
+  const [, definirParametros] = useSearchParams()
+
+  useEffect(() => {
+    if (!vazio || pagina <= PADROES.page) return
+
+    definirParametros(
+      (anteriores) => escreverFiltros({ ...lerFiltros(anteriores), page: PADROES.page }),
+      { replace: true, state: estado },
+    )
+  }, [definirParametros, estado, pagina, vazio])
 }
 
 /**
@@ -58,6 +85,8 @@ export function ListaDeClientes() {
   const filtros = lerFiltros(parametros)
   const clientes = useClients(filtros)
   const mensagem = mensagemDe(local.state)
+
+  useRecuoNoVazio(clientes.isSuccess && clientes.data.total === 0, filtros.page, local.state)
 
   return (
     <section>
