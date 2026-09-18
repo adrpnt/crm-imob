@@ -809,17 +809,18 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Exibe todos os campos cadastrados, com renda em BRL e as datas de criação e atualização
-- [ ] Identificador inexistente ou de outro usuário exibe não encontrado, **sem revelar que o registro existe**
-- [ ] Enquanto carrega, exibe esqueleto
-- [ ] Oferece editar, excluir e voltar para a listagem **preservando os filtros de origem**
-- [ ] Lê `location.state.mensagem` e exibe a confirmação vinda do cadastro e da edição — sem isso o CLNT-01 AC1 e o CLNT-15 AC4 ficam sem exibição de fato (decidido no lote 3: alerta na tela de origem sumiria no mesmo quadro da navegação)
-- [ ] Reserva o ponto onde a lista de notas entra, sem implementá-la
-- [ ] Contagem de testes: 12 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Exibe todos os campos cadastrados, com renda em BRL e as datas de criação e atualização
+- [x] Identificador inexistente ou de outro usuário exibe não encontrado, **sem revelar que o registro existe**
+- [x] Enquanto carrega, exibe esqueleto
+- [x] Oferece editar, excluir e voltar para a listagem **preservando os filtros de origem**
+- [x] Lê `location.state.mensagem` e exibe a confirmação vinda do cadastro e da edição — sem isso o CLNT-01 AC1 e o CLNT-15 AC4 ficam sem exibição de fato (decidido no lote 3: alerta na tela de origem sumiria no mesmo quadro da navegação)
+- [x] Reserva o ponto onde a lista de notas entra, sem implementá-la
+- [x] Contagem de testes: 12 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona a ficha do cliente`
 
 ---
