@@ -6,6 +6,12 @@ import { describe, expect, it, vi } from 'vitest'
 import { RotaProtegida } from '../features/auth/components/RotaProtegida'
 import { RotaPublica } from '../features/auth/components/RotaPublica'
 import { ErroDeRota } from '../components/feedback/ErroDeRota'
+import { AppLayout } from '../components/layout/AppLayout'
+import { EditarCliente } from '../features/clients/pages/EditarCliente'
+import { FichaDoCliente } from '../features/clients/pages/FichaDoCliente'
+import { ListaDeClientes } from '../features/clients/pages/ListaDeClientes'
+import { NovoCliente } from '../features/clients/pages/NovoCliente'
+import App from './App'
 import { rotas } from './router'
 
 vi.mock('../features/auth/services/profile-service', async (original) => {
@@ -47,7 +53,16 @@ function ancestraisDe(caminho: string): unknown[] {
 
 const tipoDe = (elemento: unknown) => (elemento as { type?: unknown } | null)?.type
 
-const PRIVADAS = ['/clients', '/profile']
+/** O elemento da própria rota é o último da linhagem devolvida por `ancestraisDe`. */
+function telaDe(caminho: string): unknown {
+  const linhagem = ancestraisDe(caminho)
+  return tipoDe(linhagem[linhagem.length - 1])
+}
+
+/** A linhagem inteira, para afirmar guarda e moldura de uma vez. */
+const molduraDe = (caminho: string) => ancestraisDe(caminho).map(tipoDe)
+
+const PRIVADAS = ['/clients', '/clients/new', '/clients/:id', '/clients/:id/edit', '/profile']
 const PUBLICAS = ['/login', '/signup', '/forgot-password', '/reset-password']
 
 describe('árvore de rotas', () => {
@@ -97,5 +112,39 @@ describe('árvore de rotas', () => {
   it('oferece caminho de volta ao CRM na página de não encontrado', () => {
     renderizarEm('/rota-que-nao-existe')
     expect(screen.getByRole('link', { name: 'Voltar ao CRM' })).toHaveAttribute('href', '/')
+  })
+
+  // CLNT-07: `/clients` deixou de ser o lugar-tenente e é a listagem da carteira.
+  it('liga /clients à listagem de clientes, sob a moldura das rotas privadas', () => {
+    expect(telaDe('/clients')).toBe(ListaDeClientes)
+    expect(molduraDe('/clients')).toContain(AppLayout)
+  })
+
+  // CLNT-01: o cadastro.
+  it('liga /clients/new à tela de cadastro, sob a moldura das rotas privadas', () => {
+    expect(telaDe('/clients/new')).toBe(NovoCliente)
+    expect(molduraDe('/clients/new')).toContain(AppLayout)
+  })
+
+  // CLNT-14: a ficha.
+  it('liga /clients/:id à ficha do cliente, sob a moldura das rotas privadas', () => {
+    expect(telaDe('/clients/:id')).toBe(FichaDoCliente)
+    expect(molduraDe('/clients/:id')).toContain(AppLayout)
+  })
+
+  // CLNT-15: a edição.
+  it('liga /clients/:id/edit à tela de edição, sob a moldura das rotas privadas', () => {
+    expect(telaDe('/clients/:id/edit')).toBe(EditarCliente)
+    expect(molduraDe('/clients/:id/edit')).toContain(AppLayout)
+  })
+
+  // O lugar-tenente saiu da árvore junto com o comentário que o explicava.
+  it('não registra mais o lugar-tenente em nenhuma rota', () => {
+    expect(todasAsRotas(rotas).map((rota) => tipoDe(rota.element))).not.toContain(App)
+  })
+
+  // Decisão registrada no `context.md`: a ficha concentra os dados e as notas.
+  it('não registra a rota de notas sugerida pelo PLAN', () => {
+    expect(() => ancestraisDe('/clients/:id/notes')).toThrow()
   })
 })

@@ -12,7 +12,10 @@ import { EsqueciSenha } from '../features/auth/pages/EsqueciSenha'
 import { Login } from '../features/auth/pages/Login'
 import { Perfil } from '../features/auth/pages/Perfil'
 import { RedefinirSenha } from '../features/auth/pages/RedefinirSenha'
-import App from './App'
+import { EditarCliente } from '../features/clients/pages/EditarCliente'
+import { FichaDoCliente } from '../features/clients/pages/FichaDoCliente'
+import { ListaDeClientes } from '../features/clients/pages/ListaDeClientes'
+import { NovoCliente } from '../features/clients/pages/NovoCliente'
 
 /**
  * Árvore de rotas em data mode (AD-013).
@@ -35,10 +38,13 @@ export const rotas: RouteObject[] = [
         element: <AppLayout acoesDoUsuario={<MenuDoUsuario />} />,
         children: [
           { path: '/', element: <Navigate to="/clients" replace /> },
-          // Lugar-tenente até a feature `clients` assumir esta rota. Existe para
-          // que o fluxo de autenticação feche de ponta a ponta: as guardas e o
-          // login apontam para cá depois de entrar.
-          { path: '/clients', element: <App /> },
+          { path: '/clients', element: <ListaDeClientes /> },
+          { path: '/clients/new', element: <NovoCliente /> },
+          // A ficha concentra dados cadastrais e histórico de notas; a rota
+          // `/clients/:id/notes` do PLAN §6 não existe, por decisão registrada
+          // no `context.md`.
+          { path: '/clients/:id', element: <FichaDoCliente /> },
+          { path: '/clients/:id/edit', element: <EditarCliente /> },
           { path: '/profile', element: <Perfil /> },
         ],
       },

@@ -870,16 +870,17 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] `/clients`, `/clients/new`, `/clients/:id` e `/clients/:id/edit` ficam sob `RotaProtegida` e `AppLayout`
-- [ ] O lugar-tenente `App.tsx` sai da rota, e o comentário que o explicava sai com ele
-- [ ] O teste de rotas passa a asserir as quatro rotas novas, e o que afirmava o lugar-tenente é **atualizado, não apagado**
-- [ ] A asserção de que nenhuma rota tem `loader` continua valendo (AD-013)
-- [ ] `/clients/:id/notes` **não** existe, conforme decisão registrada no `context.md`
-- [ ] Contagem de testes: os testes existentes de `router.test.tsx` mais 6 novos passam
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
+- [x] `/clients`, `/clients/new`, `/clients/:id` e `/clients/:id/edit` ficam sob `RotaProtegida` e `AppLayout`
+- [x] O lugar-tenente `App.tsx` sai da rota, e o comentário que o explicava sai com ele
+- [x] O teste de rotas passa a asserir as quatro rotas novas, e o que afirmava o lugar-tenente é **atualizado, não apagado**
+- [x] A asserção de que nenhuma rota tem `loader` continua valendo (AD-013)
+- [x] `/clients/:id/notes` **não** existe, conforme decisão registrada no `context.md`
+- [x] Contagem de testes: os testes existentes de `router.test.tsx` mais 6 novos passam
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run build && npm run test:unit`
 
 **Tests**: unit
 **Gate**: build
+**Status**: ✅ Done
 **Commit**: `feat(clients): liga as rotas de clientes à árvore`
 
 ---

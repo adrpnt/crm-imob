@@ -31,7 +31,8 @@ test('cria conta e entra no CRM sem passo intermediário', async ({ page }) => {
 
   // AD-007: confirmação de e-mail desligada, então o cadastro já devolve sessão.
   await expect(page).toHaveURL(/\/clients$/)
-  await expect(page.getByRole('heading', { name: 'CRM Imobiliário' })).toBeVisible()
+  // O título da listagem: `/clients` deixou de ser o lugar-tenente em T27.
+  await expect(page.getByRole('heading', { name: 'Clientes', level: 1 })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Joana E2E' })).toBeVisible()
 })
 
@@ -59,7 +60,7 @@ test('recarregar uma rota privada autenticado nunca passa pelo login', async ({ 
   })
 
   await page.reload()
-  await expect(page.getByRole('heading', { name: 'CRM Imobiliário' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Clientes', level: 1 })).toBeVisible()
 
   expect(navegacoes.filter((url) => url.includes('/login'))).toEqual([])
 })
