@@ -898,18 +898,19 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] Cadastrar um cliente com só o nome leva à ficha dele, e ele aparece no topo da listagem
-- [ ] Com 25 clientes semeados, filtrar por região e status, copiar a URL e abrir em **outra aba** mostra a mesma lista (teste independente do spec)
-- [ ] Buscar por trecho de nome com acento e por telefone com máscara encontra o cliente
-- [ ] Editar o status reflete na ficha e na listagem
-- [ ] Excluir um cliente com notas o remove da listagem, e o total se recalcula
-- [ ] Todo o fluxo de cadastro, edição e exclusão é percorrido **apenas pelo teclado**, sem perder o foco (critério de sucesso do spec)
-- [ ] Nenhum erro de console em nenhuma das telas
-- [ ] Contagem de testes: os 15 E2E existentes mais 7 novos passam
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
+- [x] Cadastrar um cliente com só o nome leva à ficha dele, e ele aparece no topo da listagem
+- [x] Com 25 clientes semeados, filtrar por região e status, copiar a URL e abrir em **outra aba** mostra a mesma lista (teste independente do spec)
+- [x] Buscar por trecho de nome com acento e por telefone com máscara encontra o cliente
+- [x] Editar o status reflete na ficha e na listagem
+- [x] Excluir um cliente com notas o remove da listagem, e o total se recalcula
+- [x] Todo o fluxo de cadastro, edição e exclusão é percorrido **apenas pelo teclado**, sem perder o foco (critério de sucesso do spec)
+- [x] Nenhum erro de console em nenhuma das telas
+- [x] Contagem de testes: os 15 E2E existentes mais 7 novos passam
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
 
 **Tests**: e2e
 **Gate**: full
+**Status**: ✅ Done
 **Commit**: `test(e2e): cobre o fluxo de clientes ponta a ponta`
 
 ---
