@@ -98,6 +98,14 @@ T25 → T26
 T27 → T28
 ```
 
+### Phase 8: Correções pós-verificação
+
+Fase inserida pelo orquestrador após auditar a evidência do verificador da rodada 1.
+
+```
+T29 → T30
+```
+
 ---
 
 ## Task Breakdown
@@ -915,10 +923,67 @@ T27 → T28
 
 ---
 
+### Phase 8: Correções pós-verificação
+
+#### T29: Carregar os filtros da listagem ao abrir a ficha
+
+**What**: O link de cada cliente leva a query string corrente da listagem, para que a ficha tenha o que preservar ao voltar.
+**Where**: `src/features/clients/components/TabelaDeClientes.tsx`
+**Depends on**: T28
+**Reuses**: `useSearchParams`, já importado no arquivo; `CartoesDeClientes.tsx` recebe a mesma mudança
+**Requirement**: CLNT-14
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Lacuna encontrada na auditoria do orquestrador.** O CLNT-14 AC8 exige voltar à listagem "preservando os filtros de origem". A ficha faz a sua parte (`FichaDoCliente.tsx:64` devolve `search: local.search`), mas tabela e cartões linkam para `/clients/:id` sem query string, então `local.search` chega vazio e os filtros somem. O teste que sustentava o AC (`FichaDoCliente.test.tsx:171`) renderiza a ficha com a query já na URL — uma precondição que a navegação real do app nunca produz. Requisito coberto por partes, não de ponta a ponta.
+
+**Done when**:
+- [ ] O link da tabela e o do cartão levam a query string corrente da listagem
+- [ ] Um teste percorre a cadeia real: listar com filtro → abrir o cliente → o link de voltar da ficha traz aquele filtro
+- [ ] O teste falha se qualquer um dos dois links deixar de carregar a query
+- [ ] O E2E percorre o mesmo caminho com dado real, em vez de precondição montada
+- [ ] Contagem de testes: os existentes mais 4 novos passam (sem deleções silenciosas)
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
+
+**Tests**: unit e e2e
+**Gate**: full
+**Commit**: `fix(clients): preserva os filtros ao abrir e fechar a ficha`
+
+---
+
+#### T30: Recuar de página quando o total zera
+
+**What**: O recuo da página inexistente passa a valer também quando o total é zero.
+**Where**: `src/features/clients/pages/ListaDeClientes.tsx`
+**Depends on**: T29
+**Reuses**: o efeito de recuo que já vive em `Paginacao.tsx`
+**Requirement**: CLNT-17
+
+**Tools**:
+- MCP: NONE
+- Skill: NONE
+
+**Canto descoberto na auditoria.** `ListaDeClientes.tsx:124` retorna no estado vazio antes de renderizar `Paginacao`, onde o recuo vive. Com `page=2` e total zero — excluir o último cliente de uma lista filtrada — a tela mostra o vazio na página 2 e o consultor não tem como voltar. O CLNT-17 AC5 manda navegar para a página anterior quando a corrente fica vazia e existe anterior; a página 1 existe.
+
+**Done when**:
+- [ ] Com total zero e página acima de 1, a listagem volta para a primeira página
+- [ ] O estado vazio e o de busca sem resultado continuam distintos (CLNT-13 AC13 e AC14)
+- [ ] Teste cobre excluir o último cliente de uma página filtrada
+- [ ] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas)
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+
+**Tests**: unit
+**Gate**: quick
+**Commit**: `fix(clients): recua de página quando o total zera`
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8
 
 Phase 1:  T1 → T2 → T3 → T4 → T5 → T6
 Phase 2:  T7 → T8 → T9
@@ -927,6 +992,7 @@ Phase 4:  T15 → T16 → T17 → T18
 Phase 5:  T19 → T20 → T21 → T22 → T23 → T24
 Phase 6:  T25 → T26
 Phase 7:  T27 → T28
+Phase 8:  T29 → T30
 ```
 
 A execução é estritamente sequencial: não há paralelismo dentro de uma fase.
