@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryRouter } from 'react-router'
+import { createMemoryRouter, type InitialEntry } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -36,7 +36,7 @@ function cliente(parcial: Partial<Cliente> = {}): Cliente {
   }
 }
 
-function renderizar(entrada = '/clients') {
+function renderizar(entrada: InitialEntry = '/clients') {
   const cliente = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const router = createMemoryRouter(
     [
@@ -246,5 +246,24 @@ describe('ListaDeClientes', () => {
     await screen.findByRole('alert')
     expect(screen.getByLabelText('Buscar')).toBeInTheDocument()
     expect(screen.getByRole('group', { name: 'Filtros' })).toBeInTheDocument()
+  })
+
+  // CLNT-16 AC3: a confirmação da exclusão é exibida aqui, onde o consultor chega.
+  it('exibe a confirmação que veio no estado da navegação', async () => {
+    renderizar({ pathname: '/clients', state: { mensagem: 'Cliente excluído.' } })
+
+    await screen.findByRole('table')
+    const anuncio = screen.getByRole('status')
+    expect(anuncio).toHaveTextContent('Cliente excluído.')
+    expect(anuncio).toHaveAttribute('data-tom', 'sucesso')
+  })
+
+  // CLNT-17 AC5: a página corrente ficou vazia depois da exclusão e existe anterior.
+  it('recua uma página quando a corrente deixa de existir', async () => {
+    lista.mockResolvedValue({ clientes: [cliente()], total: 20 })
+    const router = renderizar('/clients?page=2')
+
+    await screen.findByRole('table')
+    await waitFor(() => expect(router.state.location.search).toBe(''))
   })
 })

@@ -838,18 +838,19 @@ T27 → T28
 - Skill: NONE
 
 **Done when**:
-- [ ] O diálogo nomeia o cliente e avisa que a ação é irreversível e que as notas serão removidas junto
-- [ ] A ação destrutiva é visualmente distinta e o cancelamento é o foco padrão
-- [ ] Confirmar exclui, confirma e retorna à listagem com os filtros anteriores preservados
-- [ ] Durante a exclusão, o progresso é indicado e uma segunda confirmação é impedida
-- [ ] Falha na exclusão mantém o registro visível e exibe a mensagem
-- [ ] Cancelar fecha sem nenhuma alteração
-- [ ] Se a página corrente ficar vazia e existir anterior, a listagem recua uma página
-- [ ] Contagem de testes: 14 testes passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] O diálogo nomeia o cliente e avisa que a ação é irreversível e que as notas serão removidas junto
+- [x] A ação destrutiva é visualmente distinta e o cancelamento é o foco padrão
+- [x] Confirmar exclui, confirma e retorna à listagem com os filtros anteriores preservados
+- [x] Durante a exclusão, o progresso é indicado e uma segunda confirmação é impedida
+- [x] Falha na exclusão mantém o registro visível e exibe a mensagem
+- [x] Cancelar fecha sem nenhuma alteração
+- [x] Se a página corrente ficar vazia e existir anterior, a listagem recua uma página
+- [x] Contagem de testes: 14 testes passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `feat(clients): adiciona a exclusão com confirmação`
 
 ---

@@ -1,9 +1,10 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 
 import { Esqueleto } from '../../../components/feedback/Esqueleto'
 import { Alerta } from '../../../components/ui/Alerta'
 import { Botao } from '../../../components/ui/Botao'
+import { DialogoDeExclusao } from '../components/DialogoDeExclusao'
 import { SEM_VALOR, formatarData, formatarRenda, formatarTelefone } from '../formato'
 import { useClient } from '../hooks/leitura'
 import { ORIGENS, STATUS, TIPOS_DE_RENDA } from '../schemas'
@@ -58,6 +59,7 @@ export function FichaDoCliente() {
   const { id = '' } = useParams()
   const local = useLocation()
   const consulta = useClient(id)
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false)
 
   const paraAListagem = { pathname: '/clients', search: local.search }
 
@@ -96,8 +98,9 @@ export function FichaDoCliente() {
           >
             Editar
           </Link>
-          {/* A confirmação de exclusão entra aqui em T26; o botão já é o gesto do AC8. */}
-          <Botao variante="destrutiva">Excluir</Botao>
+          <Botao variante="destrutiva" onClick={() => setConfirmandoExclusao(true)}>
+            Excluir
+          </Botao>
         </div>
       </header>
 
@@ -130,6 +133,13 @@ export function FichaDoCliente() {
           Voltar para a listagem
         </Link>
       </p>
+
+      <DialogoDeExclusao
+        aberto={confirmandoExclusao}
+        cliente={cliente}
+        destino={paraAListagem}
+        aoFechar={() => setConfirmandoExclusao(false)}
+      />
     </section>
   )
 }

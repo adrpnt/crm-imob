@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, type InitialEntry } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -188,6 +189,28 @@ describe('FichaDoCliente', () => {
 
     await screen.findByRole('heading', { level: 1, name: 'Joana Silva' })
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  // CLNT-16 AC1: acionar excluir abre a confirmação nomeando o cliente.
+  it('abre a confirmação de exclusão ao acionar excluir', async () => {
+    renderizar()
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }))
+
+    const dialogo = screen.getByRole('dialog')
+    expect(dialogo).toHaveAccessibleName('Excluir cliente?')
+    expect(dialogo).toHaveTextContent('Joana Silva')
+  })
+
+  // CLNT-16 AC7: cancelar fecha sem nenhuma alteração, e o registro continua visível.
+  it('mantém a ficha quando a confirmação de exclusão é cancelada', async () => {
+    renderizar()
+
+    await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: 'Joana Silva' })).toBeInTheDocument()
   })
 
   // A lista de notas pertence à feature `notes`; a ficha reserva o lugar dela.

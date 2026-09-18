@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from 'react-router'
+import { Link, useLocation, useSearchParams } from 'react-router'
 
 import { Esqueleto } from '../../../components/feedback/Esqueleto'
 import { Alerta } from '../../../components/ui/Alerta'
@@ -28,6 +28,20 @@ function temFiltros(filtros: FiltrosDeClientes): boolean {
 }
 
 /**
+ * A confirmação vinda da tela que navegou para cá — hoje, a exclusão
+ * (CLNT-16 AC3).
+ *
+ * A mensagem viaja no estado da navegação porque a tela de origem sai no mesmo
+ * quadro em que confirma, como já acontece entre o cadastro e a ficha. O estado
+ * do histórico é escrito por quem navega, então é lido como desconhecido.
+ */
+function mensagemDe(estado: unknown): string | null {
+  if (typeof estado !== 'object' || estado === null) return null
+  const { mensagem } = estado as { mensagem?: unknown }
+  return typeof mensagem === 'string' ? mensagem : null
+}
+
+/**
  * A listagem da carteira, em `/clients` (CLNT-07, CLNT-10, CLNT-11, CLNT-13).
  *
  * Todo o estado da tela vem da URL (AD-015): a tela lê os filtros, a chave do
@@ -40,11 +54,19 @@ function temFiltros(filtros: FiltrosDeClientes): boolean {
  */
 export function ListaDeClientes() {
   const [parametros] = useSearchParams()
+  const local = useLocation()
   const filtros = lerFiltros(parametros)
   const clientes = useClients(filtros)
+  const mensagem = mensagemDe(local.state)
 
   return (
     <section>
+      {mensagem ? (
+        <Alerta tom="sucesso" className="mb-4">
+          {mensagem}
+        </Alerta>
+      ) : null}
+
       <header className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-xl">Clientes</h1>
         <Link
