@@ -73,6 +73,12 @@ function CabecalhoOrdenavel({
  * o devolve a quem usa o mouse.
  */
 export function TabelaDeClientes({ clientes }: Props) {
+  // A query string corrente viaja no link do cliente (CLNT-14 AC8): é dela que
+  // a ficha tira os filtros para o caminho de volta. Sem ela, `local.search`
+  // chega vazio lá e voltar devolve a listagem sem filtro nenhum.
+  const [parametros] = useSearchParams()
+  const filtrosDaListagem = parametros.toString()
+
   return (
     <div className="hidden overflow-x-auto md:block">
       <table className="w-full border-collapse text-left text-sm">
@@ -102,7 +108,7 @@ export function TabelaDeClientes({ clientes }: Props) {
             <tr key={cliente.id} className="border-b border-graphite-700">
               <td className="px-3 py-2">
                 <Link
-                  to={`/clients/${cliente.id}`}
+                  to={{ pathname: `/clients/${cliente.id}`, search: filtrosDaListagem }}
                   title={cliente.name}
                   className="block max-w-[18rem] truncate text-rocket-500"
                 >

@@ -100,6 +100,20 @@ describe('TabelaDeClientes', () => {
     )
   })
 
+  // CLNT-14 AC8: o link carrega a query string corrente, que é o que a ficha
+  // devolve ao voltar. Sem ela a ficha não tem filtro nenhum para preservar.
+  it('leva os filtros correntes da listagem no link do cliente', () => {
+    renderizar(
+      [cliente({ id: 'abc-123', name: 'Ana Prado' })],
+      '/clients?status=lead&region=Zona+Sul&page=2',
+    )
+
+    expect(screen.getByRole('link', { name: 'Ana Prado' })).toHaveAttribute(
+      'href',
+      '/clients/abc-123?status=lead&region=Zona+Sul&page=2',
+    )
+  })
+
   // CLNT-11 AC9: ordenar por nome ou por data, nas duas direções.
   it('ordena por nome ao acionar o cabeçalho Nome', async () => {
     const router = renderizar([cliente()])

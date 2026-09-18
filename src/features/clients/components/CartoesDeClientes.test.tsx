@@ -27,7 +27,7 @@ function cliente(parcial: Partial<Cliente> = {}): Cliente {
 }
 
 /** Monta só os cartões, ou o par inteiro, sob o mesmo roteador. */
-function renderizar(clientes: Cliente[], comTabela = false) {
+function renderizar(clientes: Cliente[], comTabela = false, entrada = '/clients') {
   const conteudo = (
     <>
       {comTabela ? <TabelaDeClientes clientes={clientes} /> : null}
@@ -36,7 +36,7 @@ function renderizar(clientes: Cliente[], comTabela = false) {
   )
 
   const router = createMemoryRouter([{ path: '/clients', element: conteudo }], {
-    initialEntries: ['/clients'],
+    initialEntries: [entrada],
   })
   render(<RouterProvider router={router} />)
 }
@@ -79,6 +79,17 @@ describe('CartoesDeClientes', () => {
     expect(screen.getByRole('link', { name: 'Ana Prado' })).toHaveAttribute(
       'href',
       '/clients/abc-123',
+    )
+  })
+
+  // CLNT-14 AC8: o cartão carrega a mesma query string que a linha da tabela,
+  // senão abrir o cliente pelo celular perde os filtros no caminho de volta.
+  it('leva os filtros correntes da listagem no link do cliente', () => {
+    renderizar([cliente({ id: 'abc-123' })], false, '/clients?status=lead&region=Zona+Sul&page=2')
+
+    expect(screen.getByRole('link', { name: 'Ana Prado' })).toHaveAttribute(
+      'href',
+      '/clients/abc-123?status=lead&region=Zona+Sul&page=2',
     )
   })
 

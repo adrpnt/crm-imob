@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import { SEM_VALOR, formatarTelefone } from '../formato'
 import { STATUS } from '../schemas'
@@ -27,6 +27,13 @@ function rotuloDeStatus(valor: string): string {
  * dado existir só no desktop.
  */
 export function CartoesDeClientes({ clientes }: Props) {
+  // A query string vem da URL, como na tabela, e não por propriedade: as duas
+  // árvores já vivem dentro do roteador por causa do `Link`, e a listagem é a
+  // mesma nas duas (AD-015). Um caminho só evita que o cartão e a linha da
+  // tabela levem filtros diferentes para a ficha.
+  const [parametros] = useSearchParams()
+  const filtrosDaListagem = parametros.toString()
+
   return (
     <ul className="flex flex-col gap-3 md:hidden">
       {clientes.map((cliente) => (
@@ -35,7 +42,7 @@ export function CartoesDeClientes({ clientes }: Props) {
           className="rounded-surface border border-graphite-400 bg-graphite-800 p-4"
         >
           <Link
-            to={`/clients/${cliente.id}`}
+            to={{ pathname: `/clients/${cliente.id}`, search: filtrosDaListagem }}
             title={cliente.name}
             className="block truncate text-rocket-500"
           >

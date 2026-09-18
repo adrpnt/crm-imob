@@ -5,17 +5,25 @@ import { createMemoryRouter, type InitialEntry } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { listarClientes, listarRegioes, type Cliente } from '../services/client-service'
+import {
+  buscarCliente,
+  listarClientes,
+  listarRegioes,
+  type Cliente,
+} from '../services/client-service'
+import { FichaDoCliente } from './FichaDoCliente'
 import { ListaDeClientes } from './ListaDeClientes'
 
 vi.mock('../services/client-service', async (importarOriginal) => ({
   ...(await importarOriginal<typeof import('../services/client-service')>()),
+  buscarCliente: vi.fn(),
   listarClientes: vi.fn(),
   listarRegioes: vi.fn(),
 }))
 
 const lista = vi.mocked(listarClientes)
 const regioes = vi.mocked(listarRegioes)
+const ficha = vi.mocked(buscarCliente)
 
 function cliente(parcial: Partial<Cliente> = {}): Cliente {
   return {
@@ -42,6 +50,9 @@ function renderizar(entrada: InitialEntry = '/clients') {
     [
       { path: '/clients', element: <ListaDeClientes /> },
       { path: '/clients/new', element: <p>cadastro de cliente</p> },
+      // A ficha entra no roteador para que a ida e a volta entre as duas telas
+      // sejam percorridas de verdade, e não montadas por precondição.
+      { path: '/clients/:id', element: <FichaDoCliente /> },
     ],
     { initialEntries: [entrada] },
   )
@@ -65,6 +76,7 @@ const cartoes = () => within(screen.getByRole('list')).getAllByRole('listitem')
 beforeEach(() => {
   lista.mockResolvedValue({ clientes: [cliente()], total: 1 })
   regioes.mockResolvedValue(['Barra', 'Zona Sul'])
+  ficha.mockResolvedValue(cliente())
 })
 
 afterEach(() => {
@@ -256,6 +268,35 @@ describe('ListaDeClientes', () => {
     const anuncio = screen.getByRole('status')
     expect(anuncio).toHaveTextContent('Cliente excluído.')
     expect(anuncio).toHaveAttribute('data-tom', 'sucesso')
+  })
+
+  // CLNT-14 AC8, a cadeia inteira: a listagem filtrada põe a query string no
+  // link, a ficha a devolve, e voltar restaura a lista de origem. É o percurso
+  // que o consultor faz, e não a ficha aberta com a query já pronta na URL.
+  it('volta da ficha para a listagem filtrada de origem, pela tabela', async () => {
+    const router = renderizar('/clients?status=lead&region=Zona+Sul')
+
+    await screen.findByRole('table')
+    await userEvent.click(within(tabela()).getByRole('link', { name: 'Ana Prado' }))
+
+    await userEvent.click(await screen.findByRole('link', { name: 'Voltar para a listagem' }))
+
+    expect(router.state.location.pathname).toBe('/clients')
+    expect(router.state.location.search).toBe('?status=lead&region=Zona+Sul')
+    expect(await screen.findByLabelText('Status')).toHaveValue('lead')
+  })
+
+  // O mesmo percurso pelo celular: o cartão é o único link disponível lá.
+  it('leva os filtros de origem para a ficha também pelos cartões', async () => {
+    renderizar('/clients?status=lead&region=Zona+Sul')
+
+    await screen.findByRole('table')
+    await userEvent.click(within(screen.getByRole('list')).getByRole('link', { name: 'Ana Prado' }))
+
+    expect(await screen.findByRole('link', { name: 'Voltar para a listagem' })).toHaveAttribute(
+      'href',
+      '/clients?status=lead&region=Zona+Sul',
+    )
   })
 
   // CLNT-17 AC5: a página corrente ficou vazia depois da exclusão e existe anterior.

@@ -229,6 +229,35 @@ test('restaura a mesma lista filtrada ao abrir a URL em outra aba', async ({
   await outraAba.close()
 })
 
+test('volta da ficha para a listagem filtrada preservando os filtros de origem', async ({
+  page,
+  request,
+}) => {
+  const email = novoEmail('volta-filtrada')
+  await criarConta(page, email)
+  const sessao = await sessaoDe(request, email)
+
+  await semearClientes(request, sessao, [
+    { name: 'Alvo Zona Sul', region: 'Zona Sul', status: 'lead' },
+    { name: 'Outro da Barra', region: 'Barra', status: 'lead' },
+  ])
+
+  await page.goto('/clients')
+  await page.getByLabel('Região').selectOption({ label: 'Zona Sul' })
+  await expect(linhas(page)).toHaveCount(2)
+
+  // CLNT-14 AC8: o filtro viaja no link da listagem e volta pelo da ficha. O
+  // percurso é o do consultor, com dado real, e não a ficha aberta com a query
+  // já montada na URL.
+  await page.getByRole('link', { name: 'Alvo Zona Sul' }).first().click()
+  await expect(page).toHaveURL(/\/clients\/[0-9a-f-]{36}\?region=Zona\+Sul$/)
+
+  await page.getByRole('link', { name: 'Voltar para a listagem' }).click()
+  await expect(page).toHaveURL(/\/clients\?region=Zona\+Sul$/)
+  await expect(page.getByLabel('Região')).toHaveValue('Zona Sul')
+  await expect(linhas(page)).toHaveCount(2)
+})
+
 test('encontra o cliente por trecho de nome com acento e por telefone com máscara', async ({
   page,
   request,

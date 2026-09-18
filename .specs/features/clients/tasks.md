@@ -940,15 +940,16 @@ T29 → T30
 **Lacuna encontrada na auditoria do orquestrador.** O CLNT-14 AC8 exige voltar à listagem "preservando os filtros de origem". A ficha faz a sua parte (`FichaDoCliente.tsx:64` devolve `search: local.search`), mas tabela e cartões linkam para `/clients/:id` sem query string, então `local.search` chega vazio e os filtros somem. O teste que sustentava o AC (`FichaDoCliente.test.tsx:171`) renderiza a ficha com a query já na URL — uma precondição que a navegação real do app nunca produz. Requisito coberto por partes, não de ponta a ponta.
 
 **Done when**:
-- [ ] O link da tabela e o do cartão levam a query string corrente da listagem
-- [ ] Um teste percorre a cadeia real: listar com filtro → abrir o cliente → o link de voltar da ficha traz aquele filtro
-- [ ] O teste falha se qualquer um dos dois links deixar de carregar a query
-- [ ] O E2E percorre o mesmo caminho com dado real, em vez de precondição montada
-- [ ] Contagem de testes: os existentes mais 4 novos passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
+- [x] O link da tabela e o do cartão levam a query string corrente da listagem
+- [x] Um teste percorre a cadeia real: listar com filtro → abrir o cliente → o link de voltar da ficha traz aquele filtro
+- [x] O teste falha se qualquer um dos dois links deixar de carregar a query
+- [x] O E2E percorre o mesmo caminho com dado real, em vez de precondição montada
+- [x] Contagem de testes: os existentes mais 4 novos passam (sem deleções silenciosas) — 542 → 546 unitários, mais 1 E2E (22 → 23)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
 
 **Tests**: unit e e2e
 **Gate**: full
+**Status**: ✅ Done
 **Commit**: `fix(clients): preserva os filtros ao abrir e fechar a ficha`
 
 ---
