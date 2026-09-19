@@ -109,7 +109,7 @@ T29 → T30 → T31
 ### Phase 9: Correções da rodada 2
 
 ```
-T32 → T33 → T34
+T32 → T33 → T34 → T35
 ```
 
 ---
@@ -1094,6 +1094,30 @@ T32 → T33 → T34
 
 ---
 
+#### T35: Preservar os filtros ao cancelar a edição
+
+**What**: O link "Voltar para a ficha" leva a query string corrente, como a navegação de salvar já faz.
+**Where**: `src/features/clients/pages/EditarCliente.tsx`
+**Depends on**: T34
+**Reuses**: `local.search`, que o próprio arquivo já usa na linha 79 para o caminho de salvar
+**Requirement**: CLNT-14
+
+**Quarta ocorrência da mesma família, reportada pelo worker do T34 fora do escopo dele.** `EditarCliente.tsx:118` navega para `/clients/${id}` sem `search`. É o caminho de cancelar: listagem filtrada → ficha → editar → **desistir** → a ficha reabre sem a query, e o "voltar para a listagem" dela devolve a carteira inteira. O T34 fechou a ida e a volta pelo salvamento e deixou este aberto porque não estava no "Done when" dele. Mesma decisão do `context.md:21`.
+
+**Done when**:
+- [x] O link de voltar para a ficha leva a query string corrente
+- [x] Um teste percorre listagem filtrada → ficha → editar → cancelar → voltar, e assere o filtro no fim
+- [x] Remover o repasse derruba esse teste (discriminação provada, não suposta)
+- [x] Contagem de testes: os existentes mais 2 novos passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+
+**Tests**: unit
+**Gate**: quick
+**Status**: ✅ Done
+**Commit**: `fix(clients): preserva os filtros ao cancelar a edição`
+
+---
+
 ## Phase Execution Map
 
 ```
@@ -1107,7 +1131,7 @@ Phase 5:  T19 → T20 → T21 → T22 → T23 → T24
 Phase 6:  T25 → T26
 Phase 7:  T27 → T28
 Phase 8:  T29 → T30 → T31
-Phase 9:  T32 → T33 → T34
+Phase 9:  T32 → T33 → T34 → T35
 ```
 
 A execução é estritamente sequencial: não há paralelismo dentro de uma fase.

@@ -158,6 +158,27 @@ describe('EditarCliente', () => {
     expect(router.state.location.search).toBe('?status=lead&region=Zona+Sul')
   })
 
+  // Mesma exigência no caminho de desistir: cancelar a edição não pode custar
+  // os filtros, senão a ficha reabre sem query e o "Voltar para a listagem"
+  // dela devolve a carteira inteira (context.md:21).
+  it('volta para a ficha mantendo os filtros ao cancelar a edição', async () => {
+    const router = renderizar('/clients/c1/edit?status=lead&region=Zona+Sul')
+
+    await userEvent.click(await screen.findByRole('link', { name: 'Voltar para a ficha' }))
+
+    expect(router.state.location.pathname).toBe('/clients/c1')
+    expect(router.state.location.search).toBe('?status=lead&region=Zona+Sul')
+  })
+
+  it('não inventa query ao cancelar quando não havia filtro', async () => {
+    const router = renderizar('/clients/c1/edit')
+
+    await userEvent.click(await screen.findByRole('link', { name: 'Voltar para a ficha' }))
+
+    expect(router.state.location.pathname).toBe('/clients/c1')
+    expect(router.state.location.search).toBe('')
+  })
+
   it('leva a confirmação das alterações para a ficha', async () => {
     const router = renderizar()
 

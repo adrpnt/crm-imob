@@ -115,7 +115,7 @@ export function EditarCliente() {
       </div>
 
       <p className="mt-4 text-sm">
-        <Link to={`/clients/${id}`} className="text-rocket-500">
+        <Link to={{ pathname: `/clients/${id}`, search: local.search }} className="text-rocket-500">
           Voltar para a ficha
         </Link>
       </p>
