@@ -205,6 +205,32 @@ describe('ListaDeClientes', () => {
     expect(screen.queryByText('Sua carteira está vazia')).not.toBeInTheDocument()
   })
 
+  // AC14, o ramo de região: filtrar por região sem resultado continua sendo
+  // busca sem resultado, com a ação de limpar. Sem este ramo, quem tem carteira
+  // cheia veria o convite ao primeiro cadastro.
+  it('exibe a busca sem resultado ao filtrar apenas por região', async () => {
+    lista.mockResolvedValue({ clientes: [], total: 0 })
+    renderizar('/clients?region=Barra')
+
+    expect(await screen.findByText('Nenhum cliente encontrado')).toBeInTheDocument()
+    expect(screen.queryByText('Sua carteira está vazia')).not.toBeInTheDocument()
+    expect(
+      within(bloco('Nenhum cliente encontrado')).getByRole('button', { name: 'Limpar filtros' }),
+    ).toBeInTheDocument()
+  })
+
+  // AC14, o ramo de origem: o mesmo, pelo filtro que sobrou sem cobertura.
+  it('exibe a busca sem resultado ao filtrar apenas por origem', async () => {
+    lista.mockResolvedValue({ clientes: [], total: 0 })
+    renderizar('/clients?source=portal')
+
+    expect(await screen.findByText('Nenhum cliente encontrado')).toBeInTheDocument()
+    expect(screen.queryByText('Sua carteira está vazia')).not.toBeInTheDocument()
+    expect(
+      within(bloco('Nenhum cliente encontrado')).getByRole('button', { name: 'Limpar filtros' }),
+    ).toBeInTheDocument()
+  })
+
   it('devolve a listagem sem filtros ao limpar', async () => {
     lista.mockResolvedValue({ clientes: [], total: 0 })
     const router = renderizar('/clients?search=zzz&status=inactive&region=Barra')

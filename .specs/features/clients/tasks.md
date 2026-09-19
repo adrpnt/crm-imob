@@ -1055,15 +1055,16 @@ T32 → T33 → T34
 **Lacuna bloqueante da rodada 2 (L2).** `ListaDeClientes.tsx:22-29` separa os dois estados vazios do spec por quatro ramos, e só `busca` e `status` são exercitados. Desativar o ramo de região ou o de origem não derruba nada — e o efeito é visível para o consultor: quem filtra por região sem resultado passa a ver "Sua carteira está vazia" com o convite ao primeiro cadastro, **sem a ação de limpar filtros**, tendo carteira cheia. O ramo do status mata um teste, então a forma funciona; faltam dois ramos.
 
 **Done when**:
-- [ ] Filtrar por região sem resultado exibe busca sem resultado, com a ação de limpar filtros
-- [ ] Filtrar por origem sem resultado exibe o mesmo
-- [ ] Desativar qualquer um dos quatro ramos de `temFiltros` derruba ao menos um teste
-- [ ] Os dois estados vazios continuam distintos (CLNT-13 AC13 e AC14)
-- [ ] Contagem de testes: os existentes mais 2 novos passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] Filtrar por região sem resultado exibe busca sem resultado, com a ação de limpar filtros
+- [x] Filtrar por origem sem resultado exibe o mesmo
+- [x] Desativar qualquer um dos quatro ramos de `temFiltros` derruba ao menos um teste
+- [x] Os dois estados vazios continuam distintos (CLNT-13 AC13 e AC14)
+- [x] Contagem de testes: os existentes mais 2 novos passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `test(clients): cobre os ramos de região e origem do estado vazio`
 
 ---
