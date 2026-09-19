@@ -54,6 +54,11 @@ function Dado({ termo, children }: { termo: string; children: ReactNode }) {
  * O retorno à listagem leva a query string desta tela, que é onde vivem busca,
  * filtros, ordenação e página (AD-015). É o que atende "preservando os filtros
  * de origem" do AC8 sem guardar cópia do estado da listagem em lugar nenhum.
+ *
+ * A ida para a edição leva a mesma query string, e a edição a devolve ao voltar
+ * para a ficha. Sem isso a volta da edição entrega a carteira inteira, e a
+ * decisão do `context.md` — voltar da ficha preserva os filtros aplicados —
+ * valeria só enquanto o consultor não editasse nada.
  */
 export function FichaDoCliente() {
   const { id = '' } = useParams()
@@ -93,7 +98,7 @@ export function FichaDoCliente() {
 
         <div className="flex gap-2">
           <Link
-            to={`/clients/${cliente.id}/edit`}
+            to={{ pathname: `/clients/${cliente.id}/edit`, search: local.search }}
             className="rounded-control bg-rocket-500 px-4 py-2 font-medium text-graphite-950"
           >
             Editar

@@ -1080,15 +1080,16 @@ T32 → T33 → T34
 **Lacuna menor da rodada 2 (L3), dentro da decisão registrada.** `FichaDoCliente.tsx:96` e `EditarCliente.tsx:75` navegam sem `search`: listagem filtrada → ficha → Editar → salvar → "Voltar para a listagem" devolve a carteira inteira. A leitura literal do CLNT-14 AC8 prende a preservação à ação de voltar, e por isso a rodada 2 não a classificou como bloqueante. Mas o `context.md:21` decide na fase Specify que "voltar da ficha para a listagem preserva os filtros que estavam aplicados", e a ficha não tem como cumprir isso se a ida à edição derruba a query.
 
 **Done when**:
-- [ ] O link de editar leva a query string corrente
-- [ ] Salvar a edição volta para a ficha mantendo a query string
-- [ ] Um teste percorre listagem filtrada → ficha → editar → salvar → voltar, e assere o filtro no fim
-- [ ] Desfazer qualquer um dos dois repasses derruba esse teste
-- [ ] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+- [x] O link de editar leva a query string corrente
+- [x] Salvar a edição volta para a ficha mantendo a query string
+- [x] Um teste percorre listagem filtrada → ficha → editar → salvar → voltar, e assere o filtro no fim
+- [x] Desfazer qualquer um dos dois repasses derruba esse teste
+- [x] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
 
 **Tests**: unit
 **Gate**: quick
+**Status**: ✅ Done
 **Commit**: `fix(clients): preserva os filtros na ida e volta da edição`
 
 ---

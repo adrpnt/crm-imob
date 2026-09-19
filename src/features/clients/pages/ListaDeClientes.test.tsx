@@ -6,16 +6,19 @@ import { RouterProvider } from 'react-router/dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  atualizarCliente,
   buscarCliente,
   listarClientes,
   listarRegioes,
   type Cliente,
 } from '../services/client-service'
+import { EditarCliente } from './EditarCliente'
 import { FichaDoCliente } from './FichaDoCliente'
 import { ListaDeClientes } from './ListaDeClientes'
 
 vi.mock('../services/client-service', async (importarOriginal) => ({
   ...(await importarOriginal<typeof import('../services/client-service')>()),
+  atualizarCliente: vi.fn(),
   buscarCliente: vi.fn(),
   listarClientes: vi.fn(),
   listarRegioes: vi.fn(),
@@ -24,6 +27,7 @@ vi.mock('../services/client-service', async (importarOriginal) => ({
 const lista = vi.mocked(listarClientes)
 const regioes = vi.mocked(listarRegioes)
 const ficha = vi.mocked(buscarCliente)
+const atualizar = vi.mocked(atualizarCliente)
 
 function cliente(parcial: Partial<Cliente> = {}): Cliente {
   return {
@@ -45,7 +49,9 @@ function cliente(parcial: Partial<Cliente> = {}): Cliente {
 }
 
 function renderizar(entrada: InitialEntry = '/clients') {
-  const cliente = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  const cliente = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
   const router = createMemoryRouter(
     [
       { path: '/clients', element: <ListaDeClientes /> },
@@ -53,6 +59,9 @@ function renderizar(entrada: InitialEntry = '/clients') {
       // A ficha entra no roteador para que a ida e a volta entre as duas telas
       // sejam percorridas de verdade, e não montadas por precondição.
       { path: '/clients/:id', element: <FichaDoCliente /> },
+      // A edição também, pelo mesmo motivo: a ida e a volta dela fazem parte do
+      // percurso que leva os filtros de volta à listagem.
+      { path: '/clients/:id/edit', element: <EditarCliente /> },
     ],
     { initialEntries: [entrada] },
   )
@@ -77,6 +86,7 @@ beforeEach(() => {
   lista.mockResolvedValue({ clientes: [cliente()], total: 1 })
   regioes.mockResolvedValue(['Barra', 'Zona Sul'])
   ficha.mockResolvedValue(cliente())
+  atualizar.mockResolvedValue({ ok: true, cliente: cliente() })
 })
 
 afterEach(() => {
@@ -323,6 +333,26 @@ describe('ListaDeClientes', () => {
       'href',
       '/clients?status=lead&region=Zona+Sul',
     )
+  })
+
+  // CLNT-14 AC8 e a decisão do `context.md`: voltar da ficha preserva os
+  // filtros, e editar no meio do caminho não pode desfazer isso. O percurso é
+  // listagem filtrada → ficha → editar → salvar → voltar, inteiro.
+  it('preserva os filtros de origem na ida e na volta da edição', async () => {
+    const router = renderizar('/clients?status=lead&region=Zona+Sul')
+
+    await screen.findByRole('table')
+    await userEvent.click(within(tabela()).getByRole('link', { name: 'Ana Prado' }))
+
+    await userEvent.click(await screen.findByRole('link', { name: 'Editar' }))
+    await userEvent.type(await screen.findByLabelText('Nome'), ' Souza')
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar alterações' }))
+
+    await userEvent.click(await screen.findByRole('link', { name: 'Voltar para a listagem' }))
+
+    expect(router.state.location.pathname).toBe('/clients')
+    expect(router.state.location.search).toBe('?status=lead&region=Zona+Sul')
+    expect(await screen.findByLabelText('Status')).toHaveValue('lead')
   })
 
   // CLNT-17 AC5: a página corrente ficou vazia depois da exclusão e existe anterior.

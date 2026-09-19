@@ -213,6 +213,17 @@ describe('FichaDoCliente', () => {
     )
   })
 
+  // CLNT-14 AC8: a ida para a edição leva os filtros de origem. Sem eles, a
+  // ficha que a edição devolve não tem para onde voltar.
+  it('leva os filtros de origem para a edição', async () => {
+    renderizar('/clients/c1?status=lead&region=Zona+Sul')
+
+    expect(await screen.findByRole('link', { name: 'Editar' })).toHaveAttribute(
+      'href',
+      '/clients/c1/edit?status=lead&region=Zona+Sul',
+    )
+  })
+
   // CLNT-14 AC8 e CLNT-16 AC2: a ação destrutiva é distinta da primária.
   it('oferece a exclusão do cliente como ação destrutiva', async () => {
     renderizar()

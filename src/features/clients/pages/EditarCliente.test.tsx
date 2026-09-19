@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { createMemoryRouter } from 'react-router'
+import { createMemoryRouter, type InitialEntry } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -52,7 +52,7 @@ const DADOS_ATUAIS = {
   income_type: 'formal',
 }
 
-function renderizar() {
+function renderizar(entrada: InitialEntry = '/clients/c1/edit') {
   const cliente = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
@@ -62,7 +62,7 @@ function renderizar() {
       { path: '/clients/:id', element: <p>ficha do cliente</p> },
       { path: '/clients', element: <p>listagem de clientes</p> },
     ],
-    { initialEntries: ['/clients/c1/edit'] },
+    { initialEntries: [entrada] },
   )
 
   render(
@@ -141,6 +141,21 @@ describe('EditarCliente', () => {
 
     expect(await screen.findByText('ficha do cliente')).toBeInTheDocument()
     expect(router.state.location.pathname).toBe('/clients/c1')
+  })
+
+  // CLNT-14 AC8: a query string da listagem chega pelo link da ficha e volta
+  // com o consultor. Sem ela, "Voltar para a listagem" entrega a carteira
+  // inteira depois de qualquer edição.
+  it('volta para a ficha mantendo os filtros de origem', async () => {
+    const router = renderizar('/clients/c1/edit?status=lead&region=Zona+Sul')
+
+    const nome = await screen.findByLabelText('Nome')
+    await userEvent.type(nome, ' Souza')
+    await salvar()
+
+    await screen.findByText('ficha do cliente')
+    expect(router.state.location.pathname).toBe('/clients/c1')
+    expect(router.state.location.search).toBe('?status=lead&region=Zona+Sul')
   })
 
   it('leva a confirmação das alterações para a ficha', async () => {

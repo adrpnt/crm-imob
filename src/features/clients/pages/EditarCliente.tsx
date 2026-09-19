@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router'
+import { Link, useLocation, useNavigate, useParams } from 'react-router'
 
 import { Esqueleto } from '../../../components/feedback/Esqueleto'
 import { ConfirmacaoDeSaida } from '../components/ConfirmacaoDeSaida'
@@ -51,6 +51,7 @@ function valoresDe(cliente: Cliente) {
  */
 export function EditarCliente() {
   const { id = '' } = useParams()
+  const local = useLocation()
   const navegar = useNavigate()
   const consulta = useClient(id)
   const salvar = useUpdateClient()
@@ -72,7 +73,12 @@ export function EditarCliente() {
     }
 
     concluido.current = true
-    navegar(`/clients/${id}`, { replace: true, state: { mensagem: 'Alterações salvas.' } })
+    // A query string da listagem de origem chega aqui pelo link da ficha e volta
+    // com o consultor (CLNT-14 AC8): sem ela, a ficha perde para onde voltar.
+    navegar(
+      { pathname: `/clients/${id}`, search: local.search },
+      { replace: true, state: { mensagem: 'Alterações salvas.' } },
+    )
   }
 
   if (consulta.isPending) {
