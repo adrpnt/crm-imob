@@ -1030,15 +1030,16 @@ T32 → T33 → T34
 **Lacuna bloqueante da rodada 2 (L1).** "Retornar à listagem com os filtros anteriores preservados" só é asserido em `DialogoDeExclusao.test.tsx:123`, onde o `destino` é entregue pelo próprio teste. Nada prova que `FichaDoCliente.tsx:140` o produz: trocar por `destino="/clients"` deixa 551 unitários e 8 E2E passando. O E2E de exclusão parte de `/clients` sem filtro, então a versão mutada o satisfaz igual. É a mesma forma de defeito do T29, uma rota adiante.
 
 **Done when**:
-- [ ] Um teste monta a ficha a partir de uma listagem filtrada e assere que o diálogo recebe o destino com a query string
-- [ ] Trocar `destino={paraAListagem}` por `"/clients"` derruba esse teste (discriminação provada, não suposta)
-- [ ] O E2E de exclusão parte de uma listagem **filtrada** e confirma o retorno com o filtro intacto
-- [ ] O teste existente de `DialogoDeExclusao` continua como está
-- [ ] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas)
-- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
+- [x] Um teste monta a ficha a partir de uma listagem filtrada e assere que o diálogo recebe o destino com a query string
+- [x] Trocar `destino={paraAListagem}` por `"/clients"` derruba esse teste (discriminação provada, não suposta)
+- [x] O E2E de exclusão parte de uma listagem **filtrada** e confirma o retorno com o filtro intacto
+- [x] O teste existente de `DialogoDeExclusao` continua como está
+- [x] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas)
+- [x] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
 
 **Tests**: unit e e2e
 **Gate**: full
+**Status**: ✅ Done
 **Commit**: `test(clients): prova a cadeia da exclusão a partir da ficha`
 
 ---

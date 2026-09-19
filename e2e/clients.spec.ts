@@ -337,6 +337,37 @@ test('exclui um cliente com notas e recalcula o total da listagem', async ({ pag
   expect(await notasDe(request, sessao, alvo)).toEqual([])
 })
 
+test('exclui a partir de uma listagem filtrada e volta com o filtro intacto', async ({
+  page,
+  request,
+}) => {
+  const email = novoEmail('exclusao-filtrada')
+  await criarConta(page, email)
+  const sessao = await sessaoDe(request, email)
+
+  await semearClientes(request, sessao, [
+    { name: 'Rita da Zona Sul', region: 'Zona Sul' },
+    { name: 'Sergio da Zona Sul', region: 'Zona Sul' },
+    { name: 'Tania da Barra', region: 'Barra' },
+  ])
+
+  await page.goto('/clients')
+  await page.getByLabel('Região').selectOption({ label: 'Zona Sul' })
+  await expect(linhas(page)).toHaveCount(3)
+
+  await page.getByRole('link', { name: 'Rita da Zona Sul' }).first().click()
+  await page.getByRole('button', { name: 'Excluir' }).click()
+  await page.getByRole('dialog').getByRole('button', { name: 'Excluir' }).click()
+
+  // CLNT-16 AC3: a volta é para a listagem filtrada de origem, e não para a
+  // carteira inteira. O teste de exclusão acima parte de `/clients` sem filtro,
+  // e por isso não distingue as duas.
+  await expect(page).toHaveURL(/\/clients\?region=Zona\+Sul$/)
+  await expect(page.getByRole('status')).toContainText('Cliente excluído.')
+  await expect(page.getByLabel('Região')).toHaveValue('Zona Sul')
+  await expect(linhas(page)).toHaveCount(2)
+})
+
 test('percorre cadastro, edição e exclusão apenas pelo teclado', async ({ page }) => {
   await criarConta(page, novoEmail('teclado'))
 

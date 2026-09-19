@@ -1,19 +1,32 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, type InitialEntry } from 'react-router'
 import { RouterProvider } from 'react-router/dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { buscarCliente, type Cliente } from '../services/client-service'
+import {
+  buscarCliente,
+  excluirCliente,
+  listarClientes,
+  listarRegioes,
+  type Cliente,
+} from '../services/client-service'
 import { FichaDoCliente } from './FichaDoCliente'
+import { ListaDeClientes } from './ListaDeClientes'
 
 vi.mock('../services/client-service', async (importarOriginal) => ({
   ...(await importarOriginal<typeof import('../services/client-service')>()),
   buscarCliente: vi.fn(),
+  excluirCliente: vi.fn(),
+  listarClientes: vi.fn(),
+  listarRegioes: vi.fn(),
 }))
 
 const buscar = vi.mocked(buscarCliente)
+const excluir = vi.mocked(excluirCliente)
+const lista = vi.mocked(listarClientes)
+const regioes = vi.mocked(listarRegioes)
 
 const CLIENTE: Cliente = {
   id: 'c1',
@@ -50,6 +63,48 @@ function renderizar(entrada: InitialEntry = '/clients/c1') {
   return router
 }
 
+/**
+ * A cadeia real da listagem até a ficha (CLNT-16 AC3).
+ *
+ * A ficha não é montada por uma URL escrita à mão: o percurso começa na
+ * listagem filtrada e passa pelo link da tabela, que é o gesto do consultor. É
+ * o que prova que o `destino` entregue ao diálogo vem da tela, e não do teste.
+ */
+function renderizarACadeia(entrada: InitialEntry) {
+  const cliente = new QueryClient({
+    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+  })
+  const router = createMemoryRouter(
+    [
+      { path: '/clients', element: <ListaDeClientes /> },
+      { path: '/clients/:id', element: <FichaDoCliente /> },
+    ],
+    { initialEntries: [entrada] },
+  )
+
+  render(
+    <QueryClientProvider client={cliente}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>,
+  )
+  return router
+}
+
+/** Listagem filtrada → ficha → excluir → confirmar, sem atalho nenhum. */
+async function excluirPelaCadeia(entrada: InitialEntry) {
+  const router = renderizarACadeia(entrada)
+
+  await screen.findByRole('table')
+  await userEvent.click(
+    within(screen.getByRole('table')).getByRole('link', { name: 'Joana Silva' }),
+  )
+
+  await userEvent.click(await screen.findByRole('button', { name: 'Excluir' }))
+  await userEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Excluir' }))
+
+  return router
+}
+
 /** O valor exibido sob um termo da lista de dados. */
 function valorDe(termo: string): string {
   const dt = screen.getByText(termo)
@@ -59,6 +114,9 @@ function valorDe(termo: string): string {
 
 beforeEach(() => {
   buscar.mockResolvedValue(CLIENTE)
+  excluir.mockResolvedValue({ ok: true, cliente: CLIENTE })
+  lista.mockResolvedValue({ clientes: [CLIENTE], total: 1 })
+  regioes.mockResolvedValue(['Barra', 'Zona Sul'])
 })
 
 afterEach(() => {
@@ -211,6 +269,29 @@ describe('FichaDoCliente', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 1, name: 'Joana Silva' })).toBeInTheDocument()
+  })
+
+  // CLNT-16 AC3, a cadeia inteira: o `destino` do diálogo é produzido pela
+  // ficha a partir da query string que a listagem filtrada pôs no link. Trocar
+  // `destino={paraAListagem}` por `"/clients"` derruba este teste; o teste do
+  // `DialogoDeExclusao` não, porque lá o destino é entregue como propriedade.
+  it('retorna à listagem filtrada de origem ao excluir a partir da ficha', async () => {
+    const router = await excluirPelaCadeia('/clients?status=lead&region=Zona+Sul')
+
+    await waitFor(() => expect(router.state.location.pathname).toBe('/clients'))
+    expect(router.state.location.search).toBe('?status=lead&region=Zona+Sul')
+  })
+
+  // CLNT-16 AC3: a confirmação chega à listagem, e a listagem que reaparece é
+  // a filtrada — não a carteira inteira.
+  it('exibe a confirmação na listagem filtrada que reaparece depois da exclusão', async () => {
+    await excluirPelaCadeia('/clients?status=lead&region=Zona+Sul')
+
+    await waitFor(() => expect(screen.getByRole('status')).toHaveTextContent('Cliente excluído.'))
+    expect(screen.getByLabelText('Status')).toHaveValue('lead')
+    expect(lista).toHaveBeenLastCalledWith(
+      expect.objectContaining({ status: 'lead', regiao: 'Zona Sul' }),
+    )
   })
 
   // A lista de notas pertence à feature `notes`; a ficha reserva o lugar dela.
