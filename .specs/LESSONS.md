@@ -84,6 +84,18 @@ Seen once or not yet corroborated. Tracked, not trusted.
 - evidence: M8 rodada 1 / L3 (processo)
 - last seen: 2026-09-16T18:54:42Z
 
+### L-013 - Teste que monta a precondição por propriedade ou por URL assere sobre um estado que a navegação real não produz: cubra a cadeia desde a tela que origina o estado, senão o requisito fica coberto por partes e a mutação sobrevive.
+- signal: `surviving_mutant` · recurrence: 1 feature(s) · scope: `testes/cadeia` · harmful: 0
+- features: clients
+- evidence: M5 rodada 2 (CLNT-16 AC3) + L1 da auditoria (CLNT-14 AC8): mutacao sobreviveu a 551 unitarios e 23 E2E (testes/cadeia)
+- last seen: 2026-09-19T14:34:32Z
+
+### L-014 - Critério que descreve uma transição sem definir o caso limite (total zero, lista vazia, primeiro elemento) deixa o teste asserir a leitura de quem implementou: feche o limite no spec antes de implementar.
+- signal: `spec_precision_gap` · recurrence: 1 feature(s) · scope: `spec` · harmful: 0
+- features: clients
+- evidence: S2 rodada 3 (CLNT-17 AC5): 'navegar para a pagina anterior' nao define o caso de total zero (spec)
+- last seen: 2026-09-19T14:34:38Z
+
 ## Quarantined (failed when applied - ignore)
 
 A confirmed lesson that recurred alongside failure. Kept for the maintainer to review.

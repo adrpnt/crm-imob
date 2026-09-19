@@ -133,11 +133,11 @@
 
 ## Handoff
 
-- **Feature**: `.specs/features/auth` — concluída e verificada
-- **Phase / Task**: `auth` — Execute concluído (T1 a T22); verificação independente encerrada na rodada 2 com **PASS**
-- **Completed**: Specify das 5 features (aprovado); `foundation` inteira (29 tarefas, 32 commits, 3 rodadas de verificação); `auth` inteira (22 tarefas, 27 commits, 2 rodadas — rodada 1 FAIL por lacuna bloqueante, rodada 2 PASS)
+- **Feature**: `.specs/features/clients` — concluída e verificada
+- **Phase / Task**: `clients` — Execute concluído (T1 a T35); verificação independente encerrada na rodada 3 com **PASS**
+- **Completed**: Specify das 5 features; `foundation` (29 tarefas, 3 rodadas); `auth` (22 tarefas, 2 rodadas); `clients` (35 tarefas, 3 rodadas — rodada 1 PASS revertido por auditoria, rodada 2 FAIL, rodada 3 PASS)
 - **In-progress** (file:line): nenhum
-- **Next step**: Iniciar a fase Design de `clients`, a única feature com Specify pronto e nada adiante (`context.md` marca `Ready for design`). Antes de desenhar, resolver dois pontos de entrada registrados abaixo.
+- **Next step**: Iniciar a fase Design de `notes` ou de `deploy`, as duas com Specify pronto e nada adiante. `notes` é a continuação natural: a ficha do cliente já reserva o ponto onde a lista de notas entra.
 - **Blockers**: nenhum
 - **Uncommitted files**: nenhum
 - **Branch**: main
@@ -148,30 +148,34 @@
 | ------- | ------- | ------ | ----- | ------- | ----------- |
 | `foundation` | ✅ | ✅ | ✅ | ✅ | ✅ PASS (3 rodadas) |
 | `auth` | ✅ | ✅ | ✅ | ✅ | ✅ PASS (rodada 2) |
-| `clients` | ✅ | — | — | — | — |
+| `clients` | ✅ | ✅ | ✅ | ✅ | ✅ PASS (rodada 3) |
 | `notes` | ✅ | — | — | — | — |
 | `deploy` | ✅ | — | — | — | — |
 
-### Gates na última medição (rodada 2 de `auth`, códigos de saída diretos)
+### Gates na última medição (rodada 3 de `clients`, códigos de saída diretos)
 
-`npm run lint` · `typecheck` · `test` (242 unitários em 27 arquivos; pgTAP 9 arquivos e 137 asserções; 34 RLS em 5 arquivos) · `test:e2e` (15) · `build` — todos `0`. Pilha local no ar: API 54321, DB 54322, Mailpit 54324.
+`lint` · `typecheck` · `test` (560 unitários; pgTAP 137 asserções; 52 de RLS) · `test:e2e` (24) · `build` — todos `0`. Crescimento desde o fim de `auth`: +316 unitários, +18 de RLS, +9 E2E. Nenhuma contagem caiu em nenhuma das três rodadas; zero `.skip`, `.only` ou `.todo`.
 
-### Dois pontos a resolver na entrada do Design de `clients`
+### O que `clients` mudou no projeto além da própria feature
 
-1. **Nove premissas do `spec.md` de `clients` seguem com `Confirmed? n`** — ordenação padrão, obrigatoriedade de campos, retorno à primeira página ao filtrar, comportamento da busca e do telefone, mudança de status só pelo formulário, confirmação de saída com alterações pendentes e ausência de suporte offline. Três delas mudam a forma dos componentes; confirmar em bloco antes de desenhar.
-2. **Onde o 401 de mutação é tratado** — ver D3 abaixo.
+- **Design system trocado** (`984a4c9`): grafite, laranja Rocket e prata metálico, com as duas regras de contraste medidas — texto sobre laranja é grafite (claro reprova a 2.66:1) e `graphite-700` não serve como borda de controle (1.29:1). Guardado por `e2e/smoke.spec.ts`.
+- **AD-015** e **AD-016** nasceram aqui: URL como fonte única do estado de listagem, e falha de autorização em mutação tratada por `mutationCache.onError`. O AD-016 fechou a dívida D3 de `auth`.
+- **Nenhuma migration**: a camada de banco de `clients` veio pronta da `foundation`.
 
-### Débito de `auth` que atravessa para `clients`
+### Dívida remanescente (nenhuma bloqueante)
 
-- **D3** (`validation.md` §7): `src/lib/query-client.ts:68-69` liga a detecção de sessão expirada só ao `QueryCache`; não existe `MutationCache`. Em `auth` era P2, com uma escrita única que captura o próprio erro. `clients` traz criar, editar e excluir — o Design precisa decidir a camada.
-- **AUTH-12 AC4** só se torna testável aqui: `validation.md` §6.3 registra que não existia, em `auth`, tela capaz de originar `42501`. O formulário de cliente é essa tela.
-
-### Débito remanescente de `auth` (nenhum bloqueante)
-
-D1 e D2 foram fechadas em T22, após o relatório — ver o adendo do autor em `validation.md`. Seguem abertas **D3 a D9**, entre elas: AUTH-12 AC1/AC2 sem cadeia percorrida de ponta a ponta (D4), os dois edge cases deixados como dívida por decisão do usuário (D5 perfil ilegível após cadastro, D6 sair numa aba refletindo na outra), duas indistinguibilidades benignas medidas (D7, D8) e, cosmético, a tabela de rastreabilidade mais os Success Criteria de `.specs/features/auth/spec.md:184-211` ainda marcados como `Pending` depois de Tasks e Execute (D9). Débito de `foundation`: sete itens em `validation.md` §6, os quatro recomendados fechados em T29.
+- **D12** (rodada 3): `EditarCliente.test.tsx:104` assere a presença do link do estado "não encontrado", não o destino — a mutação sobrevive. Nenhum AC reivindica esse estado. É o lado espelhado do defeito que a feature perseguiu: estado alcançável com asserção que não discrimina.
+- **D11** (rodada 2): `Paginacao.test.tsx:114` monta `total={0}`, estado que a árvore não produz.
+- **S1**: CLNT-18 AC6 pede contraste 4.5:1 sem dizer entre quais pares; nenhum teste calcula a razão. As razões desta feature foram medidas à mão na troca do design system.
+- **S2**: CLNT-17 AC5 não define o caso de total zero; a implementação recua para a primeira página e o teste assere essa leitura.
+- **Fragilidade cruzada**: `supabase/tests/database/clients_search.test.sql:41` consulta `public.clients` sem escopo de dono, então resíduo do E2E derruba o pgTAP. Mitigado por limpeza no `afterEach` de `e2e/clients.spec.ts`; a causa real é o teste da `foundation` não filtrar por dono.
+- Itens D1 a D10 da rodada 1 seguem registrados em `validation.md`; **D9 foi encerrada** na rodada 3.
 
 ### Lições
 
-Doze candidatas em `.specs/lessons.json` — oito de `foundation` (L-001 a L-008), quatro de `auth` (L-009 a L-012). **Nenhuma promovida a confirmada**, então o Design de `clients` não carrega nenhuma como guia obrigatório, embora valha ler L-001 (grant versus política) e L-009 (serviço novo sem teste próprio) pelo escopo que `clients` vai tocar.
+Quatorze no store, duas confirmadas (L-001 e L-012, carregadas como guia). `clients` acrescentou duas candidatas:
 
-Dois pontos para o mantenedor revisar com `lessons.py`, não à mão: L-012 lista evidência em `foundation` **e** `auth` mas registra `recurrence: 1` com apenas `auth` em `features`; e a mensagem de `a3cebbf` admite reincidência de L-001 em `auth`, que segue marcada só com `foundation`. Sob `promote_threshold=2`, qualquer uma das duas viraria confirmada.
+- **L-013** (`surviving_mutant`, `testes/cadeia`) — teste que monta a precondição por propriedade ou URL assere sobre estado que a navegação real não produz. **Foi a forma de defeito dominante desta feature**: apareceu quatro vezes, passou pela rodada 1 inteira, e é o que a auditoria e a rodada 2 encontraram.
+- **L-014** (`spec_precision_gap`, `spec`) — critério que descreve transição sem definir o caso limite deixa o teste asserir a leitura de quem implementou.
+
+Se qualquer uma reaparecer em `notes` ou `deploy`, é promovida a confirmada e passa a ser carregada no Design.
