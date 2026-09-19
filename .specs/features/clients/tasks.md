@@ -106,6 +106,12 @@ Fase inserida pelo orquestrador após auditar a evidência do verificador da rod
 T29 → T30 → T31
 ```
 
+### Phase 9: Correções da rodada 2
+
+```
+T32 → T33 → T34
+```
+
 ---
 
 ## Task Breakdown
@@ -1011,10 +1017,84 @@ T29 → T30 → T31
 
 ---
 
+### Phase 9: Correções da rodada 2
+
+#### T32: Provar que a ficha produz o destino da exclusão
+
+**What**: Teste que percorre a cadeia real da exclusão, em vez de receber o destino como propriedade montada.
+**Where**: `src/features/clients/pages/FichaDoCliente.test.tsx`
+**Depends on**: T31
+**Reuses**: o padrão de teste de cadeia que T29 criou em `ListaDeClientes.test.tsx`
+**Requirement**: CLNT-16
+
+**Lacuna bloqueante da rodada 2 (L1).** "Retornar à listagem com os filtros anteriores preservados" só é asserido em `DialogoDeExclusao.test.tsx:123`, onde o `destino` é entregue pelo próprio teste. Nada prova que `FichaDoCliente.tsx:140` o produz: trocar por `destino="/clients"` deixa 551 unitários e 8 E2E passando. O E2E de exclusão parte de `/clients` sem filtro, então a versão mutada o satisfaz igual. É a mesma forma de defeito do T29, uma rota adiante.
+
+**Done when**:
+- [ ] Um teste monta a ficha a partir de uma listagem filtrada e assere que o diálogo recebe o destino com a query string
+- [ ] Trocar `destino={paraAListagem}` por `"/clients"` derruba esse teste (discriminação provada, não suposta)
+- [ ] O E2E de exclusão parte de uma listagem **filtrada** e confirma o retorno com o filtro intacto
+- [ ] O teste existente de `DialogoDeExclusao` continua como está
+- [ ] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas)
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test && npm run test:e2e`
+
+**Tests**: unit e e2e
+**Gate**: full
+**Commit**: `test(clients): prova a cadeia da exclusão a partir da ficha`
+
+---
+
+#### T33: Cobrir os ramos de região e origem do estado vazio
+
+**What**: Testes para os dois ramos de `temFiltros` que nenhuma asserção exercita.
+**Where**: `src/features/clients/pages/ListaDeClientes.test.tsx`
+**Depends on**: T32
+**Reuses**: os testes de estado vazio que já existem para busca e status
+**Requirement**: CLNT-13
+
+**Lacuna bloqueante da rodada 2 (L2).** `ListaDeClientes.tsx:22-29` separa os dois estados vazios do spec por quatro ramos, e só `busca` e `status` são exercitados. Desativar o ramo de região ou o de origem não derruba nada — e o efeito é visível para o consultor: quem filtra por região sem resultado passa a ver "Sua carteira está vazia" com o convite ao primeiro cadastro, **sem a ação de limpar filtros**, tendo carteira cheia. O ramo do status mata um teste, então a forma funciona; faltam dois ramos.
+
+**Done when**:
+- [ ] Filtrar por região sem resultado exibe busca sem resultado, com a ação de limpar filtros
+- [ ] Filtrar por origem sem resultado exibe o mesmo
+- [ ] Desativar qualquer um dos quatro ramos de `temFiltros` derruba ao menos um teste
+- [ ] Os dois estados vazios continuam distintos (CLNT-13 AC13 e AC14)
+- [ ] Contagem de testes: os existentes mais 2 novos passam (sem deleções silenciosas)
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+
+**Tests**: unit
+**Gate**: quick
+**Commit**: `test(clients): cobre os ramos de região e origem do estado vazio`
+
+---
+
+#### T34: Levar os filtros pela ida e volta da edição
+
+**What**: A navegação para a edição e a volta dela preservam a query string da listagem.
+**Where**: `src/features/clients/pages/FichaDoCliente.tsx`
+**Depends on**: T33
+**Reuses**: `paraAListagem`, que a ficha já monta; `EditarCliente.tsx` recebe a mesma mudança no retorno
+**Requirement**: CLNT-14
+
+**Lacuna menor da rodada 2 (L3), dentro da decisão registrada.** `FichaDoCliente.tsx:96` e `EditarCliente.tsx:75` navegam sem `search`: listagem filtrada → ficha → Editar → salvar → "Voltar para a listagem" devolve a carteira inteira. A leitura literal do CLNT-14 AC8 prende a preservação à ação de voltar, e por isso a rodada 2 não a classificou como bloqueante. Mas o `context.md:21` decide na fase Specify que "voltar da ficha para a listagem preserva os filtros que estavam aplicados", e a ficha não tem como cumprir isso se a ida à edição derruba a query.
+
+**Done when**:
+- [ ] O link de editar leva a query string corrente
+- [ ] Salvar a edição volta para a ficha mantendo a query string
+- [ ] Um teste percorre listagem filtrada → ficha → editar → salvar → voltar, e assere o filtro no fim
+- [ ] Desfazer qualquer um dos dois repasses derruba esse teste
+- [ ] Contagem de testes: os existentes mais 3 novos passam (sem deleções silenciosas)
+- [ ] Gate check passa: `npm run lint && npm run typecheck && npm run test:unit`
+
+**Tests**: unit
+**Gate**: quick
+**Commit**: `fix(clients): preserva os filtros na ida e volta da edição`
+
+---
+
 ## Phase Execution Map
 
 ```
-Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8
+Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6 → Phase 7 → Phase 8 → Phase 9
 
 Phase 1:  T1 → T2 → T3 → T4 → T5 → T6
 Phase 2:  T7 → T8 → T9
@@ -1024,6 +1104,7 @@ Phase 5:  T19 → T20 → T21 → T22 → T23 → T24
 Phase 6:  T25 → T26
 Phase 7:  T27 → T28
 Phase 8:  T29 → T30 → T31
+Phase 9:  T32 → T33 → T34
 ```
 
 A execução é estritamente sequencial: não há paralelismo dentro de uma fase.
